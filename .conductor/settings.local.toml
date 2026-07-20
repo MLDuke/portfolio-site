@@ -1,0 +1,38 @@
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+
+[scripts]
+setup = """
+if [ -f pnpm-lock.yaml ]; then
+  pnpm install --frozen-lockfile
+elif [ -f yarn.lock ]; then
+  yarn install --immutable
+elif [ -f bun.lock ] || [ -f bun.lockb ]; then
+  bun install
+elif [ -f package-lock.json ]; then
+  npm ci
+elif [ -f package.json ]; then
+  npm install
+else
+  echo "No package.json found; skipping dependency install."
+fi
+"""
+archive = "rm -rf .next"
+run_mode = "concurrent"
+
+[scripts.run.dev]
+command = """
+if [ -f pnpm-lock.yaml ]; then
+  pnpm dev --port "$CONDUCTOR_PORT"
+elif [ -f yarn.lock ]; then
+  yarn dev --port "$CONDUCTOR_PORT"
+elif [ -f bun.lock ] || [ -f bun.lockb ]; then
+  bun run dev --port "$CONDUCTOR_PORT"
+elif [ -f package.json ]; then
+  npm run dev -- --port "$CONDUCTOR_PORT"
+else
+  echo "No package.json found; scaffold the Next.js app before running."
+  exit 1
+fi
+"""
+default = true
+icon = "play"
