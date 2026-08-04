@@ -8,6 +8,17 @@ import {
   NavButton,
 } from "../components/ComponentPrimitives";
 import { FigureCard } from "../components/FigureCard";
+import {
+  ProjectBlockRenderer,
+  ProjectCompareRow,
+  ProjectFeatureMedia,
+  ProjectMediaFigure,
+  ProjectMediaGrid,
+  ProjectMediaPair,
+  ProjectMosaic,
+  ProjectTextBlock,
+} from "../components/ProjectArchive";
+import type { ProjectBlock, ProjectMedia } from "../data/portfolio";
 
 const semanticColors = [
   ["surface-base", "bg-surface-base", "text-on-surface-primary"],
@@ -83,6 +94,64 @@ const radiusSamples = [
   ["xl", "rounded-xl"],
 ] as const;
 
+const archiveMedia: Record<string, ProjectMedia> = {
+  neutral: {
+    caption: "Neutral placeholder",
+    aspect: "16/9",
+    tone: "neutral",
+  },
+  dark: {
+    caption: "Dark placeholder",
+    aspect: "4/3",
+    tone: "dark",
+  },
+  blue: {
+    caption: "Blue placeholder",
+    aspect: "1/1",
+    tone: "blue",
+  },
+  green: {
+    caption: "Green placeholder",
+    aspect: "3/4",
+    tone: "green",
+  },
+};
+
+const archiveBlocks: ProjectBlock[] = [
+  {
+    type: "feature",
+    label: "Archive 01",
+    media: archiveMedia.neutral,
+  },
+  {
+    type: "text",
+    body: "Short archive text creates a quiet pause between media groups.",
+  },
+  {
+    type: "pair",
+    items: [archiveMedia.dark, archiveMedia.blue],
+  },
+  {
+    type: "grid",
+    columns: 3,
+    items: [archiveMedia.neutral, archiveMedia.green, archiveMedia.dark],
+  },
+  {
+    type: "compare",
+    before: archiveMedia.dark,
+    after: archiveMedia.green,
+  },
+  {
+    type: "mosaic",
+    items: [
+      archiveMedia.neutral,
+      archiveMedia.blue,
+      archiveMedia.green,
+      archiveMedia.dark,
+    ],
+  },
+];
+
 export default function SandboxPage() {
   const [showModal, setShowModal] = useState(false);
 
@@ -154,6 +223,107 @@ export default function SandboxPage() {
                 <p className="font-mono text-label-small text-on-surface-secondary">
                   journal sizing
                 </p>
+              </div>
+            </Preview>
+
+            <Preview label="Project Media">
+              <div className="grid max-w-[688px] gap-24">
+                <ProjectMediaFigure media={archiveMedia.neutral} />
+                <ProjectFeatureMedia
+                  label="Feature media"
+                  media={{
+                    caption: "Feature placeholder with a 16/9 frame",
+                    aspect: "16/9",
+                    tone: "dark",
+                  }}
+                />
+              </div>
+            </Preview>
+
+            <Preview label="Project Archive Layouts">
+              <div className="grid max-w-[688px] gap-32">
+                <ProjectMediaPair
+                  items={[
+                    {
+                      caption: "Pair left",
+                      aspect: "4/3",
+                      tone: "neutral",
+                    },
+                    {
+                      caption: "Pair right",
+                      aspect: "4/3",
+                      tone: "blue",
+                    },
+                  ]}
+                />
+                <ProjectMediaGrid
+                  columns={4}
+                  items={[
+                    {
+                      caption: "Grid A",
+                      aspect: "1/1",
+                      tone: "neutral",
+                    },
+                    {
+                      caption: "Grid B",
+                      aspect: "1/1",
+                      tone: "dark",
+                    },
+                    {
+                      caption: "Grid C",
+                      aspect: "1/1",
+                      tone: "blue",
+                    },
+                    {
+                      caption: "Grid D",
+                      aspect: "1/1",
+                      tone: "green",
+                    },
+                  ]}
+                />
+                <ProjectCompareRow
+                  before={{
+                    caption: "Before",
+                    aspect: "16/9",
+                    tone: "dark",
+                  }}
+                  after={{
+                    caption: "After",
+                    aspect: "16/9",
+                    tone: "green",
+                  }}
+                />
+                <ProjectMosaic
+                  items={[
+                    {
+                      caption: "Mosaic A",
+                      aspect: "16/9",
+                      tone: "blue",
+                    },
+                    {
+                      caption: "Mosaic B",
+                      aspect: "1/1",
+                      tone: "neutral",
+                    },
+                    {
+                      caption: "Mosaic C",
+                      aspect: "3/4",
+                      tone: "dark",
+                    },
+                    {
+                      caption: "Mosaic D",
+                      aspect: "4/3",
+                      tone: "green",
+                    },
+                  ]}
+                />
+                <ProjectTextBlock body="Text interstitials keep short notes aligned with the archive rhythm." />
+              </div>
+            </Preview>
+
+            <Preview label="Project Block Renderer">
+              <div className="max-w-[688px]">
+                <ProjectBlockRenderer blocks={archiveBlocks} />
               </div>
             </Preview>
 
