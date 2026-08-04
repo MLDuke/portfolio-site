@@ -25,7 +25,6 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     <main className="grid min-h-screen grid-rows-[auto_1fr] gap-y-32 bg-surface-base px-16 py-12 text-on-surface-primary">
       <PortfolioNav
         active="projects"
-        breadcrumb={`Work / ${project.title}`}
         currentProjectSlug={project.slug}
       />
 

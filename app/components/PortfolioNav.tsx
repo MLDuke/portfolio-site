@@ -1,15 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { projects } from "../data/portfolio";
 import { AboutModal } from "./AboutModal";
-import { BreadcrumbControl, NavButton } from "./ComponentPrimitives";
+import {
+  FullNav,
+  NavButton,
+  type PageControlConfig,
+} from "./ComponentPrimitives";
 
 type PortfolioNavProps = {
   active: "projects" | "journal" | "information";
-  breadcrumb?: string;
   currentProjectSlug?: string;
+  pageControl?: PageControlConfig;
 };
 
 const navItems = [
@@ -19,8 +22,8 @@ const navItems = [
 
 export function PortfolioNav({
   active,
-  breadcrumb,
   currentProjectSlug,
+  pageControl,
 }: PortfolioNavProps) {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const projectIndex = projects.findIndex(
@@ -37,52 +40,47 @@ export function PortfolioNav({
           }`,
         }
       : null;
+  const currentProject = projectIndex >= 0 ? projects[projectIndex] : null;
+  const projectPageControl =
+    currentProject && projectNav
+      ? {
+          ariaLabel: "Project navigation",
+          levels: [
+            {
+              href: "/",
+              label: "Work",
+            },
+            {
+              href: `/projects/${currentProject.slug}`,
+              label: currentProject.title,
+              options: projects.map((project) => ({
+                active: project.slug === currentProject.slug,
+                href: `/projects/${project.slug}`,
+                label: project.title,
+              })),
+            },
+          ],
+          nextHref: projectNav.nextHref,
+          previousHref: projectNav.previousHref,
+        }
+      : null;
+  const visiblePageControl = pageControl ?? projectPageControl;
 
   return (
     <>
-      <header className="grid h-32 grid-cols-12 items-start gap-x-32 text-label-medium">
-        <Link
-          className="col-span-3 self-center whitespace-nowrap font-mono text-[#1f1f1f]"
-          href="/"
+      <FullNav pageControl={visiblePageControl}>
+        {navItems.map((item) => (
+          <NavButton active={active === item.key} href={item.href} key={item.key}>
+            {item.label}
+          </NavButton>
+        ))}
+        <NavButton
+          active={active === "information" || isAboutOpen}
+          onClick={() => setIsAboutOpen(true)}
         >
-          M.D.
-        </Link>
-
-        {breadcrumb && projectNav ? (
-          <BreadcrumbControl
-            label={breadcrumb}
-            nextHref={projectNav.nextHref}
-            previousHref={projectNav.previousHref}
-          />
-        ) : (
-          <div className="hidden md:col-span-6 md:block" />
-        )}
-
-        <nav
-          aria-label="Primary navigation"
-          data-figma-component="Nav"
-          data-node-id="33:57"
-          className="col-span-9 justify-self-end rounded-[6px] bg-surface-raised p-2 font-mono md:col-span-3"
-        >
-          <div className="flex items-center gap-2">
-            {navItems.map((item) => (
-              <NavButton
-                active={active === item.key}
-                href={item.href}
-                key={item.key}
-              >
-                {item.label}
-              </NavButton>
-            ))}
-            <NavButton
-              active={active === "information" || isAboutOpen}
-              onClick={() => setIsAboutOpen(true)}
-            >
-              Information
-            </NavButton>
-          </div>
-        </nav>
-      </header>
+          Information
+        </NavButton>
+      </FullNav>
 
       {isAboutOpen ? <AboutModal onClose={() => setIsAboutOpen(false)} /> : null}
     </>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AboutModal } from "../components/AboutModal";
 import {
   BreadcrumbControl,
+  FullNav,
   IconButton,
   NavButton,
 } from "../components/ComponentPrimitives";
@@ -32,30 +33,30 @@ const semanticColors = [
 ] as const;
 
 const primitiveColors = [
-  ["neutral-0", "bg-[var(--primitive-neutral-0)]"],
-  ["neutral-0-5", "bg-[var(--primitive-neutral-0-5)]"],
-  ["neutral-1", "bg-[var(--primitive-neutral-1)]"],
-  ["neutral-2", "bg-[var(--primitive-neutral-2)]"],
-  ["neutral-3", "bg-[var(--primitive-neutral-3)]"],
-  ["neutral-4", "bg-[var(--primitive-neutral-4)]"],
-  ["neutral-5", "bg-[var(--primitive-neutral-5)]"],
-  ["neutral-6", "bg-[var(--primitive-neutral-6)]"],
-  ["neutral-7", "bg-[var(--primitive-neutral-7)]"],
-  ["neutral-8", "bg-[var(--primitive-neutral-8)]"],
-  ["neutral-9", "bg-[var(--primitive-neutral-9)]"],
-  ["neutral-10", "bg-[var(--primitive-neutral-10)]"],
-  ["green-0", "bg-[var(--primitive-green-0)]"],
-  ["green-1", "bg-[var(--primitive-green-1)]"],
-  ["green-2", "bg-[var(--primitive-green-2)]"],
-  ["green-3", "bg-[var(--primitive-green-3)]"],
-  ["green-4", "bg-[var(--primitive-green-4)]"],
-  ["green-5", "bg-[var(--primitive-green-5)]"],
-  ["blue-0", "bg-[var(--primitive-blue-0)]"],
-  ["blue-1", "bg-[var(--primitive-blue-1)]"],
-  ["blue-2", "bg-[var(--primitive-blue-2)]"],
-  ["blue-3", "bg-[var(--primitive-blue-3)]"],
-  ["blue-4", "bg-[var(--primitive-blue-4)]"],
-  ["blue-5", "bg-[var(--primitive-blue-5)]"],
+  ["neutral-0", "bg-[var(--color-neutral-0)]"],
+  ["neutral-0-5", "bg-[var(--color-neutral-0-5)]"],
+  ["neutral-1", "bg-[var(--color-neutral-1)]"],
+  ["neutral-2", "bg-[var(--color-neutral-2)]"],
+  ["neutral-3", "bg-[var(--color-neutral-3)]"],
+  ["neutral-4", "bg-[var(--color-neutral-4)]"],
+  ["neutral-5", "bg-[var(--color-neutral-5)]"],
+  ["neutral-6", "bg-[var(--color-neutral-6)]"],
+  ["neutral-7", "bg-[var(--color-neutral-7)]"],
+  ["neutral-8", "bg-[var(--color-neutral-8)]"],
+  ["neutral-9", "bg-[var(--color-neutral-9)]"],
+  ["neutral-10", "bg-[var(--color-neutral-10)]"],
+  ["green-0", "bg-[var(--color-green-0)]"],
+  ["green-1", "bg-[var(--color-green-1)]"],
+  ["green-2", "bg-[var(--color-green-2)]"],
+  ["green-3", "bg-[var(--color-green-3)]"],
+  ["green-4", "bg-[var(--color-green-4)]"],
+  ["green-5", "bg-[var(--color-green-5)]"],
+  ["blue-0", "bg-[var(--color-blue-0)]"],
+  ["blue-1", "bg-[var(--color-blue-1)]"],
+  ["blue-2", "bg-[var(--color-blue-2)]"],
+  ["blue-3", "bg-[var(--color-blue-3)]"],
+  ["blue-4", "bg-[var(--color-blue-4)]"],
+  ["blue-5", "bg-[var(--color-blue-5)]"],
 ] as const;
 
 const typeSamples = [
@@ -167,6 +168,43 @@ export default function SandboxPage() {
 
         <SandboxSection kicker="Components" title="Figma-linked components">
           <div className="grid gap-24">
+            <Preview label="Full Nav">
+              <FullNav
+                pageControl={{
+                  ariaLabel: "Project navigation",
+                  levels: [
+                    {
+                      href: "/",
+                      label: "Work",
+                    },
+                    {
+                      href: "/projects/project-name",
+                      label: "Project Name",
+                      options: [
+                        {
+                          active: true,
+                          href: "/projects/project-name",
+                          label: "Project Name",
+                        },
+                        {
+                          href: "/projects/project-two",
+                          label: "Project Two",
+                        },
+                      ],
+                    },
+                  ],
+                  nextHref: "/projects/project-two",
+                  previousHref: "/projects/project-three",
+                }}
+              >
+                <NavButton active href="/sandbox">
+                  Projects
+                </NavButton>
+                <NavButton href="/sandbox">Journal</NavButton>
+                <NavButton>Information</NavButton>
+              </FullNav>
+            </Preview>
+
             <Preview label="Nav">
               <nav
                 aria-label="Sandbox navigation sample"
@@ -184,7 +222,28 @@ export default function SandboxPage() {
 
             <Preview label="Breadcrumb Control">
               <BreadcrumbControl
-                label="Work / Project Name"
+                ariaLabel="Project navigation"
+                levels={[
+                  {
+                    href: "/",
+                    label: "Work",
+                  },
+                  {
+                    href: "/projects/project-name",
+                    label: "Project Name",
+                    options: [
+                      {
+                        active: true,
+                        href: "/projects/project-name",
+                        label: "Project Name",
+                      },
+                      {
+                        href: "/projects/project-two",
+                        label: "Project Two",
+                      },
+                    ],
+                  },
+                ]}
                 nextHref="/projects/project-two"
                 previousHref="/projects/project-three"
               />

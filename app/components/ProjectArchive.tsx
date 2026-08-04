@@ -15,8 +15,8 @@ const aspectClasses = {
 const toneClasses = {
   neutral: "bg-[#808891]",
   dark: "bg-[#424853]",
-  blue: "bg-[var(--primitive-blue-3)]",
-  green: "bg-[var(--primitive-green-2)]",
+  blue: "bg-[var(--color-blue-3)]",
+  green: "bg-[var(--color-green-2)]",
 } satisfies Record<NonNullable<ProjectMedia["tone"]>, string>;
 
 const gridColumnClasses = {

@@ -76,7 +76,7 @@
   --text-label-medium: 0.875rem;
   --text-label-medium--line-height: 1.25rem;
   --text-label-medium--letter-spacing: 0;
-  --text-label-medium--font-weight: 500;
+  --text-label-medium--font-weight: 400;
   --text-label-small: 0.75rem;
   --text-label-small--line-height: 1rem;
   --text-label-small--letter-spacing: 0;
@@ -96,61 +96,60 @@
     --space-96: 6rem;
     --space-128: 8rem;
 
-    --primitive-neutral-0: #f9fcff;
-    --primitive-neutral-0-5: #e9eef3;
-    --primitive-neutral-1: #d9dfe7;
-    --primitive-neutral-2: #bcc4cc;
-    --primitive-neutral-3: #a0a8b1;
-    --primitive-neutral-4: #858e98;
-    --primitive-neutral-5: #6a747f;
-    --primitive-neutral-6: #515c67;
-    --primitive-neutral-7: #39444f;
-    --primitive-neutral-8: #232e39;
-    --primitive-neutral-9: #0e1924;
-    --primitive-neutral-10: #000611;
+    --color-neutral-0: #f9fcff;
+    --color-neutral-0-5: #e9eef3;
+    --color-neutral-1: #d9dfe7;
+    --color-neutral-2: #bcc4cc;
+    --color-neutral-3: #a0a8b1;
+    --color-neutral-4: #858e98;
+    --color-neutral-5: #6a747f;
+    --color-neutral-6: #515c67;
+    --color-neutral-7: #39444f;
+    --color-neutral-8: #232e39;
+    --color-neutral-9: #0e1924;
+    --color-neutral-10: #000611;
 
-    --primitive-green-0: #f9ffed;
-    --primitive-green-0-5: #ddfd8c;
-    --primitive-green-1: #cbf152;
-    --primitive-green-2: #b1d346;
-    --primitive-green-3: #98b53b;
-    --primitive-green-4: #7f9930;
-    --primitive-green-5: #687d26;
-    --primitive-green-6: #51621c;
-    --primitive-green-7: #3c4912;
-    --primitive-green-8: #273109;
-    --primitive-green-9: #141b03;
-    --primitive-green-10: #040700;
+    --color-green-0: #f9ffed;
+    --color-green-0-5: #ddfd8c;
+    --color-green-1: #cbf152;
+    --color-green-2: #b1d346;
+    --color-green-3: #98b53b;
+    --color-green-4: #7f9930;
+    --color-green-5: #687d26;
+    --color-green-6: #51621c;
+    --color-green-7: #3c4912;
+    --color-green-8: #273109;
+    --color-green-9: #141b03;
+    --color-green-10: #040700;
 
-    --primitive-blue-0: #f9fcff;
-    --primitive-blue-0-5: #def1fc;
-    --primitive-blue-1: #c1e5fa;
-    --primitive-blue-2: #86cdf6;
-    --primitive-blue-3: #40b3ee;
-    --primitive-blue-4: #3597c9;
-    --primitive-blue-5: #2a7ca5;
-    --primitive-blue-6: #1f6183;
-    --primitive-blue-7: #154862;
-    --primitive-blue-8: #0b3043;
-    --primitive-blue-9: #031a27;
-    --primitive-blue-10: #00060d;
+    --color-blue-0: #f9fcff;
+    --color-blue-0-5: #def1fc;
+    --color-blue-1: #c1e5fa;
+    --color-blue-2: #86cdf6;
+    --color-blue-3: #40b3ee;
+    --color-blue-4: #3597c9;
+    --color-blue-5: #2a7ca5;
+    --color-blue-6: #1f6183;
+    --color-blue-7: #154862;
+    --color-blue-8: #0b3043;
+    --color-blue-9: #031a27;
+    --color-blue-10: #00060d;
 
-    --surface-base: var(--primitive-neutral-0);
-    --surface-raised: var(--primitive-neutral-0-5);
-    --surface-overlay: var(--primitive-neutral-1);
-    --on-surface-primary: var(--primitive-neutral-10);
-    --on-surface-secondary: var(--primitive-neutral-8);
-    --border-default: var(--primitive-neutral-4);
+    --surface-base: var(--color-neutral-0);
+    --surface-raised: var(--color-neutral-0-5);
+    --surface-overlay: var(--color-neutral-1);
+    --on-surface-primary: var(--color-neutral-10);
+    --on-surface-secondary: var(--color-neutral-8);
+    --border-default: var(--color-neutral-4);
 
-    --accent-a-base: var(--primitive-green-3);
-    --accent-a-on-accent: var(--primitive-neutral-10);
-    --accent-b-base: var(--primitive-blue-3);
-    --accent-b-on-accent: var(--primitive-neutral-10);
+    --accent-a-base: var(--color-green-3);
+    --accent-a-on-accent: var(--color-neutral-10);
+    --accent-b-base: var(--color-blue-3);
+    --accent-b-on-accent: var(--color-neutral-10);
 
-    --state-overlay-color: var(--on-surface-primary);
-    --state-layer-hover: 0.08;
-    --state-layer-pressed: 0.12;
-    --state-layer-selected: 0.16;
+    --state-layer-hover: rgb(0 6 17 / 0.08);
+    --state-layer-pressed: rgb(0 6 17 / 0.12);
+    --state-layer-selected: rgb(0 6 17 / 0.16);
     --content-disabled: 0.38;
     --focus-ring-color: var(--on-surface-primary);
 
@@ -171,17 +170,21 @@
   }
 
   html[data-theme="dark"] {
-    --surface-base: var(--primitive-neutral-10);
-    --surface-raised: var(--primitive-neutral-9);
-    --surface-overlay: var(--primitive-neutral-8);
-    --on-surface-primary: var(--primitive-neutral-0);
-    --on-surface-secondary: var(--primitive-neutral-1);
-    --border-default: var(--primitive-neutral-4);
+    --surface-base: var(--color-neutral-10);
+    --surface-raised: var(--color-neutral-9);
+    --surface-overlay: var(--color-neutral-8);
+    --on-surface-primary: var(--color-neutral-0);
+    --on-surface-secondary: var(--color-neutral-1);
+    --border-default: var(--color-neutral-4);
 
-    --accent-a-base: var(--primitive-green-2);
-    --accent-a-on-accent: var(--primitive-neutral-10);
-    --accent-b-base: var(--primitive-blue-2);
-    --accent-b-on-accent: var(--primitive-neutral-10);
+    --accent-a-base: var(--color-green-2);
+    --accent-a-on-accent: var(--color-neutral-10);
+    --accent-b-base: var(--color-blue-2);
+    --accent-b-on-accent: var(--color-neutral-10);
+
+    --state-layer-hover: rgb(249 252 255 / 0.08);
+    --state-layer-pressed: rgb(249 252 255 / 0.12);
+    --state-layer-selected: rgb(249 252 255 / 0.16);
 
     --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.2),
       0 2px 6px rgb(0 0 0 / 0.24);
@@ -218,22 +221,21 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: var(--state-overlay-color);
-    opacity: 0;
-    transition: opacity 160ms ease;
+    background: transparent;
+    transition: background-color 160ms ease;
   }
 
   &:hover::after {
-    opacity: var(--state-layer-hover);
+    background: var(--state-layer-hover);
   }
 
   &:active::after {
-    opacity: var(--state-layer-pressed);
+    background: var(--state-layer-pressed);
   }
 
   &[aria-selected="true"]::after,
   &[data-selected="true"]::after {
-    opacity: var(--state-layer-selected);
+    background: var(--state-layer-selected);
   }
 
   &:focus-visible {
