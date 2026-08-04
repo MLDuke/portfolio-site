@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { projects } from "../data/portfolio";
 import { AboutModal } from "./AboutModal";
 import { BreadcrumbControl, NavButton } from "./ComponentPrimitives";
 
 type PortfolioNavProps = {
   active: "projects" | "journal" | "information";
   breadcrumb?: string;
+  currentProjectSlug?: string;
 };
 
 const navItems = [
@@ -15,8 +17,26 @@ const navItems = [
   { label: "Journal", href: "/journal", key: "journal" },
 ] as const;
 
-export function PortfolioNav({ active, breadcrumb }: PortfolioNavProps) {
+export function PortfolioNav({
+  active,
+  breadcrumb,
+  currentProjectSlug,
+}: PortfolioNavProps) {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const projectIndex = projects.findIndex(
+    (project) => project.slug === currentProjectSlug,
+  );
+  const projectNav =
+    projectIndex >= 0
+      ? {
+          nextHref: `/projects/${
+            projects[(projectIndex + 1) % projects.length].slug
+          }`,
+          previousHref: `/projects/${
+            projects[(projectIndex - 1 + projects.length) % projects.length].slug
+          }`,
+        }
+      : null;
 
   return (
     <>
@@ -28,11 +48,11 @@ export function PortfolioNav({ active, breadcrumb }: PortfolioNavProps) {
           M.D.
         </Link>
 
-        {breadcrumb ? (
+        {breadcrumb && projectNav ? (
           <BreadcrumbControl
             label={breadcrumb}
-            nextHref="/projects/project-two"
-            previousHref="/projects/project-three"
+            nextHref={projectNav.nextHref}
+            previousHref={projectNav.previousHref}
           />
         ) : (
           <div className="hidden md:col-span-6 md:block" />

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { PortfolioNav } from "../../components/PortfolioNav";
+import { ProjectBlockRenderer } from "../../components/ProjectArchive";
 import { projects } from "../../data/portfolio";
 
 type ProjectPageProps = {
@@ -22,7 +23,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   return (
     <main className="grid min-h-screen grid-rows-[auto_1fr] gap-y-32 bg-surface-base px-16 py-12 text-on-surface-primary">
-      <PortfolioNav active="projects" breadcrumb="Work / Project Name" />
+      <PortfolioNav
+        active="projects"
+        breadcrumb={`Work / ${project.title}`}
+        currentProjectSlug={project.slug}
+      />
 
       <article className="mx-auto grid w-full max-w-[688px] gap-32">
         <header className="grid gap-8">
@@ -32,19 +37,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               {project.index}
             </p>
           </div>
-          <div className="grid grid-cols-[minmax(0,3fr)_repeat(3,minmax(0,1fr))] gap-8 text-body-small">
-            <p className="text-on-surface-secondary">{project.description}</p>
+          <div className="grid gap-12 text-body-small sm:grid-cols-4 sm:gap-8">
+            <p className="text-on-surface-secondary sm:col-span-1">
+              {project.description}
+            </p>
             <MetaItem label="Year" value={project.year} />
             <MetaItem label="Role" value={project.role} />
             <MetaItem label="Client" value={project.client} />
           </div>
         </header>
 
-        {Array.from({ length: 4 }, (_, index) => (
-          <figure className="overflow-hidden" key={index}>
-            <div className="h-[437px] w-full bg-[#585a62]" />
-          </figure>
-        ))}
+        <ProjectBlockRenderer blocks={project.blocks} />
       </article>
     </main>
   );

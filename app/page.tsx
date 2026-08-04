@@ -6,7 +6,7 @@ import { projects } from "./data/portfolio";
 export default function ProjectsPage() {
   return (
     <main className="grid min-h-screen grid-rows-[auto_1fr_auto] gap-y-96 bg-surface-base px-24 py-16 text-on-surface-primary">
-      <PortfolioNav active="projects" breadcrumb="Work / Project Name" />
+      <PortfolioNav active="projects" />
 
       <section
         aria-label="Projects"
