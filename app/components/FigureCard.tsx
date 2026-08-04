@@ -28,14 +28,14 @@ export function FigureCard({
   };
   const stateClasses = {
     rest: "bg-surface-base",
-    hover: "bg-[rgb(0_6_17_/_0.08)]",
-    pressed: "bg-[rgb(0_6_17_/_0.12)]",
+    hover: "bg-[var(--state-layer-hover)]",
+    pressed: "bg-[var(--state-layer-pressed)]",
     focused: "bg-surface-base ring-2 ring-inset ring-[var(--focus-ring-color)]",
     disabled: "bg-surface-base cursor-default",
   };
   const rootClassName = [
     "group flex h-full w-full flex-col gap-12 overflow-hidden rounded-b-[12px] rounded-t-[8px] p-6 text-left transition-colors",
-    "hover:bg-[rgb(0_6_17_/_0.08)] active:bg-[rgb(0_6_17_/_0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--focus-ring-color)]",
+    "hover:bg-[var(--state-layer-hover)] active:bg-[var(--state-layer-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--focus-ring-color)]",
     isDisabled ? "pointer-events-none" : "cursor-pointer",
     stateClasses[state],
   ].join(" ");

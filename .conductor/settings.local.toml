@@ -1,13 +1,20 @@
 "$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
 
 [scripts]
-setup = "npm ci"
-archive = "rm -rf .next"
+setup = """
+npm ci
+sh .conductor/reap-agentation.sh
+npx -y add-mcp "npx -y agentation-mcp server" -a codex -y --gitignore
+"""
+archive = """
+rm -rf .next
+sh .conductor/reap-agentation.sh
+"""
 run_mode = "concurrent"
 
 [scripts.run.dev]
 available_in = [ "local" ]
-command = "npm run dev -- --port \"$CONDUCTOR_PORT\""
+command = "sh .conductor/reap-agentation.sh && npm run dev -- --port \"$CONDUCTOR_PORT\""
 default = true
 icon = "play"
 
