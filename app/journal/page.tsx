@@ -1,7 +1,25 @@
+import type { Metadata } from "next";
 import { FigureCard } from "../components/FigureCard";
 import { Footer } from "../components/Footer";
 import { PortfolioNav } from "../components/PortfolioNav";
 import { journalEntries } from "../data/portfolio";
+
+const title = "Journal";
+const description = "Journal entries from Matthew Duke Design.";
+
+export const metadata: Metadata = {
+  title,
+  description,
+  alternates: {
+    canonical: "/journal",
+  },
+  openGraph: {
+    title,
+    description,
+    url: "/journal",
+    type: "website",
+  },
+};
 
 export default function JournalPage() {
   return (

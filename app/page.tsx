@@ -1,7 +1,23 @@
+import type { Metadata } from "next";
 import { FigureCard } from "./components/FigureCard";
 import { Footer } from "./components/Footer";
 import { PortfolioNav } from "./components/PortfolioNav";
 import { projects } from "./data/portfolio";
+import { siteDescription, siteName } from "./metadata";
+
+export const metadata: Metadata = {
+  title: siteName,
+  description: siteDescription,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: siteName,
+    description: siteDescription,
+    url: "/",
+    type: "website",
+  },
+};
 
 export default function ProjectsPage() {
   return (
