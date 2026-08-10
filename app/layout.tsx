@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { siteDescription, siteName, siteOrigin } from "./metadata";
 import "./globals.css";
 
 const plexSans = IBM_Plex_Sans({
@@ -15,8 +16,18 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio Site",
-  description: "Portfolio site token scaffold",
+  metadataBase: new URL(siteOrigin),
+  title: {
+    default: siteName,
+    template: `%s | ${siteName}`,
+  },
+  description: siteDescription,
+  openGraph: {
+    title: siteName,
+    description: siteDescription,
+    siteName,
+    type: "website",
+  },
 };
 
 export default function RootLayout({
