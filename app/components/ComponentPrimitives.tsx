@@ -117,7 +117,7 @@ export function FullNav({
       data-node-id="80:379"
     >
       <Link
-        className="col-[1/span_3] row-start-1 self-center whitespace-nowrap font-mono text-[#1f1f1f]"
+        className="col-[1/span_3] row-start-1 self-center whitespace-nowrap font-mono text-on-surface-primary"
         href={brandHref}
       >
         {brandLabel}
