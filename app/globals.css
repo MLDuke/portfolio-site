@@ -169,7 +169,8 @@
     color-scheme: light;
   }
 
-  html[data-theme="dark"] {
+  html[data-theme="dark"],
+  .sandbox-theme[data-theme="dark"] {
     --surface-base: var(--color-neutral-10);
     --surface-raised: var(--color-neutral-9);
     --surface-overlay: var(--color-neutral-8);
