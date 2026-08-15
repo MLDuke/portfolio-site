@@ -4,6 +4,9 @@ out
 build
 dist
 .vercel
+test-results
+playwright-report
+blob-report
 
 .env
 .env*.local
