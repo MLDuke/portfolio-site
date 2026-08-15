@@ -9,7 +9,7 @@ sh .conductor/reap-agentation.sh
 run_mode = "concurrent"
 
 [scripts.run.dev]
-available_in = [ "local" ]
+available_in = ["local"]
 command = "sh .conductor/reap-agentation.sh && npm run dev -- --port \"$CONDUCTOR_PORT\""
 default = true
 icon = "play"
