@@ -201,6 +201,7 @@
 
   html {
     background: var(--surface-base);
+    scrollbar-gutter: stable;
   }
 
   body {
