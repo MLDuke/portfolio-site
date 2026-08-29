@@ -115,13 +115,13 @@ export function FullNav({
 }: FullNavProps) {
   return (
     <header
-      className="grid h-32 grid-cols-12 items-center gap-x-32 text-label-medium"
+      className="flex min-w-0 flex-wrap items-center justify-between gap-x-16 gap-y-8 text-label-medium md:grid md:grid-cols-12 md:gap-x-[32px]"
       data-figma-component="Full Nav"
       data-node-id="80:379"
       style={{ viewTransitionName: "site-header" }}
     >
       <SiteLink
-        className="pressable col-[1/span_3] row-start-1 self-center whitespace-nowrap font-mono text-on-surface-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring-color)]"
+        className="pressable self-center whitespace-nowrap font-mono text-on-surface-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring-color)] md:col-[1/span_3] md:row-start-1"
         href={brandHref}
         transitionTypes={["site-page"]}
       >
@@ -136,16 +136,16 @@ export function FullNav({
           previousHref={pageControl.previousHref}
         />
       ) : (
-        <div className="hidden md:col-[5/span_4] md:row-start-1 md:block" />
+        <div className="hidden xl:col-span-4 xl:col-start-5 xl:row-start-1 xl:block" />
       )}
 
       <nav
         aria-label={primaryNavAriaLabel}
-        className="col-[4/span_9] row-start-1 justify-self-end rounded-[6px] bg-surface-raised p-2 font-mono md:col-[10/span_3]"
+        className="min-w-0 max-w-full rounded-[6px] bg-surface-raised p-1 font-mono md:col-span-9 md:col-start-4 md:row-start-1 md:justify-self-end md:p-2 xl:col-span-3 xl:col-start-10"
         data-figma-component="Nav"
         data-node-id="33:57"
       >
-        <div className="flex items-center gap-2">{children}</div>
+        <div className="flex flex-wrap items-center gap-2">{children}</div>
       </nav>
     </header>
   );
@@ -160,7 +160,7 @@ export function BreadcrumbControl({
   return (
     <nav
       aria-label={ariaLabel}
-      className="hidden w-full max-w-[448px] min-w-0 items-center justify-center gap-12 justify-self-stretch font-mono text-label-medium md:col-[5/span_4] md:row-start-1 md:flex"
+      className="hidden w-full max-w-[448px] min-w-0 items-center justify-center gap-12 justify-self-center font-mono text-label-medium md:col-span-12 md:col-start-1 md:row-start-2 md:flex xl:col-span-4 xl:col-start-5 xl:row-start-1"
       data-figma-component="Breadcrumb control"
       data-node-id="36:281"
     >

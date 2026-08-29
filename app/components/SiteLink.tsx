@@ -122,7 +122,6 @@ export function SiteLink({
         );
       }}
       target={target}
-      transitionTypes={transitionTypes}
       {...props}
     />
   );
