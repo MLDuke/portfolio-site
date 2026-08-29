@@ -11,6 +11,10 @@ import {
 import { FigureCard } from "../components/FigureCard";
 import { Footer } from "../components/Footer";
 import {
+  interactionStates,
+  type InteractionState,
+} from "../components/interactionState";
+import {
   ProjectBlockRenderer,
   ProjectCompareRow,
   ProjectFeatureMedia,
@@ -44,12 +48,13 @@ const navGroups: SandboxNavGroup[] = [
       { href: "#spacing", label: "Spacing" },
       { href: "#radius", label: "Radius" },
       { href: "#elevation", label: "Elevation" },
-      { href: "#state-layer", label: "State layer" },
+      { href: "#state-layer", label: "Interaction states" },
     ],
   },
   {
     label: "Components",
     items: [
+      { href: "#buttons", label: "Buttons" },
       { href: "#portfolio-nav", label: "Portfolio nav" },
       { href: "#nav-buttons", label: "Nav buttons" },
       { href: "#breadcrumb-control", label: "Breadcrumb control" },
@@ -436,31 +441,25 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
       return (
         <SandboxSubsection title="Elevation tokens">
           <div className="grid grid-cols-2 gap-16">
-            <div className="grid h-96 place-items-center rounded-md bg-surface-raised shadow-raised">
+            <div
+              className="grid h-96 place-items-center rounded-md bg-surface-raised shadow-raised"
+              data-testid="elevation-raised"
+            >
               <span className="font-mono text-label-small">raised</span>
             </div>
-            <div className="grid h-96 place-items-center rounded-md bg-surface-overlay shadow-overlay">
+            <div
+              className="grid h-96 place-items-center rounded-md bg-surface-overlay shadow-overlay"
+              data-testid="elevation-overlay"
+            >
               <span className="font-mono text-label-small">overlay</span>
             </div>
           </div>
         </SandboxSubsection>
       );
     case "state-layer":
-      return (
-        <SandboxSubsection title="Interactive state surface">
-          <div className="flex flex-wrap gap-12">
-            <button className="state-layer pressable rounded-md bg-surface-raised px-16 py-12 font-mono text-label-medium">
-              Hover
-            </button>
-            <button
-              className="state-layer pressable rounded-md bg-surface-raised px-16 py-12 font-mono text-label-medium"
-              data-selected="true"
-            >
-              Selected
-            </button>
-          </div>
-        </SandboxSubsection>
-      );
+      return <InteractionStatesPage />;
+    case "buttons":
+      return <ButtonBenchPage onOpenModal={onOpenModal} />;
     case "portfolio-nav":
       return (
         <SandboxSubsection title="Full nav with project page control">
@@ -678,6 +677,506 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
     default:
       return renderSandboxPageBody(defaultPageId, onOpenModal);
   }
+}
+
+const interactionTokens = [
+  [
+    "--interaction-duration",
+    "150ms",
+    "Every hover, press, selection, and focus change.",
+  ],
+  [
+    "--interaction-easing",
+    "cubic-bezier(0.2, 0, 0, 1)",
+    "One curve, so nothing in the system eases differently.",
+  ],
+  ["--state-layer-hover", "8% on-surface", "Transient layer while hovered."],
+  [
+    "--state-layer-pressed",
+    "12% on-surface",
+    "Transient layer while the pointer is down. Wins over hover.",
+  ],
+  [
+    "--state-layer-selected",
+    "16% on-surface",
+    "Resting layer for the selected or current item.",
+  ],
+  ["--content-disabled", "0.38", "Opacity applied to a disabled control."],
+  ["--focus-ring-width", "2px", "Outline width for :focus-visible."],
+  ["--focus-ring-offset", "2px", "Outline offset for :focus-visible."],
+] as const;
+
+const stateNotes: Record<InteractionState, string> = {
+  rest: "No layer. The control's own background only.",
+  hover: "Hover layer over the resting state.",
+  pressed: "Pressed layer plus a 0.96 scale, motion-safe only.",
+  focused: "2px outline at 2px offset, keyboard focus only.",
+  disabled: "Layers suppressed, 0.38 opacity, no press feedback.",
+};
+
+const specimenButtonClassName =
+  "state-layer pressable inline-flex min-h-28 items-center justify-center rounded-sm bg-surface-raised px-12 py-8 font-mono text-label-small text-on-surface-primary";
+
+// --- Button hierarchy workbench ---------------------------------------------
+// This is a scratch surface, not a shipped component. Edit `buttonVariants`
+// below to explore hierarchy; nothing else in the app consumes them yet. Once a
+// set feels right, promote it to a real Button primitive.
+
+// One size, matching the NavButton that already ships on every page, so
+// promoting this costs no layout change at the most common call site.
+const buttonBase =
+  "state-layer pressable inline-flex min-h-28 shrink-0 items-center justify-center rounded-sm px-8 py-4 font-mono text-label-medium whitespace-nowrap";
+
+type ButtonVariantKey = "primary" | "secondary" | "text";
+
+const buttonVariants: Record<
+  ButtonVariantKey,
+  { classes: string; note: string }
+> = {
+  primary: {
+    classes: "accent-surface bg-accent-a-base text-accent-a-on-accent",
+    note: "Highest emphasis. One per view, for the single action you want taken.",
+  },
+  secondary: {
+    classes: "bg-surface-raised text-on-surface-primary",
+    note: "Default emphasis. What every button in the product uses today.",
+  },
+  text: {
+    classes: "text-on-surface-primary",
+    note: "Lowest emphasis. Today's icon buttons, breadcrumbs, and modal close.",
+  },
+};
+
+const buttonVariantKeys = Object.keys(buttonVariants) as ButtonVariantKey[];
+
+function BenchButton({
+  children,
+  previewState,
+  variant,
+}: {
+  children: React.ReactNode;
+  previewState?: InteractionState;
+  variant: ButtonVariantKey;
+}) {
+  return (
+    <button
+      className={[buttonBase, buttonVariants[variant].classes].join(" ")}
+      data-state={previewState}
+      disabled={previewState === "disabled"}
+      type="button"
+    >
+      {children}
+    </button>
+  );
+}
+
+/** All three variants side by side — the view for judging relative emphasis. */
+function HierarchyRow() {
+  return (
+    <div className="flex flex-wrap items-center gap-8">
+      {buttonVariantKeys.map((variant) => (
+        <BenchButton key={variant} variant={variant}>
+          {variant}
+        </BenchButton>
+      ))}
+    </div>
+  );
+}
+
+function ButtonBenchPage({ onOpenModal }: { onOpenModal: () => void }) {
+  return (
+    <>
+      <SandboxSubsection title="Hierarchy at a glance">
+        <div className="grid gap-12">
+          <HierarchyRow />
+          <p className="max-w-[560px] text-body-small text-on-surface-secondary">
+            Squint at this row. Emphasis should fall off cleanly from left to
+            right; if two variants read as equal weight, they are not separate
+            tiers.
+          </p>
+        </div>
+      </SandboxSubsection>
+
+      <SandboxSubsection title="Variant × state">
+        <div className="grid min-w-[720px] gap-2">
+          <div className="grid grid-cols-[112px_repeat(5,minmax(0,1fr))] gap-8 pb-6">
+            <span />
+            {interactionStates.map((state) => (
+              <span
+                className="font-mono text-label-small text-on-surface-secondary"
+                key={state}
+              >
+                {state}
+              </span>
+            ))}
+          </div>
+          {buttonVariantKeys.map((variant) => (
+            <div
+              className="grid grid-cols-[112px_repeat(5,minmax(0,1fr))] items-center justify-items-start gap-8 border-t border-border-default py-10"
+              key={variant}
+            >
+              <span className="font-mono text-label-small text-on-surface-secondary">
+                {variant}
+              </span>
+              {interactionStates.map((state) => (
+                <BenchButton key={state} previewState={state} variant={variant}>
+                  Label
+                </BenchButton>
+              ))}
+            </div>
+          ))}
+        </div>
+      </SandboxSubsection>
+
+      <SandboxSubsection title="Both themes">
+        <div className="grid gap-16 sm:grid-cols-2">
+          {(["light", "dark"] as const).map((specimenTheme) => (
+            <div
+              className="sandbox-theme grid gap-12 rounded-md border border-border-default bg-surface-base p-16"
+              data-testid={`button-bench-${specimenTheme}`}
+              data-theme={specimenTheme}
+              key={specimenTheme}
+            >
+              <p className="font-mono text-label-small text-on-surface-secondary">
+                {specimenTheme}
+              </p>
+              <HierarchyRow />
+            </div>
+          ))}
+        </div>
+      </SandboxSubsection>
+
+      <SandboxSubsection title="What each tier is for">
+        <div className="grid gap-2">
+          {buttonVariantKeys.map((variant) => (
+            <div
+              className="grid items-center gap-8 border-t border-border-default py-10 md:grid-cols-[140px_1fr]"
+              key={variant}
+            >
+              <BenchButton variant={variant}>{variant}</BenchButton>
+              <p className="text-body-small text-on-surface-secondary">
+                {buttonVariants[variant].note}
+              </p>
+            </div>
+          ))}
+        </div>
+      </SandboxSubsection>
+
+      <SandboxSubsection title="Shipped today — every button currently in the product">
+        <div className="grid gap-2">
+          <ShippedButtonRow
+            note="ComponentPrimitives · bg-surface-raised, label-medium, min-h-28"
+            name="NavButton"
+          >
+            <NavButton active>Projects</NavButton>
+            <NavButton>Journal</NavButton>
+          </ShippedButtonRow>
+
+          <ShippedButtonRow
+            note="ComponentPrimitives · no fill, 28×28, breadcrumb prev/next"
+            name="IconButton"
+          >
+            <IconButton aria-label="Previous item" href="/sandbox" icon="←" />
+            <IconButton aria-label="Next item" href="/sandbox" icon="→" />
+          </ShippedButtonRow>
+
+          <ShippedButtonRow
+            note="BreadcrumbLevelItem · no fill, 28×28, aria-expanded drives the selected layer"
+            name="Disclosure trigger"
+          >
+            <button
+              aria-expanded="false"
+              aria-label="Show options"
+              className="state-layer pressable flex h-28 w-28 shrink-0 items-center justify-center rounded-sm text-on-surface-primary"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                className="h-16 w-16"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.5"
+                viewBox="0 0 16 16"
+              >
+                <path d="m4 6 4 4 4-4" />
+              </svg>
+            </button>
+          </ShippedButtonRow>
+
+          <ShippedButtonRow
+            note="Sandbox · bg-surface-raised, label-small, min-h-32 — taller than NavButton"
+            name="Theme toggle"
+          >
+            <button
+              aria-pressed="false"
+              className="state-layer pressable inline-flex min-h-32 items-center justify-center rounded-sm bg-surface-raised px-10 py-6 font-mono text-label-small text-on-surface-primary"
+              type="button"
+            >
+              light theme
+            </button>
+          </ShippedButtonRow>
+
+          <ShippedButtonRow
+            note="AboutModal · no fill on a fixed dark shell, label-small"
+            name="Modal close"
+          >
+            <div className="modal-surface inline-flex rounded-sm bg-[#232e39] p-8">
+              <button
+                className="state-layer pressable rounded-sm px-8 py-4 font-mono text-label-small text-[#f9fcff]"
+                type="button"
+              >
+                Close
+              </button>
+            </div>
+          </ShippedButtonRow>
+
+          <ShippedButtonRow
+            note="Sandbox · bg-surface-raised, label-medium — opens the live modal"
+            name="Modal trigger"
+          >
+            <button
+              className="state-layer pressable rounded-sm bg-surface-raised px-8 py-4 font-mono text-label-medium"
+              onClick={onOpenModal}
+              type="button"
+            >
+              Open Information
+            </button>
+          </ShippedButtonRow>
+        </div>
+      </SandboxSubsection>
+    </>
+  );
+}
+
+function ShippedButtonRow({
+  children,
+  name,
+  note,
+}: {
+  children: React.ReactNode;
+  name: string;
+  note: string;
+}) {
+  return (
+    <div className="grid gap-8 border-t border-border-default py-12 md:grid-cols-[160px_200px_1fr] md:items-center">
+      <span className="font-mono text-label-small text-on-surface-primary">
+        {name}
+      </span>
+      <div className="flex flex-wrap items-center gap-8">{children}</div>
+      <p className="text-body-small text-on-surface-secondary">{note}</p>
+    </div>
+  );
+}
+
+function InteractionStatesPage() {
+  return (
+    <>
+      <SandboxSubsection title="Live controls — hover, press, and tab through these">
+        <div className="flex flex-wrap items-center gap-12">
+          <button className={specimenButtonClassName} type="button">
+            Rest
+          </button>
+          <button
+            aria-current="page"
+            className={specimenButtonClassName}
+            type="button"
+          >
+            Current
+          </button>
+          <button
+            className={specimenButtonClassName}
+            data-selected="true"
+            type="button"
+          >
+            Selected
+          </button>
+          <button className={specimenButtonClassName} disabled type="button">
+            Disabled
+          </button>
+        </div>
+        <p className="mt-12 max-w-[560px] text-body-small text-on-surface-secondary">
+          Hovering or pressing a selected control still reads as a change: the
+          selected layer sits on <code className="font-mono">::before</code> and
+          the transient layer on <code className="font-mono">::after</code>, so
+          the two composite instead of replacing each other.
+        </p>
+      </SandboxSubsection>
+
+      <SandboxSubsection title="Static states — the same rules, driven by data-state">
+        <div className="grid gap-16">
+          {interactionStates.map((state) => (
+            <div
+              className="grid items-center gap-12 border-t border-border-default py-12 md:grid-cols-[112px_repeat(3,minmax(0,auto))_1fr]"
+              key={state}
+            >
+              <p className="font-mono text-label-small text-on-surface-secondary">
+                {state}
+              </p>
+              <button
+                className={specimenButtonClassName}
+                data-state={state}
+                disabled={state === "disabled"}
+                type="button"
+              >
+                Label
+              </button>
+              <NavButton previewState={state}>Projects</NavButton>
+              <IconButton
+                aria-label={`Previous item, ${state} state`}
+                href="/sandbox"
+                icon="←"
+                previewState={state}
+              />
+              <p className="text-body-small text-on-surface-secondary">
+                {stateNotes[state]}
+              </p>
+            </div>
+          ))}
+        </div>
+      </SandboxSubsection>
+
+      <SandboxSubsection title="Selected and current, across both themes">
+        <div className="grid gap-16 sm:grid-cols-2">
+          {(["light", "dark"] as const).map((specimenTheme) => (
+            <div
+              className="sandbox-theme grid gap-12 rounded-md border border-border-default bg-surface-base p-16"
+              data-testid={`theme-specimen-${specimenTheme}`}
+              data-theme={specimenTheme}
+              key={specimenTheme}
+            >
+              <p className="font-mono text-label-small text-on-surface-secondary">
+                {specimenTheme}
+              </p>
+              <div className="flex flex-wrap items-center gap-8">
+                <button className={specimenButtonClassName} type="button">
+                  Rest
+                </button>
+                <button
+                  className={specimenButtonClassName}
+                  data-state="hover"
+                  type="button"
+                >
+                  Hover
+                </button>
+                <button
+                  className={specimenButtonClassName}
+                  data-state="pressed"
+                  type="button"
+                >
+                  Pressed
+                </button>
+                <button
+                  aria-current="page"
+                  className={specimenButtonClassName}
+                  type="button"
+                >
+                  Current
+                </button>
+                <button
+                  className={specimenButtonClassName}
+                  data-state="focused"
+                  type="button"
+                >
+                  Focused
+                </button>
+                <button
+                  className={specimenButtonClassName}
+                  disabled
+                  type="button"
+                >
+                  Disabled
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </SandboxSubsection>
+
+      <SandboxSubsection title="Figure card states">
+        <div className="grid gap-16 [grid-template-columns:repeat(auto-fill,minmax(180px,1fr))]">
+          {interactionStates.map((state) => (
+            <div className="grid gap-8" key={state}>
+              <div className="h-[260px]">
+                <FigureCard index="002" state={state} title="Project Name" />
+              </div>
+              <p className="font-mono text-label-small text-on-surface-secondary">
+                {state}
+              </p>
+            </div>
+          ))}
+        </div>
+      </SandboxSubsection>
+
+      <SandboxSubsection title="Reduced motion">
+        <ReducedMotionNotice />
+      </SandboxSubsection>
+
+      <SandboxSubsection title="Tokens">
+        <div className="grid gap-2">
+          {interactionTokens.map(([name, value, note]) => (
+            <div
+              className="grid gap-4 border-t border-border-default py-10 md:grid-cols-[240px_200px_1fr] md:gap-16"
+              key={name}
+            >
+              <code className="font-mono text-label-small text-on-surface-primary">
+                {name}
+              </code>
+              <code className="font-mono text-label-small text-on-surface-secondary">
+                {value}
+              </code>
+              <p className="text-body-small text-on-surface-secondary">{note}</p>
+            </div>
+          ))}
+        </div>
+      </SandboxSubsection>
+    </>
+  );
+}
+
+function ReducedMotionNotice() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState<
+    boolean | null
+  >(null);
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setPrefersReducedMotion(query.matches);
+
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
+  return (
+    <div className="grid max-w-[560px] gap-12">
+      <p className="font-mono text-label-small text-on-surface-secondary">
+        prefers-reduced-motion:{" "}
+        {prefersReducedMotion === null
+          ? "reading…"
+          : prefersReducedMotion
+            ? "reduce"
+            : "no-preference"}
+      </p>
+      <ul className="grid list-disc gap-8 pl-16 text-body-small text-on-surface-secondary">
+        <li>Press feedback drops the 0.96 scale and becomes colour only.</li>
+        <li>Route and modal transitions collapse to a single frame.</li>
+        <li>
+          Hover, pressed, selected, and focus colours all still apply, because
+          they are what makes a control legible as interactive.
+        </li>
+      </ul>
+      <div className="flex flex-wrap items-center gap-12">
+        <button className={specimenButtonClassName} type="button">
+          Press me
+        </button>
+        <p className="text-body-small text-on-surface-secondary">
+          Scales under no-preference, holds still under reduce.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function SandboxSidePanel({

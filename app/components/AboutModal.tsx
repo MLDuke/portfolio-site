@@ -107,7 +107,7 @@ export function AboutModal({ onClose }: AboutModalProps) {
       />
       <div
         className={[
-          "relative grid w-full max-w-[600px] grid-cols-[minmax(0,0.5fr)_minmax(0,1fr)] gap-x-16 overflow-hidden rounded-[2px] bg-[#232e39] px-20 py-24 text-body-medium text-[#f9fcff] shadow-overlay",
+          "modal-surface relative grid w-full max-w-[600px] grid-cols-[minmax(0,0.5fr)_minmax(0,1fr)] gap-x-16 overflow-hidden rounded-[2px] bg-[#232e39] px-20 py-24 text-body-medium text-[#f9fcff] shadow-overlay",
           isClosing ? "modal-shell-closing" : "modal-shell-entering",
         ].join(" ")}
       >
@@ -135,7 +135,7 @@ export function AboutModal({ onClose }: AboutModalProps) {
         <div className="grid gap-16 text-[#d9dfe7]">
           {aboutLinks.slice(0, 2).map((link) => (
             <a
-              className="rounded-sm underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f9fcff]"
+              className="focus-ring rounded-sm underline underline-offset-2"
               href={link.href}
               key={link.label}
             >
@@ -150,7 +150,7 @@ export function AboutModal({ onClose }: AboutModalProps) {
         <div className="grid gap-16 text-[#d9dfe7]">
           {aboutLinks.slice(2).map((link) => (
             <a
-              className="rounded-sm underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f9fcff]"
+              className="focus-ring rounded-sm underline underline-offset-2"
               href={link.href}
               key={link.label}
             >

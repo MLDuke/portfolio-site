@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { BreadcrumbLevelItem } from "./BreadcrumbLevelItem";
+import type { InteractionState } from "./interactionState";
 import { SiteLink } from "./SiteLink";
 
 type NavButtonProps = {
@@ -7,6 +8,8 @@ type NavButtonProps = {
   children: ReactNode;
   href?: string;
   onClick?: () => void;
+  /** Forces a static state for design-system previews. Live controls omit it. */
+  previewState?: InteractionState;
   transitionTypes?: string[];
 };
 
@@ -15,20 +18,21 @@ export function NavButton({
   children,
   href,
   onClick,
+  previewState,
   transitionTypes,
 }: NavButtonProps) {
-  const state = active ? "active" : "rest";
-  const className = [
-    "state-layer pressable inline-flex min-h-28 shrink-0 items-center justify-center rounded-sm bg-surface-raised px-8 py-4 font-mono text-label-medium text-on-surface-primary whitespace-nowrap",
-  ].join(" ");
+  const className =
+    "state-layer pressable inline-flex min-h-28 shrink-0 items-center justify-center rounded-sm bg-surface-raised px-8 py-4 font-mono text-label-medium text-on-surface-primary whitespace-nowrap";
   const commonProps = {
     "data-figma-component": "Nav Button",
     "data-node-id": active ? "33:58" : "32:761",
     "data-selected": active ? "true" : undefined,
-    "data-state": state,
+    "data-state": previewState ?? (active ? "selected" : "rest"),
   };
 
-  if (href) {
+  // Same reason as IconButton: a disabled preview falls back to a real button,
+  // because an anchor cannot be disabled.
+  if (href && previewState !== "disabled") {
     return (
       <SiteLink
         aria-current={active ? "page" : undefined}
@@ -43,7 +47,13 @@ export function NavButton({
   }
 
   return (
-    <button className={className} onClick={onClick} type="button" {...commonProps}>
+    <button
+      className={className}
+      disabled={previewState === "disabled"}
+      onClick={onClick}
+      type="button"
+      {...commonProps}
+    >
       {children}
     </button>
   );
@@ -53,6 +63,8 @@ type IconButtonProps = {
   "aria-label": string;
   href: string;
   icon: "←" | "→";
+  /** Forces a static state for design-system previews. Live controls omit it. */
+  previewState?: InteractionState;
   transitionTypes?: string[];
 };
 
@@ -60,17 +72,34 @@ export function IconButton({
   "aria-label": ariaLabel,
   href,
   icon,
+  previewState,
   transitionTypes,
 }: IconButtonProps) {
+  const className =
+    "state-layer pressable flex h-28 min-w-28 shrink-0 items-center justify-center rounded-sm px-5 text-body-medium text-on-surface-primary";
+  const commonProps = {
+    "aria-label": ariaLabel,
+    "data-figma-component": "Icon Button",
+    "data-node-id": "35:135",
+    "data-state": previewState ?? "rest",
+  };
+
+  // A link cannot be disabled, so the preview renders a real disabled control
+  // rather than an anchor that merely looks inert but still navigates.
+  if (previewState === "disabled") {
+    return (
+      <button className={className} disabled type="button" {...commonProps}>
+        {icon}
+      </button>
+    );
+  }
+
   return (
     <SiteLink
-      aria-label={ariaLabel}
-      className="state-layer pressable flex h-28 min-w-28 shrink-0 items-center justify-center rounded-sm px-5 text-body-medium text-on-surface-primary"
-      data-figma-component="Icon Button"
-      data-node-id="35:135"
-      data-state="rest"
+      className={className}
       href={href}
       transitionTypes={transitionTypes}
+      {...commonProps}
     >
       {icon}
     </SiteLink>
@@ -121,7 +150,7 @@ export function FullNav({
       style={{ viewTransitionName: "site-header" }}
     >
       <SiteLink
-        className="pressable self-center whitespace-nowrap font-mono text-on-surface-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring-color)] md:col-[1/span_3] md:row-start-1"
+        className="state-layer pressable -mx-4 self-center rounded-sm px-4 py-2 whitespace-nowrap font-mono text-on-surface-primary md:col-[1/span_3] md:row-start-1"
         href={brandHref}
         transitionTypes={["site-page"]}
       >

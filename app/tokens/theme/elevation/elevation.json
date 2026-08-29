@@ -1,0 +1,22 @@
+{
+  "theme": {
+    "elevation": {
+      "raised": {
+        "$type": "shadow",
+        "$value": "{global.effects.shadow.raised.light}",
+        "$extensions": { "mode": {
+          "light": "{global.effects.shadow.raised.light}",
+          "dark":  "{global.effects.shadow.raised.dark}"
+        } }
+      },
+      "overlay": {
+        "$type": "shadow",
+        "$value": "{global.effects.shadow.overlay.light}",
+        "$extensions": { "mode": {
+          "light": "{global.effects.shadow.overlay.light}",
+          "dark":  "{global.effects.shadow.overlay.dark}"
+        } }
+      }
+    }
+  }
+}

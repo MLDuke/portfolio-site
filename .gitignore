@@ -4,6 +4,7 @@ out
 build
 dist
 .vercel
+*.tsbuildinfo
 test-results
 playwright-report
 blob-report

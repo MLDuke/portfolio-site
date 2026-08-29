@@ -1,0 +1,11 @@
+{
+  "theme": {
+    "border": {
+      "default": {
+        "$type": "color",
+        "$value": "{global.color.neutral.4}",
+        "$extensions": { "mode": { "light": "{global.color.neutral.4}", "dark": "{global.color.neutral.4}" } }
+      }
+    }
+  }
+}
