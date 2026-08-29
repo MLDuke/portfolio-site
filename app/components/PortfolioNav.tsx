@@ -70,7 +70,12 @@ export function PortfolioNav({
     <>
       <FullNav pageControl={visiblePageControl}>
         {navItems.map((item) => (
-          <NavButton active={active === item.key} href={item.href} key={item.key}>
+          <NavButton
+            active={active === item.key}
+            href={item.href}
+            key={item.key}
+            transitionTypes={["site-page"]}
+          >
             {item.label}
           </NavButton>
         ))}
