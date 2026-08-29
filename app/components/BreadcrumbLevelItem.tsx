@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import type { BreadcrumbLevel } from "./ComponentPrimitives";
+import { SiteLink } from "./SiteLink";
 
 const panelClassName = [
   "invisible absolute left-1/2 top-full z-30 min-w-max -translate-x-1/2 -translate-y-4 pt-6 opacity-0 blur-[4px]",
@@ -75,13 +75,14 @@ export function BreadcrumbLevelItem({
         }}
         ref={containerRef}
       >
-        <Link
+        <SiteLink
           aria-current={isCurrent ? "page" : undefined}
-          className="state-layer flex min-w-0 items-center justify-center rounded-sm px-4 py-2 text-on-surface-primary"
+          className="state-layer pressable flex min-w-0 items-center justify-center rounded-sm px-4 py-2 text-on-surface-primary"
           href={level.href}
+          transitionTypes={["site-page"]}
         >
           <span className="truncate whitespace-nowrap">{level.label}</span>
-        </Link>
+        </SiteLink>
 
         {hasOptions ? (
           <>
@@ -89,7 +90,7 @@ export function BreadcrumbLevelItem({
               aria-controls={panelId}
               aria-expanded={isOpen}
               aria-label={`Show ${level.label} options`}
-              className="state-layer flex h-24 w-24 shrink-0 items-center justify-center rounded-sm text-on-surface-primary"
+              className="state-layer pressable flex h-28 w-28 shrink-0 items-center justify-center rounded-sm text-on-surface-primary"
               onClick={() => setIsPinned((pinned) => !pinned)}
               ref={toggleRef}
               type="button"
@@ -112,16 +113,17 @@ export function BreadcrumbLevelItem({
               <div className="rounded-[6px] bg-surface-raised p-2 shadow-overlay">
                 <div className="grid max-h-[min(360px,calc(100vh-96px))] min-w-160 overflow-y-auto">
                   {options.map((option) => (
-                    <Link
+                    <SiteLink
                       aria-current={option.active ? "page" : undefined}
-                      className="state-layer rounded-sm px-8 py-4 text-on-surface-primary whitespace-nowrap"
+                      className="state-layer pressable rounded-sm px-8 py-4 text-on-surface-primary whitespace-nowrap"
                       data-selected={option.active ? "true" : undefined}
                       href={option.href}
                       key={option.href}
                       onClick={() => setIsPinned(false)}
+                      transitionTypes={["site-page"]}
                     >
                       {option.label}
-                    </Link>
+                    </SiteLink>
                   ))}
                 </div>
               </div>

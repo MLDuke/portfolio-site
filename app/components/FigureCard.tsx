@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { SiteLink } from "./SiteLink";
 
 type FigureCardProps = {
   href?: string;
@@ -31,11 +31,12 @@ export function FigureCard({
     hover: "bg-[var(--state-layer-hover)]",
     pressed: "bg-[var(--state-layer-pressed)]",
     focused: "bg-surface-base ring-2 ring-inset ring-[var(--focus-ring-color)]",
-    disabled: "bg-surface-base cursor-default",
+    disabled: "bg-surface-base cursor-default opacity-[var(--content-disabled)]",
   };
   const rootClassName = [
-    "group flex h-full w-full flex-col gap-12 overflow-hidden rounded-b-[12px] rounded-t-[8px] p-6 text-left transition-colors",
-    "hover:bg-[var(--state-layer-hover)] active:bg-[var(--state-layer-pressed)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--focus-ring-color)]",
+    "group flex h-full w-full flex-col gap-12 overflow-hidden rounded-b-[12px] rounded-t-[8px] p-6 text-left touch-manipulation",
+    "motion-safe:transition-[background-color,scale,box-shadow] motion-safe:duration-150 motion-safe:ease-out",
+    "hover:bg-[var(--state-layer-hover)] active:bg-[var(--state-layer-pressed)] motion-safe:active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring-color)]",
     isDisabled ? "pointer-events-none" : "cursor-pointer",
     stateClasses[state],
   ].join(" ");
@@ -50,7 +51,7 @@ export function FigureCard({
       <div
         className={[
           imageHeight,
-          "w-full shrink-0 bg-[#808080] transition-[border-radius]",
+          "w-full shrink-0 bg-[#808080] motion-safe:transition-[border-radius] motion-safe:duration-150 motion-safe:ease-out",
           hasExpandedImageRadius ? "rounded-md" : "rounded-[6px]",
           "group-active:rounded-md group-focus-visible:rounded-md",
         ].join(" ")}
@@ -60,15 +61,16 @@ export function FigureCard({
 
   if (href && !isDisabled) {
     return (
-      <Link
+      <SiteLink
         className={rootClassName}
         data-figma-component="Figure"
         data-node-id={stateNodeIds[state]}
         data-state={state}
         href={href}
+        transitionTypes={["site-page"]}
       >
         {frame}
-      </Link>
+      </SiteLink>
     );
   }
 

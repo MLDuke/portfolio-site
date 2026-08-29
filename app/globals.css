@@ -212,10 +212,51 @@
   }
 }
 
+@layer utilities {
+  .pressable {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition-property: scale;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+
+  .modal-backdrop {
+    background: rgb(0 6 17 / 0.24);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pressable:active {
+      scale: 0.96;
+    }
+
+    html[data-site-page-transition="fallback"] .site-page-content {
+      animation: site-page-enter 210ms ease-out both;
+    }
+
+    .modal-backdrop-entering {
+      animation: modal-backdrop-enter 210ms ease-out both;
+    }
+
+    .modal-backdrop-closing {
+      animation: modal-backdrop-exit 150ms ease-out both;
+    }
+
+    .modal-shell-entering {
+      animation: modal-shell-enter 210ms ease-out both;
+    }
+
+    .modal-shell-closing {
+      animation: modal-shell-exit 150ms ease-out both;
+    }
+  }
+}
+
 @utility state-layer {
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
 
   &::after {
     content: "";
@@ -223,7 +264,9 @@
     inset: 0;
     pointer-events: none;
     background: transparent;
-    transition: background-color 160ms ease;
+    transition-property: background-color;
+    transition-duration: 160ms;
+    transition-timing-function: ease;
   }
 
   &:hover::after {
@@ -242,5 +285,124 @@
   &:focus-visible {
     outline: 2px solid var(--focus-ring-color);
     outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition {
+    pointer-events: none;
+  }
+
+  ::view-transition-group(site-header) {
+    animation: none;
+    z-index: 100;
+  }
+
+  ::view-transition-old(site-header) {
+    display: none;
+  }
+
+  ::view-transition-new(site-header) {
+    animation: none;
+  }
+
+  ::view-transition-old(root) {
+    animation: site-page-exit 150ms ease-out both;
+  }
+
+  ::view-transition-new(root) {
+    animation: site-page-enter 210ms ease-out 80ms both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	  .pressable,
+	  .site-page-content,
+	  .modal-backdrop-entering,
+	  .modal-backdrop-closing,
+	  .modal-shell-entering,
+	  .modal-shell-closing,
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes site-page-enter {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes site-page-exit {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes modal-backdrop-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-backdrop-exit {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-shell-enter {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes modal-shell-exit {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translateY(-6px);
   }
 }

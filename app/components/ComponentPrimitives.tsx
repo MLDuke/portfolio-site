@@ -1,12 +1,13 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { BreadcrumbLevelItem } from "./BreadcrumbLevelItem";
+import { SiteLink } from "./SiteLink";
 
 type NavButtonProps = {
   active?: boolean;
   children: ReactNode;
   href?: string;
   onClick?: () => void;
+  transitionTypes?: string[];
 };
 
 export function NavButton({
@@ -14,13 +15,11 @@ export function NavButton({
   children,
   href,
   onClick,
+  transitionTypes,
 }: NavButtonProps) {
   const state = active ? "active" : "rest";
   const className = [
-    "state-layer flex shrink-0 rounded-sm bg-surface-raised px-8 py-4 font-mono text-label-medium text-on-surface-primary",
-    active
-      ? "items-start justify-end text-right whitespace-nowrap"
-      : "flex-col items-center justify-center gap-8",
+    "state-layer pressable inline-flex min-h-28 shrink-0 items-center justify-center rounded-sm bg-surface-raised px-8 py-4 font-mono text-label-medium text-on-surface-primary whitespace-nowrap",
   ].join(" ");
   const commonProps = {
     "data-figma-component": "Nav Button",
@@ -31,14 +30,15 @@ export function NavButton({
 
   if (href) {
     return (
-      <Link
+      <SiteLink
         aria-current={active ? "page" : undefined}
         className={className}
         href={href}
+        transitionTypes={transitionTypes}
         {...commonProps}
       >
         {children}
-      </Link>
+      </SiteLink>
     );
   }
 
@@ -53,24 +53,27 @@ type IconButtonProps = {
   "aria-label": string;
   href: string;
   icon: "←" | "→";
+  transitionTypes?: string[];
 };
 
 export function IconButton({
   "aria-label": ariaLabel,
   href,
   icon,
+  transitionTypes,
 }: IconButtonProps) {
   return (
-    <Link
+    <SiteLink
       aria-label={ariaLabel}
-      className="state-layer flex h-24 min-w-24 shrink-0 items-center justify-center rounded-sm px-5 text-body-medium text-on-surface-primary"
+      className="state-layer pressable flex h-28 min-w-28 shrink-0 items-center justify-center rounded-sm px-5 text-body-medium text-on-surface-primary"
       data-figma-component="Icon Button"
       data-node-id="35:135"
       data-state="rest"
       href={href}
+      transitionTypes={transitionTypes}
     >
       {icon}
-    </Link>
+    </SiteLink>
   );
 }
 
@@ -115,13 +118,15 @@ export function FullNav({
       className="grid h-32 grid-cols-12 items-center gap-x-32 text-label-medium"
       data-figma-component="Full Nav"
       data-node-id="80:379"
+      style={{ viewTransitionName: "site-header" }}
     >
-      <Link
-        className="col-[1/span_3] row-start-1 self-center whitespace-nowrap font-mono text-on-surface-primary"
+      <SiteLink
+        className="pressable col-[1/span_3] row-start-1 self-center whitespace-nowrap font-mono text-on-surface-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring-color)]"
         href={brandHref}
+        transitionTypes={["site-page"]}
       >
         {brandLabel}
-      </Link>
+      </SiteLink>
 
       {pageControl ? (
         <BreadcrumbControl
@@ -159,7 +164,12 @@ export function BreadcrumbControl({
       data-figma-component="Breadcrumb control"
       data-node-id="36:281"
     >
-      <IconButton aria-label="Previous item" href={previousHref} icon="←" />
+      <IconButton
+        aria-label="Previous item"
+        href={previousHref}
+        icon="←"
+        transitionTypes={["site-page"]}
+      />
       <div className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-sm">
         {levels.map((level, index) => (
           <BreadcrumbLevelItem
@@ -169,7 +179,12 @@ export function BreadcrumbControl({
           />
         ))}
       </div>
-      <IconButton aria-label="Next item" href={nextHref} icon="→" />
+      <IconButton
+        aria-label="Next item"
+        href={nextHref}
+        icon="→"
+        transitionTypes={["site-page"]}
+      />
     </nav>
   );
 }

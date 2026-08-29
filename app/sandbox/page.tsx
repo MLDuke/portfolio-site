@@ -449,11 +449,11 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
       return (
         <SandboxSubsection title="Interactive state surface">
           <div className="flex flex-wrap gap-12">
-            <button className="state-layer rounded-md bg-surface-raised px-16 py-12 font-mono text-label-medium">
+            <button className="state-layer pressable rounded-md bg-surface-raised px-16 py-12 font-mono text-label-medium">
               Hover
             </button>
             <button
-              className="state-layer rounded-md bg-surface-raised px-16 py-12 font-mono text-label-medium"
+              className="state-layer pressable rounded-md bg-surface-raised px-16 py-12 font-mono text-label-medium"
               data-selected="true"
             >
               Selected
@@ -465,10 +465,12 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
       return (
         <SandboxSubsection title="Full nav with project page control">
           <FullNav pageControl={projectPageControl}>
-            <NavButton active href="/sandbox">
+            <NavButton active href="/sandbox" transitionTypes={["site-page"]}>
               Projects
             </NavButton>
-            <NavButton href="/sandbox">Journal</NavButton>
+            <NavButton href="/sandbox" transitionTypes={["site-page"]}>
+              Journal
+            </NavButton>
             <NavButton>Information</NavButton>
           </FullNav>
         </SandboxSubsection>
@@ -482,10 +484,12 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
             data-figma-component="Nav"
             data-node-id="33:57"
           >
-            <NavButton active href="/sandbox">
+            <NavButton active href="/sandbox" transitionTypes={["site-page"]}>
               Projects
             </NavButton>
-            <NavButton href="/sandbox">Journal</NavButton>
+            <NavButton href="/sandbox" transitionTypes={["site-page"]}>
+              Journal
+            </NavButton>
             <NavButton>Information</NavButton>
           </nav>
         </SandboxSubsection>
@@ -657,7 +661,7 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
       return (
         <SandboxSubsection title="Modal trigger">
           <button
-            className="state-layer rounded-sm bg-surface-raised px-8 py-4 font-mono text-label-medium"
+            className="state-layer pressable rounded-sm bg-surface-raised px-8 py-4 font-mono text-label-medium"
             onClick={onOpenModal}
             type="button"
           >
@@ -767,7 +771,7 @@ function ThemeToggle({
     <button
       aria-label={`Switch sandbox to ${nextTheme} theme`}
       aria-pressed={theme === "dark"}
-      className="state-layer inline-flex min-h-32 items-center justify-center rounded-sm bg-surface-raised px-10 py-6 font-mono text-label-small text-on-surface-primary"
+      className="state-layer pressable inline-flex min-h-32 items-center justify-center rounded-sm bg-surface-raised px-10 py-6 font-mono text-label-small text-on-surface-primary"
       onClick={onToggleTheme}
       type="button"
     >
@@ -812,7 +816,7 @@ function SandboxNav({
                 aria-current={
                   activePage === item.href.slice(1) ? "page" : undefined
                 }
-                className="state-layer rounded-sm px-8 py-6 font-mono text-label-small text-on-surface-primary"
+                className="state-layer pressable rounded-sm px-8 py-6 font-mono text-label-small text-on-surface-primary"
                 data-selected={
                   activePage === item.href.slice(1) ? "true" : undefined
                 }
