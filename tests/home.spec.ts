@@ -1,4 +1,10 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
+
+function fontSizeOf(locator: Locator) {
+  return locator.evaluate((element) =>
+    Number.parseFloat(window.getComputedStyle(element).fontSize),
+  );
+}
 
 test("home page renders portfolio navigation and project links", async ({
   page,
@@ -49,9 +55,20 @@ test.describe("portfolio page shell", () => {
     test(`${route} reflows with 200% text sizing`, async ({ page }) => {
       await page.setViewportSize({ height: 900, width: 320 });
       await page.goto(route);
+
+      // The type scale has to be rem-based for this to test anything: with a px
+      // scale the page never resizes and the reflow assertion below passes
+      // vacuously.
+      const label = page
+        .getByRole("navigation", { name: "Primary navigation" })
+        .getByRole("link", { name: "Projects" });
+      const restingSize = await fontSizeOf(label);
+
       await page.addStyleTag({
         content: "html { font-size: 200% !important; }",
       });
+
+      expect(await fontSizeOf(label)).toBeCloseTo(restingSize * 2, 1);
 
       const horizontalScroll = await page.evaluate(() => {
         window.scrollTo(1_000_000, window.scrollY);
@@ -158,4 +175,38 @@ test.describe("portfolio page shell", () => {
     await expect(page.getByRole("dialog", { name: "About" })).toBeHidden();
     await expect(informationButton).toBeFocused();
   });
+});
+
+test.describe("theme tokens", () => {
+  /**
+   * Tailwind inlines @theme shadow values into the generated utility, so a
+   * theme-switched shadow only works while `@theme` aliases `--shadow-*` to a
+   * differently named var. Naming the theme token `--shadow-*` compiles cleanly
+   * and silently leaves dark mode on the light shadows, which is exactly why
+   * this is asserted rather than eyeballed.
+   */
+  for (const name of ["raised", "overlay"] as const) {
+    test(`${name} elevation follows the theme`, async ({ page }) => {
+      await page.goto("/sandbox#elevation");
+
+      const specimen = page.getByTestId(`elevation-${name}`);
+      const light = await specimen.evaluate(
+        (element) => window.getComputedStyle(element).boxShadow,
+      );
+
+      await page
+        .getByRole("button", { name: "Switch sandbox to dark theme" })
+        .filter({ visible: true })
+        .first()
+        .click();
+
+      const dark = await specimen.evaluate(
+        (element) => window.getComputedStyle(element).boxShadow,
+      );
+
+      expect(light).not.toBe("none");
+      expect(dark).not.toBe("none");
+      expect(dark).not.toBe(light);
+    });
+  }
 });

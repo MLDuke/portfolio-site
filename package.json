@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "setup": "sh scripts/setup.sh",
+    "tokens": "node app/tokens/build-css.mjs",
     "dev": "next dev",
+    "prebuild": "node app/tokens/build-css.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

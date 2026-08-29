@@ -1,11 +1,20 @@
+import type { InteractionState } from "./interactionState";
 import { SiteLink } from "./SiteLink";
 
 type FigureCardProps = {
   href?: string;
   index: string;
-  state?: "rest" | "hover" | "pressed" | "focused" | "disabled";
+  state?: InteractionState;
   title: string;
   variant?: "project" | "journal";
+};
+
+const stateNodeIds: Record<InteractionState, string> = {
+  rest: "21:2067",
+  hover: "21:2173",
+  pressed: "21:2132",
+  focused: "21:2138",
+  disabled: "21:2144",
 };
 
 export function FigureCard({
@@ -17,29 +26,15 @@ export function FigureCard({
 }: FigureCardProps) {
   const imageHeight = variant === "project" ? "h-[401px]" : "h-[calc(100%-36px)]";
   const isDisabled = state === "disabled";
-  const hasExpandedImageRadius =
-    state === "pressed" || state === "focused" || state === "disabled";
-  const stateNodeIds = {
-    rest: "21:2067",
-    hover: "21:2173",
-    pressed: "21:2132",
-    focused: "21:2138",
-    disabled: "21:2144",
-  };
-  const stateClasses = {
-    rest: "bg-surface-base",
-    hover: "bg-[var(--state-layer-hover)]",
-    pressed: "bg-[var(--state-layer-pressed)]",
-    focused: "bg-surface-base ring-2 ring-inset ring-[var(--focus-ring-color)]",
-    disabled: "bg-surface-base cursor-default opacity-[var(--content-disabled)]",
-  };
+  // The card is large enough that the shared state layer alone reads as flat, so
+  // it keeps one extra affordance: the image corner opens up on press and focus.
+  const hasExpandedImageRadius = state === "pressed" || state === "focused";
   const rootClassName = [
-    "group flex h-full w-full flex-col gap-12 overflow-hidden rounded-b-[12px] rounded-t-[8px] p-6 text-left touch-manipulation",
-    "motion-safe:transition-[background-color,scale,box-shadow] motion-safe:duration-150 motion-safe:ease-out",
-    "hover:bg-[var(--state-layer-hover)] active:bg-[var(--state-layer-pressed)] motion-safe:active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring-color)]",
-    isDisabled ? "pointer-events-none" : "cursor-pointer",
-    stateClasses[state],
-  ].join(" ");
+    "state-layer pressable group flex h-full w-full flex-col gap-12 rounded-b-[12px] rounded-t-[8px] bg-surface-base p-6 text-left",
+    isDisabled ? "" : "cursor-pointer",
+  ]
+    .filter(Boolean)
+    .join(" ");
   const frame = (
     <>
       <div className="flex items-center gap-10 text-on-surface-secondary">
@@ -51,7 +46,7 @@ export function FigureCard({
       <div
         className={[
           imageHeight,
-          "w-full shrink-0 bg-[#808080] motion-safe:transition-[border-radius] motion-safe:duration-150 motion-safe:ease-out",
+          "w-full shrink-0 bg-[#808080] motion-safe:transition-[border-radius] motion-safe:duration-[var(--interaction-duration)] motion-safe:ease-[var(--interaction-easing)]",
           hasExpandedImageRadius ? "rounded-md" : "rounded-[6px]",
           "group-active:rounded-md group-focus-visible:rounded-md",
         ].join(" ")}

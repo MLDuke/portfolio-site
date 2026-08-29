@@ -5,7 +5,7 @@ import type { BreadcrumbLevel } from "./ComponentPrimitives";
 import { SiteLink } from "./SiteLink";
 
 const panelClassName = [
-  "invisible absolute left-1/2 top-full z-30 min-w-max -translate-x-1/2 -translate-y-4 pt-6 opacity-0 blur-[4px]",
+  "breadcrumb-panel invisible absolute left-1/2 top-full z-30 min-w-max -translate-x-1/2 -translate-y-4 pt-6 opacity-0 blur-[4px]",
   "transition-[opacity,translate,filter,visibility] duration-150 ease-out",
   "group-data-[open=true]:visible group-data-[open=true]:translate-y-0",
   "group-data-[open=true]:opacity-100 group-data-[open=true]:blur-[0px]",
@@ -29,18 +29,31 @@ export function BreadcrumbLevelItem({
   const isOpen = hasOptions && (isPinned || isHovered);
 
   useEffect(() => {
-    if (!isPinned) {
+    if (!isOpen) {
       return;
     }
 
+    const close = () => {
+      setIsPinned(false);
+      setIsHovered(false);
+    };
     const closeOnOutsidePointer = (event: PointerEvent) => {
       if (!containerRef.current?.contains(event.target as Node)) {
-        setIsPinned(false);
+        close();
       }
     };
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsPinned(false);
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      // Only pull focus back when it is already inside this level, so escaping
+      // a panel that merely happens to be hovered cannot steal focus.
+      const holdsFocus = containerRef.current?.contains(document.activeElement);
+
+      close();
+
+      if (holdsFocus) {
         toggleRef.current?.focus();
       }
     };
@@ -51,7 +64,7 @@ export function BreadcrumbLevelItem({
       document.removeEventListener("pointerdown", closeOnOutsidePointer);
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [isPinned]);
+  }, [isOpen]);
 
   return (
     <>
@@ -97,7 +110,7 @@ export function BreadcrumbLevelItem({
             >
               <svg
                 aria-hidden="true"
-                className="h-16 w-16 transition-transform duration-200 ease-out group-data-[open=true]:rotate-180"
+                className="breadcrumb-chevron h-16 w-16 motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out group-data-[open=true]:rotate-180"
                 fill="none"
                 stroke="currentColor"
                 strokeLinecap="round"
@@ -119,7 +132,10 @@ export function BreadcrumbLevelItem({
                       data-selected={option.active ? "true" : undefined}
                       href={option.href}
                       key={option.href}
-                      onClick={() => setIsPinned(false)}
+                      onClick={() => {
+                        setIsPinned(false);
+                        setIsHovered(false);
+                      }}
                       transitionTypes={["site-page"]}
                     >
                       {option.label}
