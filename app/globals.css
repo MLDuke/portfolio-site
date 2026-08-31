@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
-/* Colour system — generated from app/tokens (GTC token set).
-   Regenerate with: node app/tokens/build-css.mjs */
-@import "./tokens/tokens.css";
+/* Design tokens — generated from app/tokens (GTC token set).
+   Regenerate with: node app/tokens/build-css.mjs
+
+   Imported into `base` rather than unlayered: the interaction tokens below
+   (--state-layer-*, --focus-ring-color) are re-pointed by the accent-surface /
+   modal-surface utilities, and an unlayered :root declaration would outrank
+   every layered rule, including those. */
+@import "./tokens/tokens.css" layer(base);
 
 @theme {
   --font-sans: var(--typography-font-family-sans);
@@ -94,19 +99,13 @@
 
 @layer base {
   :root {
-    /* Colour ramps, spacing, radius, typography, motion and shadow primitives —
-       plus the semantic surface / on-surface / border / accent / elevation
-       tokens — are generated into tokens.css from app/tokens. See the @import at
-       the top of this file. */
+    /* Every primitive and semantic token — colour, spacing, radius, typography,
+       motion, elevation, and the interaction contract (--interaction-*,
+       --state-layer-*, --focus-ring-*, --content-disabled) — is generated into
+       tokens.css from app/tokens. See the @import at the top of this file.
 
-    /* Interaction contract: one duration/easing pair and one focus ring for
-       every hover, press, selection, and focus affordance in the system. */
-    --interaction-duration: var(--motion-duration-fast);
-    --interaction-easing: var(--motion-easing-standard);
-    --content-disabled: var(--color-opacity-38);
-    --focus-ring-width: 2px;
-    --focus-ring-offset: 2px;
-
+       These weight aliases stay here because Tailwind's --text-<size>--<prop>
+       shape is not a token path the build can emit. */
     --text-display-large--font-weight-emphasized: var(--typography-font-weight-bold);
     --text-display-medium--font-weight-emphasized: var(--typography-font-weight-bold);
     --text-display-small--font-weight-emphasized: var(--typography-font-weight-bold);
@@ -123,19 +122,14 @@
 
   :root,
   .sandbox-theme[data-theme="light"] {
-    /* surface / on-surface / border / accent / elevation : tokens.css */
-    --state-layer-hover: rgb(0 6 17 / 0.08);
-    --state-layer-pressed: rgb(0 6 17 / 0.12);
-    --state-layer-selected: rgb(0 6 17 / 0.16);
-    --focus-ring-color: var(--on-surface-primary);
-
     color-scheme: light;
   }
 
   /* Tailwind substitutes the --color-* aliases where they are declared, which
      is :root, so descendants inherit the resolved value rather than re-reading
      the semantic tokens. A nested theme scope therefore has to re-point them at
-     its own tokens, otherwise only the raw --state-layer-* values invert. */
+     its own tokens. The tokens themselves come from tokens.css, which already
+     declares both sandbox scopes. */
   .sandbox-theme[data-theme] {
     --color-surface-base: var(--surface-base);
     --color-surface-raised: var(--surface-raised);
@@ -147,16 +141,10 @@
     --color-accent-a-on-accent: var(--accent-a-on-accent);
     --color-accent-b-base: var(--accent-b-base);
     --color-accent-b-on-accent: var(--accent-b-on-accent);
-    --focus-ring-color: var(--on-surface-primary);
   }
 
   html[data-theme="dark"],
   .sandbox-theme[data-theme="dark"] {
-    /* surface / on-surface / border / accent / elevation : tokens.css */
-    --state-layer-hover: rgb(249 252 255 / 0.08);
-    --state-layer-pressed: rgb(249 252 255 / 0.12);
-    --state-layer-selected: rgb(249 252 255 / 0.16);
-
     color-scheme: dark;
   }
 
@@ -296,18 +284,18 @@
    darkest neutral), so their state layers must stay dark instead of following
    the page theme. Same mechanism as modal-surface. */
 @utility accent-surface {
-  --state-layer-hover: rgb(0 6 17 / 0.08);
-  --state-layer-pressed: rgb(0 6 17 / 0.12);
-  --state-layer-selected: rgb(0 6 17 / 0.16);
+  --state-layer-hover: var(--state-layer-on-light-hover);
+  --state-layer-pressed: var(--state-layer-on-light-pressed);
+  --state-layer-selected: var(--state-layer-on-light-selected);
   --focus-ring-color: var(--accent-a-on-accent);
 }
 
 /* The information modal paints its own dark shell regardless of page theme, so
    it re-points the interaction tokens at light-on-dark values. */
 @utility modal-surface {
-  --state-layer-hover: rgb(249 252 255 / 0.08);
-  --state-layer-pressed: rgb(249 252 255 / 0.12);
-  --state-layer-selected: rgb(249 252 255 / 0.16);
+  --state-layer-hover: var(--state-layer-on-dark-hover);
+  --state-layer-pressed: var(--state-layer-on-dark-pressed);
+  --state-layer-selected: var(--state-layer-on-dark-selected);
   --focus-ring-color: var(--color-neutral-0);
 }
 

@@ -702,8 +702,16 @@ const interactionTokens = [
     "Resting layer for the selected or current item.",
   ],
   ["--content-disabled", "0.38", "Opacity applied to a disabled control."],
-  ["--focus-ring-width", "2px", "Outline width for :focus-visible."],
-  ["--focus-ring-offset", "2px", "Outline offset for :focus-visible."],
+  [
+    "--focus-ring-width",
+    "0.125rem",
+    "Outline width for :focus-visible. 2px at the default root size.",
+  ],
+  [
+    "--focus-ring-offset",
+    "0.125rem",
+    "Outline offset for :focus-visible. 2px at the default root size.",
+  ],
 ] as const;
 
 const stateNotes: Record<InteractionState, string> = {
