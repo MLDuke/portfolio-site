@@ -6,6 +6,21 @@ export type ProjectMedia = {
   tone?: "neutral" | "dark" | "blue" | "green";
 };
 
+export type DetailFigureConfig = {
+  media: ProjectMedia;
+  showCaption?: boolean;
+};
+
+export type DetailBlock =
+  | { type: "description"; body: string; index: string; title: string }
+  | ({ type: "figure" } & DetailFigureConfig)
+  | { type: "gallery"; items: [DetailFigureConfig, DetailFigureConfig] }
+  | { type: "text"; body: string };
+
+/**
+ * @deprecated Project and journal detail templates now use composable
+ * DetailBlock entries. Keep this only for deprecated sandbox archive examples.
+ */
 export type ProjectBlock =
   | { type: "feature"; media: ProjectMedia; label?: string }
   | { type: "single"; media: ProjectMedia }
@@ -20,85 +35,67 @@ export type Project = {
   title: string;
   index: string;
   description: string;
-  year: string;
-  role: string;
-  client: string;
-  blocks: ProjectBlock[];
+  blocks: DetailBlock[];
 };
 
 export type JournalEntry = {
+  slug: string;
   title: string;
   index: string;
+  description: string;
+  blocks: DetailBlock[];
 };
+
+const bodyPlaceholder =
+  "This UI component provides a reusable building block for common interface patterns. It is designed to support clear content, consistent styling, and predictable behavior across screens. Flexible properties make it easy to adapt the component to different contexts and states. Use it to speed up design work while keeping the overall experience cohesive.";
 
 export const projects: Project[] = [
   {
     slug: "project-name",
     title: "Project Name",
     index: "002",
-    description: "Project Description",
-    year: "2026",
-    role: "2026",
-    client: "2026",
+    description: bodyPlaceholder,
     blocks: [
       {
-        type: "feature",
-        label: "Archive 01",
+        type: "description",
+        title: "Project Name",
+        index: "002",
+        body: bodyPlaceholder,
+      },
+      {
+        type: "figure",
         media: {
-          caption: "Feature placeholder for the lead project image.",
-          aspect: "16/9",
-          tone: "dark",
+          caption: "Caption",
+          tone: "neutral",
+        },
+      },
+      {
+        type: "gallery",
+        items: [
+          {
+            media: {
+              caption: "Caption",
+              tone: "neutral",
+            },
+          },
+          {
+            media: {
+              caption: "Caption",
+              tone: "neutral",
+            },
+          },
+        ],
+      },
+      {
+        type: "figure",
+        media: {
+          caption: "Caption",
+          tone: "neutral",
         },
       },
       {
         type: "text",
-        body: "A short interstitial note can hold project context while final copy is still in progress.",
-      },
-      {
-        type: "pair",
-        items: [
-          {
-            caption: "Process placeholder",
-            aspect: "4/3",
-            tone: "neutral",
-          },
-          {
-            caption: "Detail placeholder",
-            aspect: "4/3",
-            tone: "blue",
-          },
-        ],
-      },
-      {
-        type: "grid",
-        columns: 3,
-        items: [
-          { caption: "Grid item A", aspect: "1/1", tone: "green" },
-          { caption: "Grid item B", aspect: "1/1", tone: "neutral" },
-          { caption: "Grid item C", aspect: "1/1", tone: "dark" },
-        ],
-      },
-      {
-        type: "compare",
-        before: {
-          caption: "Before",
-          aspect: "4/3",
-          tone: "neutral",
-        },
-        after: {
-          caption: "After",
-          aspect: "4/3",
-          tone: "green",
-        },
-      },
-      {
-        type: "mosaic",
-        items: [
-          { caption: "Mosaic A", aspect: "16/9", tone: "blue" },
-          { caption: "Mosaic B", aspect: "1/1", tone: "neutral" },
-          { caption: "Mosaic C", aspect: "3/4", tone: "dark" },
-          { caption: "Mosaic D", aspect: "4/3", tone: "green" },
-        ],
+        body: bodyPlaceholder,
       },
     ],
   },
@@ -106,38 +103,45 @@ export const projects: Project[] = [
     slug: "project-two",
     title: "Project Name",
     index: "002",
-    description: "Project Description",
-    year: "2026",
-    role: "2026",
-    client: "2026",
+    description: bodyPlaceholder,
     blocks: [
       {
-        type: "single",
+        type: "description",
+        title: "Project Name",
+        index: "002",
+        body: bodyPlaceholder,
+      },
+      {
+        type: "figure",
         media: {
-          caption: "Single media placeholder.",
-          aspect: "4/3",
           tone: "blue",
         },
+        showCaption: false,
       },
       {
-        type: "grid",
-        columns: 2,
+        type: "gallery",
         items: [
-          { caption: "Two-column item A", aspect: "3/4", tone: "neutral" },
-          { caption: "Two-column item B", aspect: "3/4", tone: "dark" },
+          {
+            media: {
+              caption: "Caption",
+              tone: "neutral",
+            },
+          },
+          {
+            media: {
+              caption: "Hidden caption",
+              tone: "dark",
+            },
+            showCaption: false,
+          },
         ],
       },
       {
-        type: "text",
-        body: "Archive blocks remain data-driven so real project assets can replace placeholders later.",
-      },
-      {
-        type: "mosaic",
-        items: [
-          { caption: "Mosaic A", aspect: "1/1", tone: "green" },
-          { caption: "Mosaic B", aspect: "16/9", tone: "neutral" },
-          { caption: "Mosaic C", aspect: "4/3", tone: "blue" },
-        ],
+        type: "figure",
+        media: {
+          caption: "Caption",
+          tone: "dark",
+        },
       },
     ],
   },
@@ -145,48 +149,65 @@ export const projects: Project[] = [
     slug: "project-three",
     title: "Project Name",
     index: "002",
-    description: "Project Description",
-    year: "2026",
-    role: "2026",
-    client: "2026",
+    description: bodyPlaceholder,
     blocks: [
       {
-        type: "feature",
-        label: "Archive 03",
+        type: "description",
+        title: "Project Name",
+        index: "002",
+        body: bodyPlaceholder,
+      },
+      {
+        type: "figure",
         media: {
-          caption: "Alternate feature placeholder.",
-          aspect: "16/9",
+          caption: "Caption",
           tone: "green",
         },
       },
       {
-        type: "compare",
-        before: {
-          caption: "Before",
-          aspect: "16/9",
-          tone: "dark",
-        },
-        after: {
-          caption: "After",
-          aspect: "16/9",
-          tone: "blue",
-        },
-      },
-      {
-        type: "pair",
+        type: "gallery",
         items: [
-          { caption: "Paired item A", aspect: "1/1", tone: "neutral" },
-          { caption: "Paired item B", aspect: "1/1", tone: "green" },
+          {
+            media: {
+              tone: "dark",
+            },
+          },
+          {
+            media: {
+              caption: "Caption",
+              tone: "neutral",
+            },
+          },
         ],
       },
     ],
   },
 ];
 
-export const journalEntries: JournalEntry[] = Array.from({ length: 8 }, () => ({
-  title: "Entry Name",
-  index: "002",
-}));
+export const journalEntries: JournalEntry[] = Array.from(
+  { length: 8 },
+  (_, index) => ({
+    slug: `entry-${index + 1}`,
+    title: "Entry Name",
+    index: "002",
+    description: bodyPlaceholder,
+    blocks: [
+      {
+        type: "figure",
+        media: {
+          tone: "neutral",
+        },
+        showCaption: false,
+      },
+      {
+        type: "description",
+        title: "Entry Name",
+        index: "002",
+        body: bodyPlaceholder,
+      },
+    ],
+  }),
+);
 
 export const aboutLinks = [
   { label: "Are.na", href: "https://www.are.na/" },

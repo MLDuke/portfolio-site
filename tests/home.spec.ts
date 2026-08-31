@@ -19,7 +19,12 @@ test("home page renders portfolio navigation and project links", async ({
 });
 
 test.describe("portfolio page shell", () => {
-  const routes = ["/", "/journal", "/projects/project-name"] as const;
+  const routes = [
+    "/",
+    "/journal",
+    "/journal/entry-1",
+    "/projects/project-name",
+  ] as const;
   const viewports = [
     { height: 568, name: "extra-small mobile", width: 280 },
     { height: 640, name: "small mobile", width: 320 },
@@ -174,6 +179,70 @@ test.describe("portfolio page shell", () => {
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog", { name: "About" })).toBeHidden();
     await expect(informationButton).toBeFocused();
+  });
+});
+
+test.describe("sandbox detail components", () => {
+  test("lists each composable detail component", async ({ page }) => {
+    await page.setViewportSize({ height: 900, width: 1280 });
+    await page.goto("/sandbox#detail-template");
+
+    const sandboxNav = page
+      .locator("aside")
+      .getByRole("navigation", { name: "Sandbox sections" });
+
+    for (const label of [
+      "Detail template",
+      "Detail description",
+      "Detail figure",
+      "Detail gallery",
+      "Detail text block",
+      "Detail block renderer",
+    ]) {
+      await expect(sandboxNav.getByRole("link", { name: label })).toBeVisible();
+    }
+  });
+
+  test("renders the detail figure caption variants", async ({ page }) => {
+    await page.goto("/sandbox#detail-figure");
+
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Detail figure" }),
+    ).toBeVisible();
+    await expect(
+      page.locator('[data-figma-component="Figure"]'),
+    ).toHaveCount(2);
+    await expect(page.getByText("Caption", { exact: true })).toBeVisible();
+    await expect(page.getByText("Hidden caption")).toHaveCount(0);
+  });
+
+  test("keeps a single h1 on pages that embed a detail description", async ({
+    page,
+  }) => {
+    for (const pageId of [
+      "detail-description",
+      "detail-template",
+      "detail-block-renderer",
+    ]) {
+      await page.goto(`/sandbox#${pageId}`);
+
+      await expect(page.locator("h1")).toHaveCount(1);
+    }
+  });
+
+  test("renders the two-up detail gallery", async ({ page }) => {
+    await page.goto("/sandbox#detail-gallery");
+
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Detail gallery" }),
+    ).toBeVisible();
+    await expect(
+      page.locator(
+        '[data-figma-component="Gallery"] [data-figma-component="Figure"]',
+      ),
+    ).toHaveCount(2);
+    await expect(page.getByText("Caption", { exact: true })).toBeVisible();
+    await expect(page.getByText("Hidden caption")).toHaveCount(0);
   });
 });
 
