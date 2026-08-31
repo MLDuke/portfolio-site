@@ -1,0 +1,30 @@
+{
+  "theme": {
+    "state-layer": {
+      "hover": {
+        "$type": "color",
+        "$value": "{global.state-layer.on-light.hover}",
+        "$extensions": { "mode": {
+          "light": "{global.state-layer.on-light.hover}",
+          "dark":  "{global.state-layer.on-dark.hover}"
+        } }
+      },
+      "pressed": {
+        "$type": "color",
+        "$value": "{global.state-layer.on-light.pressed}",
+        "$extensions": { "mode": {
+          "light": "{global.state-layer.on-light.pressed}",
+          "dark":  "{global.state-layer.on-dark.pressed}"
+        } }
+      },
+      "selected": {
+        "$type": "color",
+        "$value": "{global.state-layer.on-light.selected}",
+        "$extensions": { "mode": {
+          "light": "{global.state-layer.on-light.selected}",
+          "dark":  "{global.state-layer.on-dark.selected}"
+        } }
+      }
+    }
+  }
+}
