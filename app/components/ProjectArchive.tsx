@@ -25,6 +25,10 @@ const gridColumnClasses = {
   4: "sm:grid-cols-2 lg:grid-cols-4",
 } satisfies Record<2 | 3 | 4, string>;
 
+/**
+ * @deprecated Use DetailArticle, DetailDescription, DetailFigure, and DetailGallery from
+ * DetailTemplate for project and journal detail pages.
+ */
 export function ProjectBlockRenderer({ blocks }: ProjectBlockRendererProps) {
   return (
     <div className="grid gap-32">
@@ -35,6 +39,9 @@ export function ProjectBlockRenderer({ blocks }: ProjectBlockRendererProps) {
   );
 }
 
+/**
+ * @deprecated Use DetailFigure from DetailTemplate.
+ */
 export function ProjectMediaFigure({
   media,
   priority = false,
@@ -54,6 +61,9 @@ export function ProjectMediaFigure({
   );
 }
 
+/**
+ * @deprecated Use DetailFigure from DetailTemplate.
+ */
 export function ProjectFeatureMedia({
   label,
   media,
@@ -78,6 +88,9 @@ export function ProjectFeatureMedia({
   );
 }
 
+/**
+ * @deprecated Use DetailGallery from DetailTemplate.
+ */
 export function ProjectMediaPair({
   items,
 }: {
@@ -92,6 +105,9 @@ export function ProjectMediaPair({
   );
 }
 
+/**
+ * @deprecated Use DetailGallery from DetailTemplate.
+ */
 export function ProjectMediaGrid({
   columns,
   items,
@@ -108,6 +124,9 @@ export function ProjectMediaGrid({
   );
 }
 
+/**
+ * @deprecated Use DetailGallery from DetailTemplate.
+ */
 export function ProjectCompareRow({
   after,
   before,
@@ -123,6 +142,9 @@ export function ProjectCompareRow({
   );
 }
 
+/**
+ * @deprecated Use DetailGallery from DetailTemplate.
+ */
 export function ProjectMosaic({ items }: { items: ProjectMedia[] }) {
   return (
     <div className="grid gap-16 sm:grid-cols-6">
@@ -138,6 +160,10 @@ export function ProjectMosaic({ items }: { items: ProjectMedia[] }) {
   );
 }
 
+/**
+ * @deprecated Use DetailTextBlock from DetailTemplate or extend the new detail
+ * component set.
+ */
 export function ProjectTextBlock({ body }: { body: string }) {
   return (
     <p className="max-w-[520px] text-body-medium text-on-surface-secondary">

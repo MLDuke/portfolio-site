@@ -27,10 +27,11 @@ export default function JournalPage() {
         aria-label="Journal entries"
         className="grid auto-rows-[449px] grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-4"
       >
-        {journalEntries.map((entry, index) => (
+        {journalEntries.map((entry) => (
           <FigureCard
+            href={`/journal/${entry.slug}`}
             index={entry.index}
-            key={`${entry.title}-${index}`}
+            key={entry.slug}
             title={entry.title}
             variant="journal"
           />

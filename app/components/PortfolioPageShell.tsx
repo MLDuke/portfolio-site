@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Footer } from "./Footer";
 import { PageTransition } from "./PageTransition";
 import { PortfolioNav } from "./PortfolioNav";
+import type { PageControlConfig } from "./ComponentPrimitives";
 
 type PortfolioPageShellProps = {
   active: "projects" | "journal" | "information";
@@ -9,6 +10,7 @@ type PortfolioPageShellProps = {
   contentClassName?: string;
   contentSpacing?: "standard" | "compact";
   currentProjectSlug?: string;
+  pageControl?: PageControlConfig;
   showFooter?: boolean;
 };
 
@@ -23,6 +25,7 @@ export function PortfolioPageShell({
   contentClassName = "",
   contentSpacing = "standard",
   currentProjectSlug,
+  pageControl,
   showFooter = true,
 }: PortfolioPageShellProps) {
   return (
@@ -34,7 +37,11 @@ export function PortfolioPageShell({
         Skip to content
       </a>
 
-      <PortfolioNav active={active} currentProjectSlug={currentProjectSlug} />
+      <PortfolioNav
+        active={active}
+        currentProjectSlug={currentProjectSlug}
+        pageControl={pageControl}
+      />
 
       <PageTransition className={contentSpacingClasses[contentSpacing]}>
         <main

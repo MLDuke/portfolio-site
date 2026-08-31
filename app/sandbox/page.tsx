@@ -8,6 +8,14 @@ import {
   IconButton,
   NavButton,
 } from "../components/ComponentPrimitives";
+import {
+  DetailArticle,
+  DetailBlockRenderer,
+  DetailDescription,
+  DetailFigure,
+  DetailGallery,
+  DetailTextBlock,
+} from "../components/DetailTemplate";
 import { FigureCard } from "../components/FigureCard";
 import { Footer } from "../components/Footer";
 import {
@@ -24,7 +32,11 @@ import {
   ProjectMosaic,
   ProjectTextBlock,
 } from "../components/ProjectArchive";
-import type { ProjectBlock, ProjectMedia } from "../data/portfolio";
+import type {
+  DetailBlock,
+  ProjectBlock,
+  ProjectMedia,
+} from "../data/portfolio";
 
 type SandboxTheme = "light" | "dark";
 
@@ -60,11 +72,22 @@ const navGroups: SandboxNavGroup[] = [
       { href: "#breadcrumb-control", label: "Breadcrumb control" },
       { href: "#icon-buttons", label: "Icon buttons" },
       { href: "#figure-cards", label: "Figure cards" },
+      { href: "#detail-template", label: "Detail template" },
+      { href: "#detail-description", label: "Detail description" },
+      { href: "#detail-figure", label: "Detail figure" },
+      { href: "#detail-gallery", label: "Detail gallery" },
+      { href: "#detail-text-block", label: "Detail text block" },
+      { href: "#detail-block-renderer", label: "Detail block renderer" },
+      { href: "#information-modal", label: "Information modal" },
+      { href: "#footer", label: "Footer" },
+    ],
+  },
+  {
+    label: "Deprecated",
+    items: [
       { href: "#project-media", label: "Project media" },
       { href: "#archive-layouts", label: "Archive layouts" },
       { href: "#block-renderer", label: "Block renderer" },
-      { href: "#information-modal", label: "Information modal" },
-      { href: "#footer", label: "Footer" },
     ],
   },
 ];
@@ -232,6 +255,76 @@ const archiveBlocks: ProjectBlock[] = [
       archiveMedia.green,
       archiveMedia.dark,
     ],
+  },
+];
+
+const detailDescriptionCopy =
+  "This UI component provides a reusable building block for common interface patterns. It is designed to support clear content, consistent styling, and predictable behavior across screens. Flexible properties make it easy to adapt the component to different contexts and states. Use it to speed up design work while keeping the overall experience cohesive.";
+
+const detailBlocks: DetailBlock[] = [
+  {
+    type: "description",
+    title: "Project Name",
+    index: "002",
+    body: detailDescriptionCopy,
+  },
+  {
+    type: "figure",
+    media: {
+      caption: "Caption",
+      tone: "neutral",
+    },
+  },
+  {
+    type: "gallery",
+    items: [
+      {
+        media: {
+          caption: "Caption",
+          tone: "neutral",
+        },
+      },
+      {
+        media: {
+          caption: "Hidden caption",
+          tone: "neutral",
+        },
+        showCaption: false,
+      },
+    ],
+  },
+  {
+    type: "figure",
+    media: {
+      tone: "neutral",
+    },
+    showCaption: false,
+  },
+  {
+    type: "text",
+    body: detailDescriptionCopy,
+  },
+];
+
+// The template page above shows the project ordering; this one exercises the
+// journal ordering so the renderer's block-order independence is visible.
+const journalDetailBlocks: DetailBlock[] = [
+  {
+    type: "figure",
+    media: {
+      tone: "neutral",
+    },
+    showCaption: false,
+  },
+  {
+    type: "description",
+    title: "Entry Name",
+    index: "002",
+    body: detailDescriptionCopy,
+  },
+  {
+    type: "text",
+    body: detailDescriptionCopy,
   },
 ];
 
@@ -549,9 +642,104 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
           </SandboxSubsection>
         </>
       );
+    case "detail-template":
+      return (
+        <SandboxSubsection title="Project block sequence: description, figure, gallery, text">
+          <DetailArticle>
+            <DetailBlockRenderer blocks={detailBlocks} headingLevel="h3" />
+          </DetailArticle>
+        </SandboxSubsection>
+      );
+    case "detail-description":
+      return (
+        <SandboxSubsection title="Description">
+          <div className="max-w-[704px]">
+            <DetailDescription
+              description={detailDescriptionCopy}
+              headingLevel="h3"
+              index="002"
+              title="Project Name"
+            />
+          </div>
+        </SandboxSubsection>
+      );
+    case "detail-figure":
+      return (
+        <>
+          <SandboxSubsection title="Figure with caption">
+            <div className="max-w-[704px]">
+              <DetailFigure
+                media={{
+                  caption: "Caption",
+                  tone: "neutral",
+                }}
+                priority
+              />
+            </div>
+          </SandboxSubsection>
+
+          <SandboxSubsection title="Figure without caption">
+            <div className="max-w-[704px]">
+              <DetailFigure
+                media={{
+                  caption: "Hidden caption",
+                  tone: "blue",
+                }}
+                showCaption={false}
+              />
+            </div>
+          </SandboxSubsection>
+        </>
+      );
+    case "detail-gallery":
+      return (
+        <SandboxSubsection title="Two-up gallery">
+          <div className="max-w-[704px]">
+            <DetailGallery
+              items={[
+                {
+                  media: {
+                    caption: "Caption",
+                    tone: "neutral",
+                  },
+                },
+                {
+                  media: {
+                    caption: "Hidden caption",
+                    tone: "dark",
+                  },
+                  showCaption: false,
+                },
+              ]}
+            />
+          </div>
+        </SandboxSubsection>
+      );
+    case "detail-text-block":
+      return (
+        <SandboxSubsection title="Text block">
+          <div className="max-w-[704px]">
+            <DetailTextBlock body={detailDescriptionCopy} />
+          </div>
+        </SandboxSubsection>
+      );
+    case "detail-block-renderer":
+      return (
+        <SandboxSubsection title="Journal block sequence: figure, description, text">
+          <DetailArticle>
+            <DetailBlockRenderer
+              blocks={journalDetailBlocks}
+              headingLevel="h3"
+            />
+          </DetailArticle>
+        </SandboxSubsection>
+      );
     case "project-media":
       return (
-        <SandboxSubsection title="Media figure and feature media">
+        <SandboxSubsection
+          marker={<DeprecatedTag />}
+          title="Media figure and feature media"
+        >
           <div className="grid max-w-[688px] gap-24">
             <ProjectMediaFigure media={archiveMedia.neutral} />
             <ProjectFeatureMedia
@@ -567,7 +755,10 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
       );
     case "archive-layouts":
       return (
-        <SandboxSubsection title="Pair, grid, compare, mosaic, and text">
+        <SandboxSubsection
+          marker={<DeprecatedTag />}
+          title="Pair, grid, compare, mosaic, and text"
+        >
           <div className="grid max-w-[688px] gap-32">
             <ProjectMediaPair
               items={[
@@ -650,7 +841,10 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
       );
     case "block-renderer":
       return (
-        <SandboxSubsection title="Composed archive block sequence">
+        <SandboxSubsection
+          marker={<DeprecatedTag />}
+          title="Composed archive block sequence"
+        >
           <div className="max-w-[688px]">
             <ProjectBlockRenderer blocks={archiveBlocks} />
           </div>
@@ -1368,17 +1562,30 @@ function SandboxPageTemplate({
 
 function SandboxSubsection({
   children,
+  marker,
   title,
 }: {
   children: React.ReactNode;
+  marker?: React.ReactNode;
   title: string;
 }) {
   return (
     <section className="grid gap-12">
-      <h2 className="font-mono text-label-small text-on-surface-secondary">
-        {title}
-      </h2>
+      <div className="flex flex-wrap items-center gap-8">
+        <h2 className="font-mono text-label-small text-on-surface-secondary">
+          {title}
+        </h2>
+        {marker}
+      </div>
       <div className="min-w-0 overflow-x-auto pb-2">{children}</div>
     </section>
+  );
+}
+
+function DeprecatedTag() {
+  return (
+    <span className="rounded-sm bg-surface-raised px-6 py-2 font-mono text-label-small text-on-surface-secondary">
+      Deprecated
+    </span>
   );
 }
