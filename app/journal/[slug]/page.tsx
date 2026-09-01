@@ -5,8 +5,8 @@ import {
   DetailBlockRenderer,
 } from "../../components/DetailTemplate";
 import { PortfolioPageShell } from "../../components/PortfolioPageShell";
+import { createCollectionPageControl } from "../../data/pageControl";
 import { journalEntries } from "../../data/portfolio";
-import type { PageControlConfig } from "../../components/ComponentPrimitives";
 
 type JournalEntryPageProps = {
   params: Promise<{
@@ -74,33 +74,15 @@ export default async function JournalEntryPage({
   );
 }
 
-function createJournalPageControl(slug: string): PageControlConfig {
-  const entryIndex = journalEntries.findIndex((entry) => entry.slug === slug);
-  const entry = journalEntries[entryIndex];
-  const previousEntry =
-    journalEntries[
-      (entryIndex - 1 + journalEntries.length) % journalEntries.length
-    ];
-  const nextEntry = journalEntries[(entryIndex + 1) % journalEntries.length];
-
-  return {
+function createJournalPageControl(slug: string) {
+  return createCollectionPageControl({
     ariaLabel: "Journal navigation",
-    levels: [
-      {
-        href: "/journal",
-        label: "Journal",
-      },
-      {
-        href: `/journal/${entry.slug}`,
-        label: entry.title,
-        options: journalEntries.map((option) => ({
-          active: option.slug === entry.slug,
-          href: `/journal/${option.slug}`,
-          label: option.title,
-        })),
-      },
-    ],
-    nextHref: `/journal/${nextEntry.slug}`,
-    previousHref: `/journal/${previousEntry.slug}`,
-  };
+    currentSlug: slug,
+    itemHref: (entry) => `/journal/${entry.slug}`,
+    items: journalEntries,
+    root: {
+      href: "/journal",
+      label: "Journal",
+    },
+  });
 }

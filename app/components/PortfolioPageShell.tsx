@@ -10,7 +10,7 @@ type PortfolioPageShellProps = {
   contentClassName?: string;
   contentSpacing?: "standard" | "compact";
   currentProjectSlug?: string;
-  pageControl?: PageControlConfig;
+  pageControl?: PageControlConfig | null;
   showFooter?: boolean;
 };
 

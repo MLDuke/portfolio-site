@@ -1,18 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { createCollectionPageControl } from "../data/pageControl";
 import { projects } from "../data/portfolio";
 import { AboutModal } from "./AboutModal";
 import {
   FullNav,
   NavButton,
-  type PageControlConfig,
 } from "./ComponentPrimitives";
+import type { PageControlConfig } from "../data/pageControl";
 
 type PortfolioNavProps = {
   active: "projects" | "journal" | "information";
   currentProjectSlug?: string;
-  pageControl?: PageControlConfig;
+  pageControl?: PageControlConfig | null;
 };
 
 const navItems = [
@@ -26,44 +27,16 @@ export function PortfolioNav({
   pageControl,
 }: PortfolioNavProps) {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
-  const projectIndex = projects.findIndex(
-    (project) => project.slug === currentProjectSlug,
-  );
-  const projectNav =
-    projectIndex >= 0
-      ? {
-          nextHref: `/projects/${
-            projects[(projectIndex + 1) % projects.length].slug
-          }`,
-          previousHref: `/projects/${
-            projects[(projectIndex - 1 + projects.length) % projects.length].slug
-          }`,
-        }
-      : null;
-  const currentProject = projectIndex >= 0 ? projects[projectIndex] : null;
-  const projectPageControl =
-    currentProject && projectNav
-      ? {
-          ariaLabel: "Project navigation",
-          levels: [
-            {
-              href: "/",
-              label: "Work",
-            },
-            {
-              href: `/projects/${currentProject.slug}`,
-              label: currentProject.title,
-              options: projects.map((project) => ({
-                active: project.slug === currentProject.slug,
-                href: `/projects/${project.slug}`,
-                label: project.title,
-              })),
-            },
-          ],
-          nextHref: projectNav.nextHref,
-          previousHref: projectNav.previousHref,
-        }
-      : null;
+  const projectPageControl = createCollectionPageControl({
+    ariaLabel: "Project navigation",
+    currentSlug: currentProjectSlug,
+    itemHref: (project) => `/projects/${project.slug}`,
+    items: projects,
+    root: {
+      href: "/",
+      label: "Work",
+    },
+  });
   const visiblePageControl = pageControl ?? projectPageControl;
 
   return (

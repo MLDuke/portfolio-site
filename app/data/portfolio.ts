@@ -1,21 +1,7 @@
-export type Media = {
-  src?: string;
-  alt?: string;
-  caption?: string;
-  tone?: "neutral" | "dark" | "blue" | "green";
-};
+import { createDetailContent } from "./detailContent";
+import type { DetailBlock, Media } from "./detailContent";
 
-export type DetailFigureConfig = {
-  media: Media;
-  showCaption?: boolean;
-};
-
-export type DetailBlock =
-  | { type: "description"; body: string; index: string; title: string }
-  | ({ type: "figure" } & DetailFigureConfig)
-  | { type: "gallery"; items: [DetailFigureConfig, DetailFigureConfig] }
-  | { type: "sourceLink"; href: string; label: string }
-  | { type: "text"; body: string };
+export type { DetailBlock, DetailFigureConfig, Media } from "./detailContent";
 
 /**
  * @deprecated Project and journal detail templates now use composable
@@ -58,132 +44,129 @@ export const projects: Project[] = [
     title: "Project Name",
     index: "002",
     description: bodyPlaceholder,
-    blocks: [
-      {
-        type: "description",
-        title: "Project Name",
-        index: "002",
-        body: bodyPlaceholder,
-      },
-      {
-        type: "figure",
-        media: {
-          caption: "Caption",
-          tone: "neutral",
-        },
-      },
-      {
-        type: "gallery",
-        items: [
-          {
-            media: {
-              caption: "Caption",
-              tone: "neutral",
-            },
+    blocks: createDetailContent({
+      title: "Project Name",
+      index: "002",
+      description: bodyPlaceholder,
+      blocks: [
+        {
+          type: "figure",
+          media: {
+            caption: "Caption",
+            tone: "neutral",
           },
-          {
-            media: {
-              caption: "Caption",
-              tone: "neutral",
-            },
-          },
-        ],
-      },
-      {
-        type: "figure",
-        media: {
-          caption: "Caption",
-          tone: "neutral",
         },
-      },
-      {
-        type: "text",
-        body: bodyPlaceholder,
-      },
-    ],
+        {
+          type: "gallery",
+          items: [
+            {
+              media: {
+                caption: "Caption",
+                tone: "neutral",
+              },
+            },
+            {
+              media: {
+                caption: "Caption",
+                tone: "neutral",
+              },
+            },
+          ],
+        },
+        {
+          type: "figure",
+          media: {
+            caption: "Caption",
+            tone: "neutral",
+          },
+        },
+        {
+          type: "text",
+          body: bodyPlaceholder,
+        },
+      ],
+    }),
   },
   {
     slug: "project-two",
     title: "Project Name",
     index: "002",
     description: bodyPlaceholder,
-    blocks: [
-      {
-        type: "description",
-        title: "Project Name",
-        index: "002",
-        body: bodyPlaceholder,
-      },
-      {
-        type: "figure",
-        media: {
-          tone: "blue",
-        },
-        showCaption: false,
-      },
-      {
-        type: "gallery",
-        items: [
-          {
-            media: {
-              caption: "Caption",
-              tone: "neutral",
-            },
+    blocks: createDetailContent({
+      title: "Project Name",
+      index: "002",
+      description: bodyPlaceholder,
+      blocks: [
+        {
+          type: "figure",
+          media: {
+            tone: "blue",
           },
-          {
-            media: {
-              caption: "Hidden caption",
-              tone: "dark",
-            },
-            showCaption: false,
-          },
-        ],
-      },
-      {
-        type: "figure",
-        media: {
-          caption: "Caption",
-          tone: "dark",
+          showCaption: false,
         },
-      },
-    ],
+        {
+          type: "gallery",
+          items: [
+            {
+              media: {
+                caption: "Caption",
+                tone: "neutral",
+              },
+            },
+            {
+              media: {
+                caption: "Hidden caption",
+                tone: "dark",
+              },
+              showCaption: false,
+            },
+          ],
+        },
+        {
+          type: "figure",
+          media: {
+            caption: "Caption",
+            tone: "dark",
+          },
+        },
+      ],
+    }),
   },
   {
     slug: "project-three",
     title: "Project Name",
     index: "002",
     description: bodyPlaceholder,
-    blocks: [
-      {
-        type: "description",
-        title: "Project Name",
-        index: "002",
-        body: bodyPlaceholder,
-      },
-      {
-        type: "figure",
-        media: {
-          caption: "Caption",
-          tone: "green",
+    blocks: createDetailContent({
+      title: "Project Name",
+      index: "002",
+      description: bodyPlaceholder,
+      blocks: [
+        {
+          type: "figure",
+          media: {
+            caption: "Caption",
+            tone: "green",
+          },
         },
-      },
-      {
-        type: "gallery",
-        items: [
-          {
-            media: {
-              tone: "dark",
+        {
+          type: "gallery",
+          items: [
+            {
+              media: {
+                tone: "dark",
+              },
             },
-          },
-          {
-            media: {
-              caption: "Caption",
-              tone: "neutral",
+            {
+              media: {
+                caption: "Caption",
+                tone: "neutral",
+              },
             },
-          },
-        ],
-      },
-    ],
+          ],
+        },
+      ],
+    }),
   },
 ];
 
