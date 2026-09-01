@@ -14,6 +14,7 @@ export type DetailBlock =
   | { type: "description"; body: string; index: string; title: string }
   | ({ type: "figure" } & DetailFigureConfig)
   | { type: "gallery"; items: [DetailFigureConfig, DetailFigureConfig] }
+  | { type: "sourceLink"; href: string; label: string }
   | { type: "text"; body: string };
 
 /**
@@ -42,8 +43,11 @@ export type JournalEntry = {
   title: string;
   index: string;
   description: string;
+  cardMedia?: Media;
   blocks: DetailBlock[];
 };
+
+export { journalEntries } from "./journal.generated";
 
 const bodyPlaceholder =
   "This UI component provides a reusable building block for common interface patterns. It is designed to support clear content, consistent styling, and predictable behavior across screens. Flexible properties make it easy to adapt the component to different contexts and states. Use it to speed up design work while keeping the overall experience cohesive.";
@@ -182,31 +186,6 @@ export const projects: Project[] = [
     ],
   },
 ];
-
-export const journalEntries: JournalEntry[] = Array.from(
-  { length: 8 },
-  (_, index) => ({
-    slug: `entry-${index + 1}`,
-    title: "Entry Name",
-    index: "002",
-    description: bodyPlaceholder,
-    blocks: [
-      {
-        type: "figure",
-        media: {
-          tone: "neutral",
-        },
-        showCaption: false,
-      },
-      {
-        type: "description",
-        title: "Entry Name",
-        index: "002",
-        body: bodyPlaceholder,
-      },
-    ],
-  }),
-);
 
 export const aboutLinks = [
   { label: "Are.na", href: "https://www.are.na/" },

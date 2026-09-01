@@ -21,6 +21,16 @@ export const metadata: Metadata = {
 };
 
 export default function JournalPage() {
+  if (journalEntries.length === 0) {
+    return (
+      <PortfolioPageShell active="journal">
+        <div className="grid min-h-[449px] place-items-center text-center text-body-small text-on-surface-secondary">
+          <p>Coming soon.</p>
+        </div>
+      </PortfolioPageShell>
+    );
+  }
+
   return (
     <PortfolioPageShell active="journal">
       <section
@@ -32,6 +42,7 @@ export default function JournalPage() {
             href={`/journal/${entry.slug}`}
             index={entry.index}
             key={entry.slug}
+            media={entry.cardMedia}
             title={entry.title}
             variant="journal"
           />
