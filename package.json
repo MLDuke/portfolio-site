@@ -5,8 +5,9 @@
   "scripts": {
     "setup": "sh scripts/setup.sh",
     "tokens": "node app/tokens/build-css.mjs",
+    "journal": "node scripts/build-journal.mjs",
     "dev": "next dev",
-    "prebuild": "node app/tokens/build-css.mjs",
+    "prebuild": "npm run tokens && npm run journal",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -16,9 +17,12 @@
     "playwright:install": "playwright install"
   },
   "dependencies": {
+    "gray-matter": "^4.0.3",
     "next": "^16.3.0",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

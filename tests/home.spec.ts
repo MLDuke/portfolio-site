@@ -1,4 +1,5 @@
 import { expect, test, type Locator } from "@playwright/test";
+import { journalEntries } from "../app/data/portfolio";
 
 function fontSizeOf(locator: Locator) {
   return locator.evaluate((element) =>
@@ -19,12 +20,15 @@ test("home page renders portfolio navigation and project links", async ({
 });
 
 test.describe("portfolio page shell", () => {
+  const journalDetailRoutes = journalEntries.map(
+    (entry) => `/journal/${entry.slug}`,
+  );
   const routes = [
     "/",
     "/journal",
-    "/journal/entry-1",
+    ...journalDetailRoutes,
     "/projects/project-name",
-  ] as const;
+  ];
   const viewports = [
     { height: 568, name: "extra-small mobile", width: 280 },
     { height: 640, name: "small mobile", width: 320 },
@@ -121,6 +125,14 @@ test.describe("portfolio page shell", () => {
       "page",
     );
   });
+
+  if (journalEntries.length === 0) {
+    test("journal renders the empty state", async ({ page }) => {
+      await page.goto("/journal");
+
+      await expect(page.getByText("Coming soon.")).toBeVisible();
+    });
+  }
 
   test("project breadcrumb control follows the desktop breakpoint", async ({
     page,

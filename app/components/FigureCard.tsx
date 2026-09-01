@@ -1,7 +1,10 @@
+import Image from "next/image";
+import type { Media } from "../data/portfolio";
 import type { InteractionState } from "./interactionState";
 import { SiteLink } from "./SiteLink";
 
 type FigureCardProps = {
+  media?: Media;
   href?: string;
   index: string;
   state?: InteractionState;
@@ -20,6 +23,7 @@ const stateNodeIds: Record<InteractionState, string> = {
 export function FigureCard({
   href,
   index,
+  media,
   state = "rest",
   title,
   variant = "project",
@@ -45,12 +49,28 @@ export function FigureCard({
       </div>
       <div
         className={[
+          "relative overflow-hidden",
           imageHeight,
           "w-full shrink-0 bg-[#808080] motion-safe:transition-[border-radius] motion-safe:duration-[var(--interaction-duration)] motion-safe:ease-[var(--interaction-easing)]",
           hasExpandedImageRadius ? "rounded-md" : "rounded-[6px]",
           "group-active:rounded-md group-focus-visible:rounded-md",
         ].join(" ")}
-      />
+      >
+        {media?.src ? (
+          <Image
+            alt=""
+            className="object-cover"
+            fill
+            sizes={
+              variant === "journal"
+                ? "(min-width: 1024px) 25vw, (min-width: 640px) 50vw, calc(100vw - 32px)"
+                : "(min-width: 768px) 680px, calc(100vw - 32px)"
+            }
+            src={media.src}
+            unoptimized={isUnoptimizedImage(media.src)}
+          />
+        ) : null}
+      </div>
     </>
   );
 
@@ -81,4 +101,8 @@ export function FigureCard({
       {frame}
     </button>
   );
+}
+
+function isUnoptimizedImage(src: string) {
+  return src.toLowerCase().endsWith(".gif");
 }
