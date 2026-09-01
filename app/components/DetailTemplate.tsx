@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type {
   DetailBlock,
   DetailFigureConfig,
-  ProjectMedia,
+  Media,
 } from "../data/portfolio";
 
 type DetailArticleProps = {
@@ -22,7 +22,7 @@ const toneClasses = {
   dark: "bg-[#424853]",
   blue: "bg-[var(--color-blue-3)]",
   green: "bg-[var(--color-green-2)]",
-} satisfies Record<NonNullable<ProjectMedia["tone"]>, string>;
+} satisfies Record<NonNullable<Media["tone"]>, string>;
 
 export function DetailArticle({ children }: DetailArticleProps) {
   return (
@@ -72,7 +72,7 @@ export function DetailFigure({
   showCaption = true,
   variant = "wide",
 }: {
-  media: ProjectMedia;
+  media: Media;
   priority?: boolean;
   showCaption?: boolean;
   variant?: "wide" | "gallery";
@@ -190,7 +190,7 @@ function DetailMediaFrame({
   priority,
   variant,
 }: {
-  media: ProjectMedia;
+  media: Media;
   priority: boolean;
   variant: "wide" | "gallery";
 }) {

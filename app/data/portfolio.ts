@@ -1,13 +1,12 @@
-export type ProjectMedia = {
+export type Media = {
   src?: string;
   alt?: string;
   caption?: string;
-  aspect?: "16/9" | "4/3" | "1/1" | "3/4";
   tone?: "neutral" | "dark" | "blue" | "green";
 };
 
 export type DetailFigureConfig = {
-  media: ProjectMedia;
+  media: Media;
   showCaption?: boolean;
 };
 
@@ -22,12 +21,12 @@ export type DetailBlock =
  * DetailBlock entries. Keep this only for deprecated sandbox archive examples.
  */
 export type ProjectBlock =
-  | { type: "feature"; media: ProjectMedia; label?: string }
-  | { type: "single"; media: ProjectMedia }
-  | { type: "pair"; items: [ProjectMedia, ProjectMedia] }
-  | { type: "grid"; columns: 2 | 3 | 4; items: ProjectMedia[] }
-  | { type: "compare"; before: ProjectMedia; after: ProjectMedia }
-  | { type: "mosaic"; items: ProjectMedia[] }
+  | { type: "feature"; media: Media; label?: string }
+  | { type: "single"; media: Media }
+  | { type: "pair"; items: [Media, Media] }
+  | { type: "grid"; columns: 2 | 3 | 4; items: Media[] }
+  | { type: "compare"; before: Media; after: Media }
+  | { type: "mosaic"; items: Media[] }
   | { type: "text"; body: string };
 
 export type Project = {

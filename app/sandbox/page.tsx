@@ -34,8 +34,8 @@ import {
 } from "../components/ProjectArchive";
 import type {
   DetailBlock,
+  Media,
   ProjectBlock,
-  ProjectMedia,
 } from "../data/portfolio";
 
 type SandboxTheme = "light" | "dark";
@@ -200,25 +200,21 @@ const radiusSamples = [
   ["xl", "rounded-xl"],
 ] as const;
 
-const archiveMedia: Record<string, ProjectMedia> = {
+const archiveMedia: Record<string, Media> = {
   neutral: {
     caption: "Neutral placeholder",
-    aspect: "16/9",
     tone: "neutral",
   },
   dark: {
     caption: "Dark placeholder",
-    aspect: "4/3",
     tone: "dark",
   },
   blue: {
     caption: "Blue placeholder",
-    aspect: "1/1",
     tone: "blue",
   },
   green: {
     caption: "Green placeholder",
-    aspect: "3/4",
     tone: "green",
   },
 };
@@ -745,8 +741,7 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
             <ProjectFeatureMedia
               label="Feature media"
               media={{
-                caption: "Feature placeholder with a 16/9 frame",
-                aspect: "16/9",
+                caption: "Feature placeholder with a default frame",
                 tone: "dark",
               }}
             />
@@ -764,12 +759,10 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
               items={[
                 {
                   caption: "Pair left",
-                  aspect: "4/3",
                   tone: "neutral",
                 },
                 {
                   caption: "Pair right",
-                  aspect: "4/3",
                   tone: "blue",
                 },
               ]}
@@ -779,22 +772,18 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
               items={[
                 {
                   caption: "Grid A",
-                  aspect: "1/1",
                   tone: "neutral",
                 },
                 {
                   caption: "Grid B",
-                  aspect: "1/1",
                   tone: "dark",
                 },
                 {
                   caption: "Grid C",
-                  aspect: "1/1",
                   tone: "blue",
                 },
                 {
                   caption: "Grid D",
-                  aspect: "1/1",
                   tone: "green",
                 },
               ]}
@@ -802,12 +791,10 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
             <ProjectCompareRow
               before={{
                 caption: "Before",
-                aspect: "16/9",
                 tone: "dark",
               }}
               after={{
                 caption: "After",
-                aspect: "16/9",
                 tone: "green",
               }}
             />
@@ -815,22 +802,18 @@ function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
               items={[
                 {
                   caption: "Mosaic A",
-                  aspect: "16/9",
                   tone: "blue",
                 },
                 {
                   caption: "Mosaic B",
-                  aspect: "1/1",
                   tone: "neutral",
                 },
                 {
                   caption: "Mosaic C",
-                  aspect: "3/4",
                   tone: "dark",
                 },
                 {
                   caption: "Mosaic D",
-                  aspect: "4/3",
                   tone: "green",
                 },
               ]}

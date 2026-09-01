@@ -1,23 +1,16 @@
 import Image from "next/image";
-import type { ProjectBlock, ProjectMedia } from "../data/portfolio";
+import type { Media, ProjectBlock } from "../data/portfolio";
 
 type ProjectBlockRendererProps = {
   blocks: ProjectBlock[];
 };
-
-const aspectClasses = {
-  "16/9": "aspect-[16/9]",
-  "4/3": "aspect-[4/3]",
-  "1/1": "aspect-square",
-  "3/4": "aspect-[3/4]",
-} satisfies Record<NonNullable<ProjectMedia["aspect"]>, string>;
 
 const toneClasses = {
   neutral: "bg-[#808891]",
   dark: "bg-[#424853]",
   blue: "bg-[var(--color-blue-3)]",
   green: "bg-[var(--color-green-2)]",
-} satisfies Record<NonNullable<ProjectMedia["tone"]>, string>;
+} satisfies Record<NonNullable<Media["tone"]>, string>;
 
 const gridColumnClasses = {
   2: "sm:grid-cols-2",
@@ -46,7 +39,7 @@ export function ProjectMediaFigure({
   media,
   priority = false,
 }: {
-  media: ProjectMedia;
+  media: Media;
   priority?: boolean;
 }) {
   return (
@@ -69,7 +62,7 @@ export function ProjectFeatureMedia({
   media,
 }: {
   label?: string;
-  media: ProjectMedia;
+  media: Media;
 }) {
   return (
     <figure className="grid gap-8">
@@ -94,7 +87,7 @@ export function ProjectFeatureMedia({
 export function ProjectMediaPair({
   items,
 }: {
-  items: [ProjectMedia, ProjectMedia];
+  items: [Media, Media];
 }) {
   return (
     <div className="grid gap-16 sm:grid-cols-2">
@@ -113,7 +106,7 @@ export function ProjectMediaGrid({
   items,
 }: {
   columns: 2 | 3 | 4;
-  items: ProjectMedia[];
+  items: Media[];
 }) {
   return (
     <div className={`grid gap-16 ${gridColumnClasses[columns]}`}>
@@ -131,8 +124,8 @@ export function ProjectCompareRow({
   after,
   before,
 }: {
-  after: ProjectMedia;
-  before: ProjectMedia;
+  after: Media;
+  before: Media;
 }) {
   return (
     <div className="grid gap-16 sm:grid-cols-2">
@@ -145,7 +138,7 @@ export function ProjectCompareRow({
 /**
  * @deprecated Use DetailGallery from DetailTemplate.
  */
-export function ProjectMosaic({ items }: { items: ProjectMedia[] }) {
+export function ProjectMosaic({ items }: { items: Media[] }) {
   return (
     <div className="grid gap-16 sm:grid-cols-6">
       {items.map((item, index) => (
@@ -195,14 +188,13 @@ function ProjectMediaFrame({
   media,
   priority,
 }: {
-  media: ProjectMedia;
+  media: Media;
   priority: boolean;
 }) {
-  const aspect = media.aspect ?? "16/9";
   const tone = media.tone ?? "neutral";
   const frameClassName = [
     "relative w-full overflow-hidden rounded-[6px]",
-    aspectClasses[aspect],
+    "aspect-[16/9]",
     toneClasses[tone],
   ].join(" ");
 
