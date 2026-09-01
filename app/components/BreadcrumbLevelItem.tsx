@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import type { BreadcrumbLevel } from "./ComponentPrimitives";
+import type { BreadcrumbLevel } from "../data/pageControl";
 import { SiteLink } from "./SiteLink";
 
 const panelClassName = [

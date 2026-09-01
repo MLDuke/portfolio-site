@@ -49,10 +49,11 @@ inlined past, and the dark shadows would silently never apply.
 ## Audit
 
 ```
-python3 ~/.claude/skills/gtc-tokens/validate.py app/tokens
+npm run test:unit
 ```
 
-or the `/gtc-tokens audit` Claude Code skill.
+The token compiler test validates the local DTCG shape that `build-css.mjs`
+accepts and checks representative CSS output.
 
 ## The interaction contract
 

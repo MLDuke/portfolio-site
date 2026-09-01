@@ -1,16 +1,13 @@
-import Image from "next/image";
 import type { Media, ProjectBlock } from "../data/portfolio";
+import {
+  DetailFigure,
+  DetailGallery,
+  DetailTextBlock,
+} from "./DetailTemplate";
 
 type ProjectBlockRendererProps = {
   blocks: ProjectBlock[];
 };
-
-const toneClasses = {
-  neutral: "bg-[#808891]",
-  dark: "bg-[#424853]",
-  blue: "bg-[var(--color-blue-3)]",
-  green: "bg-[var(--color-green-2)]",
-} satisfies Record<NonNullable<Media["tone"]>, string>;
 
 const gridColumnClasses = {
   2: "sm:grid-cols-2",
@@ -42,16 +39,7 @@ export function ProjectMediaFigure({
   media: Media;
   priority?: boolean;
 }) {
-  return (
-    <figure className="grid gap-8">
-      <ProjectMediaFrame media={media} priority={priority} />
-      {media.caption ? (
-        <figcaption className="font-mono text-label-small text-on-surface-secondary">
-          {media.caption}
-        </figcaption>
-      ) : null}
-    </figure>
-  );
+  return <DetailFigure media={media} priority={priority} />;
 }
 
 /**
@@ -65,36 +53,28 @@ export function ProjectFeatureMedia({
   media: Media;
 }) {
   return (
-    <figure className="grid gap-8">
+    <div className="grid gap-8">
       {label ? (
         <p className="font-mono text-label-small text-on-surface-secondary">
           {label}
         </p>
       ) : null}
-      <ProjectMediaFrame media={media} priority />
-      {media.caption ? (
-        <figcaption className="font-mono text-label-small text-on-surface-secondary">
-          {media.caption}
-        </figcaption>
-      ) : null}
-    </figure>
+      <DetailFigure media={media} priority />
+    </div>
   );
 }
 
 /**
  * @deprecated Use DetailGallery from DetailTemplate.
  */
-export function ProjectMediaPair({
-  items,
-}: {
-  items: [Media, Media];
-}) {
+export function ProjectMediaPair({ items }: { items: [Media, Media] }) {
   return (
-    <div className="grid gap-16 sm:grid-cols-2">
-      {items.map((item, index) => (
-        <ProjectMediaFigure key={index} media={item} />
-      ))}
-    </div>
+    <DetailGallery
+      items={[
+        { media: items[0] },
+        { media: items[1] },
+      ]}
+    />
   );
 }
 
@@ -111,7 +91,7 @@ export function ProjectMediaGrid({
   return (
     <div className={`grid gap-16 ${gridColumnClasses[columns]}`}>
       {items.map((item, index) => (
-        <ProjectMediaFigure key={index} media={item} />
+        <DetailFigure key={index} media={item} variant="gallery" />
       ))}
     </div>
   );
@@ -127,12 +107,7 @@ export function ProjectCompareRow({
   after: Media;
   before: Media;
 }) {
-  return (
-    <div className="grid gap-16 sm:grid-cols-2">
-      <ProjectMediaFigure media={before} />
-      <ProjectMediaFigure media={after} />
-    </div>
-  );
+  return <ProjectMediaPair items={[before, after]} />;
 }
 
 /**
@@ -146,7 +121,7 @@ export function ProjectMosaic({ items }: { items: Media[] }) {
           className={index % 3 === 0 ? "sm:col-span-4" : "sm:col-span-2"}
           key={index}
         >
-          <ProjectMediaFigure media={item} />
+          <DetailFigure media={item} variant="gallery" />
         </div>
       ))}
     </div>
@@ -158,11 +133,7 @@ export function ProjectMosaic({ items }: { items: Media[] }) {
  * component set.
  */
 export function ProjectTextBlock({ body }: { body: string }) {
-  return (
-    <p className="max-w-[520px] text-body-medium text-on-surface-secondary">
-      {body}
-    </p>
-  );
+  return <DetailTextBlock body={body} />;
 }
 
 function ProjectBlockView({ block }: { block: ProjectBlock }) {
@@ -182,46 +153,4 @@ function ProjectBlockView({ block }: { block: ProjectBlock }) {
     case "text":
       return <ProjectTextBlock body={block.body} />;
   }
-}
-
-function ProjectMediaFrame({
-  media,
-  priority,
-}: {
-  media: Media;
-  priority: boolean;
-}) {
-  const tone = media.tone ?? "neutral";
-  const frameClassName = [
-    "relative w-full overflow-hidden rounded-[6px]",
-    "aspect-[16/9]",
-    toneClasses[tone],
-  ].join(" ");
-
-  if (media.src) {
-    const alt = media.alt?.trim();
-
-    if (!alt) {
-      throw new Error(`Project media with src "${media.src}" requires alt text.`);
-    }
-
-    return (
-      <div className={frameClassName}>
-        <Image
-          alt={alt}
-          className="object-cover"
-          fill
-          priority={priority}
-          sizes="(min-width: 768px) 688px, calc(100vw - 32px)"
-          src={media.src}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className={frameClassName}>
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgb(255_255_255_/_0.12),rgb(0_0_0_/_0.1))]" />
-    </div>
-  );
 }

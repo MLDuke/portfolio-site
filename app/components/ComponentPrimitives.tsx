@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { PageControlConfig } from "../data/pageControl";
 import { BreadcrumbLevelItem } from "./BreadcrumbLevelItem";
 import type { InteractionState } from "./interactionState";
 import { SiteLink } from "./SiteLink";
@@ -106,26 +107,11 @@ export function IconButton({
   );
 }
 
-type BreadcrumbControlProps = {
-  ariaLabel: string;
-  levels: BreadcrumbLevel[];
-  nextHref: string;
-  previousHref: string;
-};
-
-export type BreadcrumbOption = {
-  active?: boolean;
-  href: string;
-  label: string;
-};
-
-export type BreadcrumbLevel = {
-  href: string;
-  label: string;
-  options?: BreadcrumbOption[];
-};
-
-export type PageControlConfig = BreadcrumbControlProps;
+export type {
+  BreadcrumbLevel,
+  BreadcrumbOption,
+  PageControlConfig,
+} from "../data/pageControl";
 
 type FullNavProps = {
   brandHref?: string;
@@ -185,7 +171,7 @@ export function BreadcrumbControl({
   levels,
   nextHref,
   previousHref,
-}: BreadcrumbControlProps) {
+}: PageControlConfig) {
   return (
     <nav
       aria-label={ariaLabel}

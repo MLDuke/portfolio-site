@@ -2,11 +2,12 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { getPriorityMediaBlockIndex } from "../data/detailContent";
 import type {
   DetailBlock,
   DetailFigureConfig,
   Media,
-} from "../data/portfolio";
+} from "../data/detailContent";
 
 type DetailArticleProps = {
   children: ReactNode;
@@ -207,9 +208,7 @@ export function DetailBlockRenderer({
   blocks: DetailBlock[];
   headingLevel?: DetailHeadingLevel;
 }) {
-  const priorityMediaIndex = blocks.findIndex(
-    (block) => block.type === "figure" || block.type === "gallery",
-  );
+  const priorityMediaIndex = getPriorityMediaBlockIndex(blocks);
 
   return (
     <>
