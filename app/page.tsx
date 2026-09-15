@@ -2,18 +2,19 @@ import type { Metadata } from "next";
 import { FigureCard } from "./components/FigureCard";
 import { PortfolioPageShell } from "./components/PortfolioPageShell";
 import { projects } from "./data/portfolio";
+import { routes } from "./data/routes";
 import { siteDescription, siteName } from "./metadata";
 
 export const metadata: Metadata = {
   title: siteName,
   description: siteDescription,
   alternates: {
-    canonical: "/",
+    canonical: routes.work,
   },
   openGraph: {
     title: siteName,
     description: siteDescription,
-    url: "/",
+    url: routes.work,
     type: "website",
   },
 };
@@ -27,7 +28,7 @@ export default function ProjectsPage() {
       >
         {projects.map((project) => (
           <FigureCard
-            href={`/projects/${project.slug}`}
+            href={routes.project(project.slug)}
             index={project.index}
             key={project.slug}
             title={project.title}

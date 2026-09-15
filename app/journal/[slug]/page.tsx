@@ -5,8 +5,8 @@ import {
   DetailBlockRenderer,
 } from "../../components/DetailTemplate";
 import { PortfolioPageShell } from "../../components/PortfolioPageShell";
-import { createCollectionPageControl } from "../../data/pageControl";
 import { journalEntries } from "../../data/portfolio";
+import { routes } from "../../data/routes";
 
 type JournalEntryPageProps = {
   params: Promise<{
@@ -34,7 +34,7 @@ export async function generateMetadata({
     };
   }
 
-  const url = `/journal/${entry.slug}`;
+  const url = routes.journalEntry(entry.slug);
 
   return {
     title: entry.title,
@@ -65,24 +65,11 @@ export default async function JournalEntryPage({
     <PortfolioPageShell
       active="journal"
       contentSpacing="compact"
-      pageControl={createJournalPageControl(entry.slug)}
+      currentItemHref={routes.journalEntry(entry.slug)}
     >
       <DetailArticle>
         <DetailBlockRenderer blocks={entry.blocks} />
       </DetailArticle>
     </PortfolioPageShell>
   );
-}
-
-function createJournalPageControl(slug: string) {
-  return createCollectionPageControl({
-    ariaLabel: "Journal navigation",
-    currentSlug: slug,
-    itemHref: (entry) => `/journal/${entry.slug}`,
-    items: journalEntries,
-    root: {
-      href: "/journal",
-      label: "Journal",
-    },
-  });
 }

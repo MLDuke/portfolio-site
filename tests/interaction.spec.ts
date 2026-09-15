@@ -44,6 +44,21 @@ async function settledAlpha(locator: Locator, pseudo: "::before" | "::after") {
   return previous;
 }
 
+/** Waits out the open transition so geometry is read at its resting position. */
+async function settledBox(locator: Locator) {
+  let previous = Number.NaN;
+
+  await expect
+    .poll(async () => {
+      const current = (await locator.boundingBox())?.y ?? Number.NaN;
+      const settled = current === previous;
+      previous = current;
+
+      return settled;
+    })
+    .toBe(true);
+}
+
 async function outlineOf(locator: Locator) {
   return locator.evaluate((element) => {
     const style = window.getComputedStyle(element);
@@ -97,7 +112,7 @@ test.describe("global interaction pattern", () => {
   }) => {
     await page.goto("/");
 
-    const current = page.getByRole("link", { name: "Projects" });
+    const current = page.getByRole("link", { name: "Work" });
     const resting = page.getByRole("link", { name: "Journal" });
 
     // Current page: the resting selected layer, and nothing transient.
@@ -132,7 +147,7 @@ test.describe("global interaction pattern", () => {
   }) => {
     await page.goto("/");
 
-    const current = page.getByRole("link", { name: "Projects" });
+    const current = page.getByRole("link", { name: "Work" });
     await current.hover();
 
     // ::before keeps the selected state while ::after adds hover on top.
@@ -266,7 +281,7 @@ test.describe("global interaction pattern", () => {
 });
 
 test.describe("breadcrumb dropdown", () => {
-  const triggerName = "Show Project Name options";
+  const triggerName = "Project Name navigation";
 
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ height: 900, width: 1440 });
@@ -351,6 +366,53 @@ test.describe("breadcrumb dropdown", () => {
 
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
     await expect(panel).toBeHidden();
+  });
+
+  test("a closed panel keeps its options out of the tab order", async ({
+    page,
+  }) => {
+    const trigger = page.getByRole("button", { name: triggerName });
+    const panel = await panelFor(page, trigger);
+
+    await tabTo(page, trigger);
+    await expect(panel).toBeHidden();
+
+    // Dimming the panel with opacity alone would leave every option focusable
+    // and duplicated in the accessibility tree, so the next tab stop has to
+    // land outside it.
+    await page.keyboard.press("Tab");
+
+    const landedInAClosedPanel = await page.evaluate(() =>
+      Boolean(document.activeElement?.closest(".breadcrumb-panel")),
+    );
+    expect(landedInAClosedPanel).toBe(false);
+  });
+
+  test("the hover bridge stays inside the gap above the panel", async ({
+    page,
+  }) => {
+    const trigger = page.getByRole("button", { name: triggerName });
+    const panel = await panelFor(page, trigger);
+
+    await trigger.click();
+    await expect(panel).toBeVisible();
+    await settledBox(panel);
+
+    // The bridge keeps hover alive across the gap between trigger and panel.
+    // Reaching back over the trigger would put it above the button, because the
+    // panel it lives in is z-40, and swallow presses on the button's bottom edge.
+    const box = await trigger.boundingBox();
+
+    if (!box) {
+      throw new Error("Expected the breadcrumb trigger to be laid out.");
+    }
+
+    const topmost = await page.evaluate(
+      (point) => document.elementFromPoint(point.x, point.y)?.tagName ?? "",
+      { x: box.x + box.width / 2, y: box.y + box.height - 1 },
+    );
+
+    expect(topmost).toBe("BUTTON");
   });
 
   test("an open trigger reads as a resting selected state", async ({ page }) => {

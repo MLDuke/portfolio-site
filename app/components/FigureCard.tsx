@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Media } from "../data/portfolio";
 import type { InteractionState } from "./interactionState";
+import { isUnoptimizedImage, mediaToneColor } from "./media";
 import { SiteLink } from "./SiteLink";
 
 type FigureCardProps = {
@@ -51,10 +52,11 @@ export function FigureCard({
         className={[
           "relative overflow-hidden",
           imageHeight,
-          "w-full shrink-0 bg-[#808080] motion-safe:transition-[border-radius] motion-safe:duration-[var(--interaction-duration)] motion-safe:ease-[var(--interaction-easing)]",
+          "w-full shrink-0 motion-safe:transition-[border-radius] motion-safe:duration-[var(--interaction-duration)] motion-safe:ease-[var(--interaction-easing)]",
           hasExpandedImageRadius ? "rounded-md" : "rounded-[6px]",
           "group-active:rounded-md group-focus-visible:rounded-md",
         ].join(" ")}
+        style={{ backgroundColor: mediaToneColor(media?.tone) }}
       >
         {media?.src ? (
           <Image
@@ -101,8 +103,4 @@ export function FigureCard({
       {frame}
     </button>
   );
-}
-
-function isUnoptimizedImage(src: string) {
-  return src.toLowerCase().endsWith(".gif");
 }

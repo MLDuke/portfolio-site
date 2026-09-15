@@ -132,6 +132,10 @@
   --focus-ring-offset: var(--size-unit-2);
   --interaction-duration: var(--motion-duration-fast);
   --interaction-easing: var(--motion-easing-standard);
+  --media-tone-neutral: var(--color-neutral-1);
+  --media-tone-dark: var(--color-neutral-7);
+  --media-tone-blue: var(--color-blue-3);
+  --media-tone-green: var(--color-green-2);
   --on-surface-primary: var(--color-neutral-10);
   --on-surface-secondary: var(--color-neutral-8);
   --state-layer-hover: var(--state-layer-on-light-hover);
@@ -157,6 +161,10 @@ html[data-theme="dark"],
   --focus-ring-offset: var(--size-unit-2);
   --interaction-duration: var(--motion-duration-fast);
   --interaction-easing: var(--motion-easing-standard);
+  --media-tone-neutral: var(--color-neutral-1);
+  --media-tone-dark: var(--color-neutral-7);
+  --media-tone-blue: var(--color-blue-3);
+  --media-tone-green: var(--color-green-2);
   --on-surface-primary: var(--color-neutral-0);
   --on-surface-secondary: var(--color-neutral-1);
   --state-layer-hover: var(--state-layer-on-dark-hover);

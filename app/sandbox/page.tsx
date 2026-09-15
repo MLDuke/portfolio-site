@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AboutModal } from "../components/AboutModal";
+import { BreadcrumbControlV2 } from "../components/BreadcrumbControlV2";
 import {
-  BreadcrumbControl,
   FullNav,
   IconButton,
   NavButton,
@@ -22,87 +22,471 @@ import {
   interactionStates,
   type InteractionState,
 } from "../components/interactionState";
+import { placeholderBody, type DetailBlock } from "../data/portfolio";
+import { sandboxSections } from "../data/fixtures";
 import {
-  ProjectBlockRenderer,
-  ProjectCompareRow,
-  ProjectFeatureMedia,
-  ProjectMediaFigure,
-  ProjectMediaGrid,
-  ProjectMediaPair,
-  ProjectMosaic,
-  ProjectTextBlock,
-} from "../components/ProjectArchive";
-import type {
-  DetailBlock,
-  Media,
-  ProjectBlock,
-} from "../data/portfolio";
+  adjacentItems,
+  siteSections,
+  type NavSection,
+} from "../data/siteNavigation";
+import { SiteLink } from "../components/SiteLink";
 
 type SandboxTheme = "light" | "dark";
 
-type SandboxNavItem = {
-  href: `#${string}`;
+/**
+ * Every specimen the sandbox can show, in nav order.
+ *
+ * One entry per specimen: the nav reads it, the router reads it, and the body
+ * comes from the same object. Splitting the label from the renderer is what let
+ * a rename land in one of the two and not the other.
+ */
+type SandboxSpecimen = {
+  group: string;
+  id: string;
   label: string;
+  render: (context: { onOpenModal: () => void }) => ReactNode;
 };
 
-type SandboxNavGroup = {
-  items: SandboxNavItem[];
-  label: string;
-};
+const specimens: SandboxSpecimen[] = [
+  {
+    group: "Foundation",
+    id: "semantic-colors",
+    label: "Semantic colors",
+    render: () => {
+      return (
+        <SandboxSubsection title="Semantic token swatches">
+          <div className="grid gap-12 sm:grid-cols-2 xl:grid-cols-4">
+            {semanticColors.map(([name, background, foreground]) => (
+              <div
+                className={`${background} ${foreground} grid min-h-96 content-between rounded-md border border-border-default p-16`}
+                key={name}
+              >
+                <span className="font-mono text-label-small">{name}</span>
+                <span className="text-body-small">Aa</span>
+              </div>
+            ))}
+          </div>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Foundation",
+    id: "primitive-colors",
+    label: "Primitive colors",
+    render: () => {
+      return (
+        <SandboxSubsection title="Primitive color ramp">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-4 xl:grid-cols-6">
+            {primitiveColors.map(([name, background]) => (
+              <div className="grid gap-6" key={name}>
+                <div
+                  className={`${background} h-48 rounded-sm border border-border-default`}
+                />
+                <p className="font-mono text-label-small text-on-surface-secondary">
+                  {name}
+                </p>
+              </div>
+            ))}
+          </div>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Foundation",
+    id: "typography",
+    label: "Typography",
+    render: () => {
+      return (
+        <SandboxSubsection title="Type scale">
+          <div className="grid gap-8">
+            {typeSamples.map(([name, sizeClass, fontClass]) => (
+              <div
+                className="grid gap-8 border-t border-border-default py-12 md:grid-cols-[160px_1fr]"
+                key={name}
+              >
+                <span className="font-mono text-label-small text-on-surface-secondary">
+                  {name}
+                </span>
+                <span className={`${sizeClass} ${fontClass} min-w-0`}>
+                  The quick brown fox
+                </span>
+              </div>
+            ))}
+          </div>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Foundation",
+    id: "spacing",
+    label: "Spacing",
+    render: () => {
+      return (
+        <SandboxSubsection title="Spacing scale">
+          <div className="grid gap-10">
+            {spacingSamples.map(([label, width]) => (
+              <div className="flex items-center gap-12" key={label}>
+                <span className="w-48 font-mono text-label-small">{label}</span>
+                <div className={`${width} h-12 bg-on-surface-primary`} />
+              </div>
+            ))}
+          </div>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Foundation",
+    id: "radius",
+    label: "Radius",
+    render: () => {
+      return (
+        <SandboxSubsection title="Radius scale">
+          <div className="grid min-w-[360px] grid-cols-5 gap-12">
+            {radiusSamples.map(([label, radius]) => (
+              <div className="grid gap-8" key={label}>
+                <div className={`${radius} h-64 bg-surface-raised`} />
+                <p className="font-mono text-label-small">{label}</p>
+              </div>
+            ))}
+          </div>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Foundation",
+    id: "elevation",
+    label: "Elevation",
+    render: () => {
+      return (
+        <SandboxSubsection title="Elevation tokens">
+          <div className="grid grid-cols-2 gap-16">
+            <div
+              className="grid h-96 place-items-center rounded-md bg-surface-raised shadow-raised"
+              data-testid="elevation-raised"
+            >
+              <span className="font-mono text-label-small">raised</span>
+            </div>
+            <div
+              className="grid h-96 place-items-center rounded-md bg-surface-overlay shadow-overlay"
+              data-testid="elevation-overlay"
+            >
+              <span className="font-mono text-label-small">overlay</span>
+            </div>
+          </div>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Foundation",
+    id: "state-layer",
+    label: "Interaction states",
+    render: () => {
+      return <InteractionStatesPage />;
+    },
+  },
+  {
+    group: "Components",
+    id: "buttons",
+    label: "Buttons",
+    render: ({ onOpenModal }) => {
+      return <ButtonBenchPage onOpenModal={onOpenModal} />;
+    },
+  },
+  {
+    group: "Components",
+    id: "portfolio-nav",
+    label: "Portfolio nav",
+    render: () => {
+      return (
+        <SandboxSubsection title="Full nav with breadcrumb">
+          <FullNav breadcrumb={<SandboxBreadcrumb sections={siteSections} />}>
+            <NavButton active href="/sandbox" transitionTypes={["site-page"]}>
+              Work
+            </NavButton>
+            <NavButton href="/sandbox" transitionTypes={["site-page"]}>
+              Journal
+            </NavButton>
+            <NavButton>Information</NavButton>
+          </FullNav>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Components",
+    id: "nav-buttons",
+    label: "Nav buttons",
+    render: () => {
+      return (
+        <SandboxSubsection title="Primary nav segment">
+          <nav
+            aria-label="Sandbox navigation sample"
+            className="inline-flex rounded-[6px] bg-surface-raised p-2 font-mono"
+            data-figma-component="Nav"
+            data-node-id="33:57"
+          >
+            <NavButton active href="/sandbox" transitionTypes={["site-page"]}>
+              Work
+            </NavButton>
+            <NavButton href="/sandbox" transitionTypes={["site-page"]}>
+              Journal
+            </NavButton>
+            <NavButton>Information</NavButton>
+          </nav>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Components",
+    id: "breadcrumb-control",
+    label: "Breadcrumb control",
+    render: () => {
+      return (
+        <BreadcrumbControlV2Sandbox />
+      );
+    },
+  },
+  {
+    group: "Components",
+    id: "icon-buttons",
+    label: "Icon buttons",
+    render: () => {
+      return (
+        <SandboxSubsection title="Previous and next">
+          <div className="flex gap-8">
+            <IconButton aria-label="Previous" href="/sandbox" icon="←" />
+            <IconButton aria-label="Next" href="/sandbox" icon="→" />
+          </div>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Components",
+    id: "figure-cards",
+    label: "Figure cards",
+    render: () => {
+      return (
+        <>
+          <SandboxSubsection title="Project states">
+            <div className="grid gap-16 md:grid-cols-[repeat(2,346px)] 2xl:grid-cols-[repeat(5,346px)]">
+              {interactionStates.map((state) => (
+                <div className="grid gap-8" key={state}>
+                  <div className="h-[449px]">
+                    <FigureCard
+                      index="002"
+                      state={state}
+                      title="Project Name"
+                    />
+                  </div>
+                  <p className="font-mono text-label-small text-on-surface-secondary">
+                    {state}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </SandboxSubsection>
 
-const navGroups: SandboxNavGroup[] = [
-  {
-    label: "Foundation",
-    items: [
-      { href: "#semantic-colors", label: "Semantic colors" },
-      { href: "#primitive-colors", label: "Primitive colors" },
-      { href: "#typography", label: "Typography" },
-      { href: "#spacing", label: "Spacing" },
-      { href: "#radius", label: "Radius" },
-      { href: "#elevation", label: "Elevation" },
-      { href: "#state-layer", label: "Interaction states" },
-    ],
+          <SandboxSubsection title="Journal sizing">
+            <div className="grid gap-8 md:w-[346px]">
+              <div className="h-[449px]">
+                <FigureCard index="002" title="Entry Name" variant="journal" />
+              </div>
+              <p className="font-mono text-label-small text-on-surface-secondary">
+                journal
+              </p>
+            </div>
+          </SandboxSubsection>
+        </>
+      );
+    },
   },
   {
-    label: "Components",
-    items: [
-      { href: "#buttons", label: "Buttons" },
-      { href: "#portfolio-nav", label: "Portfolio nav" },
-      { href: "#nav-buttons", label: "Nav buttons" },
-      { href: "#breadcrumb-control", label: "Breadcrumb control" },
-      { href: "#icon-buttons", label: "Icon buttons" },
-      { href: "#figure-cards", label: "Figure cards" },
-      { href: "#detail-template", label: "Detail template" },
-      { href: "#detail-description", label: "Detail description" },
-      { href: "#detail-figure", label: "Detail figure" },
-      { href: "#detail-gallery", label: "Detail gallery" },
-      { href: "#detail-text-block", label: "Detail text block" },
-      { href: "#detail-block-renderer", label: "Detail block renderer" },
-      { href: "#information-modal", label: "Information modal" },
-      { href: "#footer", label: "Footer" },
-    ],
+    group: "Components",
+    id: "detail-template",
+    label: "Detail template",
+    render: () => {
+      return (
+        <SandboxSubsection title="Project block sequence: description, figure, gallery, text">
+          <DetailArticle>
+            <DetailBlockRenderer blocks={detailBlocks} headingLevel="h3" />
+          </DetailArticle>
+        </SandboxSubsection>
+      );
+    },
   },
   {
-    label: "Deprecated",
-    items: [
-      { href: "#project-media", label: "Project media" },
-      { href: "#archive-layouts", label: "Archive layouts" },
-      { href: "#block-renderer", label: "Block renderer" },
-    ],
+    group: "Components",
+    id: "detail-description",
+    label: "Detail description",
+    render: () => {
+      return (
+        <SandboxSubsection title="Description">
+          <div className="max-w-[704px]">
+            <DetailDescription
+              description={placeholderBody}
+              headingLevel="h3"
+              index="002"
+              title="Project Name"
+            />
+          </div>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Components",
+    id: "detail-figure",
+    label: "Detail figure",
+    render: () => {
+      return (
+        <>
+          <SandboxSubsection title="Figure with caption">
+            <div className="max-w-[704px]">
+              <DetailFigure
+                media={{
+                  caption: "Caption",
+                  tone: "neutral",
+                }}
+                priority
+              />
+            </div>
+          </SandboxSubsection>
+
+          <SandboxSubsection title="Figure without caption">
+            <div className="max-w-[704px]">
+              <DetailFigure
+                media={{
+                  caption: "Hidden caption",
+                  tone: "blue",
+                }}
+                showCaption={false}
+              />
+            </div>
+          </SandboxSubsection>
+        </>
+      );
+    },
+  },
+  {
+    group: "Components",
+    id: "detail-gallery",
+    label: "Detail gallery",
+    render: () => {
+      return (
+        <SandboxSubsection title="Two-up gallery">
+          <div className="max-w-[704px]">
+            <DetailGallery
+              items={[
+                {
+                  media: {
+                    caption: "Caption",
+                    tone: "neutral",
+                  },
+                },
+                {
+                  media: {
+                    caption: "Hidden caption",
+                    tone: "dark",
+                  },
+                  showCaption: false,
+                },
+              ]}
+            />
+          </div>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Components",
+    id: "detail-text-block",
+    label: "Detail text block",
+    render: () => {
+      return (
+        <SandboxSubsection title="Text block">
+          <div className="max-w-[704px]">
+            <DetailTextBlock body={placeholderBody} />
+          </div>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Components",
+    id: "detail-block-renderer",
+    label: "Detail block renderer",
+    render: () => {
+      return (
+        <SandboxSubsection title="Journal block sequence: figure, description, text">
+          <DetailArticle>
+            <DetailBlockRenderer
+              blocks={journalDetailBlocks}
+              headingLevel="h3"
+            />
+          </DetailArticle>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Components",
+    id: "information-modal",
+    label: "Information modal",
+    render: ({ onOpenModal }) => {
+      return (
+        <SandboxSubsection title="Modal trigger">
+          <button
+            className="state-layer pressable rounded-sm bg-surface-raised px-8 py-4 font-mono text-label-medium"
+            onClick={onOpenModal}
+            type="button"
+          >
+            Open Information
+          </button>
+        </SandboxSubsection>
+      );
+    },
+  },
+  {
+    group: "Components",
+    id: "footer",
+    label: "Footer",
+    render: () => {
+      return (
+        <SandboxSubsection title="Site footer">
+          <Footer />
+        </SandboxSubsection>
+      );
+    },
   },
 ];
 
-const defaultPageId = navGroups[0].items[0].href.slice(1);
-const navItems = navGroups.flatMap((group) =>
-  group.items.map((item) => ({
-    ...item,
-    group: group.label,
-    id: item.href.slice(1),
-  })),
+const specimenGroups = specimens.reduce<{ items: SandboxSpecimen[]; label: string }[]>(
+  (acc, specimen) => {
+    const group = acc.find((candidate) => candidate.label === specimen.group);
+
+    if (group) {
+      group.items.push(specimen);
+    } else {
+      acc.push({ label: specimen.group, items: [specimen] });
+    }
+
+    return acc;
+  },
+  [],
 );
 
+const defaultPageId = specimens[0].id;
+
 function findSandboxPage(pageId: string) {
-  return navItems.find((item) => item.id === pageId) ?? navItems[0];
+  return specimens.find((specimen) => specimen.id === pageId) ?? specimens[0];
 }
 
 function getPageIdFromHash() {
@@ -110,8 +494,7 @@ function getPageIdFromHash() {
     return defaultPageId;
   }
 
-  const pageId = window.location.hash.replace("#", "");
-  return findSandboxPage(pageId).id;
+  return findSandboxPage(window.location.hash.replace("#", "")).id;
 }
 
 const semanticColors = [
@@ -200,69 +583,13 @@ const radiusSamples = [
   ["xl", "rounded-xl"],
 ] as const;
 
-const archiveMedia: Record<string, Media> = {
-  neutral: {
-    caption: "Neutral placeholder",
-    tone: "neutral",
-  },
-  dark: {
-    caption: "Dark placeholder",
-    tone: "dark",
-  },
-  blue: {
-    caption: "Blue placeholder",
-    tone: "blue",
-  },
-  green: {
-    caption: "Green placeholder",
-    tone: "green",
-  },
-};
-
-const archiveBlocks: ProjectBlock[] = [
-  {
-    type: "feature",
-    label: "Archive 01",
-    media: archiveMedia.neutral,
-  },
-  {
-    type: "text",
-    body: "Short archive text creates a quiet pause between media groups.",
-  },
-  {
-    type: "pair",
-    items: [archiveMedia.dark, archiveMedia.blue],
-  },
-  {
-    type: "grid",
-    columns: 3,
-    items: [archiveMedia.neutral, archiveMedia.green, archiveMedia.dark],
-  },
-  {
-    type: "compare",
-    before: archiveMedia.dark,
-    after: archiveMedia.green,
-  },
-  {
-    type: "mosaic",
-    items: [
-      archiveMedia.neutral,
-      archiveMedia.blue,
-      archiveMedia.green,
-      archiveMedia.dark,
-    ],
-  },
-];
-
-const detailDescriptionCopy =
-  "This UI component provides a reusable building block for common interface patterns. It is designed to support clear content, consistent styling, and predictable behavior across screens. Flexible properties make it easy to adapt the component to different contexts and states. Use it to speed up design work while keeping the overall experience cohesive.";
 
 const detailBlocks: DetailBlock[] = [
   {
     type: "description",
     title: "Project Name",
     index: "002",
-    body: detailDescriptionCopy,
+    body: placeholderBody,
   },
   {
     type: "figure",
@@ -298,7 +625,7 @@ const detailBlocks: DetailBlock[] = [
   },
   {
     type: "text",
-    body: detailDescriptionCopy,
+    body: placeholderBody,
   },
 ];
 
@@ -316,47 +643,20 @@ const journalDetailBlocks: DetailBlock[] = [
     type: "description",
     title: "Entry Name",
     index: "002",
-    body: detailDescriptionCopy,
+    body: placeholderBody,
   },
   {
     type: "text",
-    body: detailDescriptionCopy,
+    body: placeholderBody,
   },
 ];
-
-const projectPageControl = {
-  ariaLabel: "Project navigation",
-  levels: [
-    {
-      href: "/",
-      label: "Work",
-    },
-    {
-      href: "/projects/project-name",
-      label: "Project Name",
-      options: [
-        {
-          active: true,
-          href: "/projects/project-name",
-          label: "Project Name",
-        },
-        {
-          href: "/projects/project-two",
-          label: "Project Two",
-        },
-      ],
-    },
-  ],
-  nextHref: "/projects/project-two",
-  previousHref: "/projects/project-three",
-};
 
 export default function SandboxPage() {
   const [activePage, setActivePage] = useState(defaultPageId);
   const [showModal, setShowModal] = useState(false);
   const [theme, setTheme] = useState<SandboxTheme>("light");
   const nextTheme = theme === "light" ? "dark" : "light";
-  const activePageMeta = findSandboxPage(activePage);
+  const activeSpecimen = findSandboxPage(activePage);
 
   useEffect(() => {
     const syncActivePage = () => setActivePage(getPageIdFromHash());
@@ -401,7 +701,6 @@ export default function SandboxPage() {
 
       <SandboxMobileNav
         activePage={activePage}
-        navGroups={navGroups}
         nextTheme={nextTheme}
         onToggleTheme={() => setTheme(nextTheme)}
         onSelectPage={selectPage}
@@ -411,7 +710,6 @@ export default function SandboxPage() {
       <div className="mx-auto grid w-full max-w-[1440px] gap-32 px-16 py-20 lg:grid-cols-[224px_minmax(0,1fr)] lg:gap-48 lg:px-24 lg:py-24">
         <SandboxSidePanel
           activePage={activePage}
-          navGroups={navGroups}
           nextTheme={nextTheme}
           onToggleTheme={() => setTheme(nextTheme)}
           onSelectPage={selectPage}
@@ -420,8 +718,8 @@ export default function SandboxPage() {
 
         <div className="min-w-0" id="sandbox-content">
           <ActiveSandboxPage
-            meta={activePageMeta}
             onOpenModal={() => setShowModal(true)}
+            specimen={activeSpecimen}
           />
         </div>
       </div>
@@ -432,429 +730,23 @@ export default function SandboxPage() {
 }
 
 function ActiveSandboxPage({
-  meta,
   onOpenModal,
+  specimen,
 }: {
-  meta: (typeof navItems)[number];
   onOpenModal: () => void;
+  specimen: SandboxSpecimen;
 }) {
   return (
-    <SandboxPageTemplate group={meta.group} id={meta.id} title={meta.label}>
-      {renderSandboxPageBody(meta.id, onOpenModal)}
+    <SandboxPageTemplate
+      group={specimen.group}
+      id={specimen.id}
+      title={specimen.label}
+    >
+      {specimen.render({ onOpenModal })}
     </SandboxPageTemplate>
   );
 }
 
-function renderSandboxPageBody(pageId: string, onOpenModal: () => void) {
-  switch (pageId) {
-    case "semantic-colors":
-      return (
-        <SandboxSubsection title="Semantic token swatches">
-          <div className="grid gap-12 sm:grid-cols-2 xl:grid-cols-4">
-            {semanticColors.map(([name, background, foreground]) => (
-              <div
-                className={`${background} ${foreground} grid min-h-96 content-between rounded-md border border-border-default p-16`}
-                key={name}
-              >
-                <span className="font-mono text-label-small">{name}</span>
-                <span className="text-body-small">Aa</span>
-              </div>
-            ))}
-          </div>
-        </SandboxSubsection>
-      );
-    case "primitive-colors":
-      return (
-        <SandboxSubsection title="Primitive color ramp">
-          <div className="grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-4 xl:grid-cols-6">
-            {primitiveColors.map(([name, background]) => (
-              <div className="grid gap-6" key={name}>
-                <div
-                  className={`${background} h-48 rounded-sm border border-border-default`}
-                />
-                <p className="font-mono text-label-small text-on-surface-secondary">
-                  {name}
-                </p>
-              </div>
-            ))}
-          </div>
-        </SandboxSubsection>
-      );
-    case "typography":
-      return (
-        <SandboxSubsection title="Type scale">
-          <div className="grid gap-8">
-            {typeSamples.map(([name, sizeClass, fontClass]) => (
-              <div
-                className="grid gap-8 border-t border-border-default py-12 md:grid-cols-[160px_1fr]"
-                key={name}
-              >
-                <span className="font-mono text-label-small text-on-surface-secondary">
-                  {name}
-                </span>
-                <span className={`${sizeClass} ${fontClass} min-w-0`}>
-                  The quick brown fox
-                </span>
-              </div>
-            ))}
-          </div>
-        </SandboxSubsection>
-      );
-    case "spacing":
-      return (
-        <SandboxSubsection title="Spacing scale">
-          <div className="grid gap-10">
-            {spacingSamples.map(([label, width]) => (
-              <div className="flex items-center gap-12" key={label}>
-                <span className="w-48 font-mono text-label-small">{label}</span>
-                <div className={`${width} h-12 bg-on-surface-primary`} />
-              </div>
-            ))}
-          </div>
-        </SandboxSubsection>
-      );
-    case "radius":
-      return (
-        <SandboxSubsection title="Radius scale">
-          <div className="grid min-w-[360px] grid-cols-5 gap-12">
-            {radiusSamples.map(([label, radius]) => (
-              <div className="grid gap-8" key={label}>
-                <div className={`${radius} h-64 bg-surface-raised`} />
-                <p className="font-mono text-label-small">{label}</p>
-              </div>
-            ))}
-          </div>
-        </SandboxSubsection>
-      );
-    case "elevation":
-      return (
-        <SandboxSubsection title="Elevation tokens">
-          <div className="grid grid-cols-2 gap-16">
-            <div
-              className="grid h-96 place-items-center rounded-md bg-surface-raised shadow-raised"
-              data-testid="elevation-raised"
-            >
-              <span className="font-mono text-label-small">raised</span>
-            </div>
-            <div
-              className="grid h-96 place-items-center rounded-md bg-surface-overlay shadow-overlay"
-              data-testid="elevation-overlay"
-            >
-              <span className="font-mono text-label-small">overlay</span>
-            </div>
-          </div>
-        </SandboxSubsection>
-      );
-    case "state-layer":
-      return <InteractionStatesPage />;
-    case "buttons":
-      return <ButtonBenchPage onOpenModal={onOpenModal} />;
-    case "portfolio-nav":
-      return (
-        <SandboxSubsection title="Full nav with project page control">
-          <FullNav pageControl={projectPageControl}>
-            <NavButton active href="/sandbox" transitionTypes={["site-page"]}>
-              Projects
-            </NavButton>
-            <NavButton href="/sandbox" transitionTypes={["site-page"]}>
-              Journal
-            </NavButton>
-            <NavButton>Information</NavButton>
-          </FullNav>
-        </SandboxSubsection>
-      );
-    case "nav-buttons":
-      return (
-        <SandboxSubsection title="Primary nav segment">
-          <nav
-            aria-label="Sandbox navigation sample"
-            className="inline-flex rounded-[6px] bg-surface-raised p-2 font-mono"
-            data-figma-component="Nav"
-            data-node-id="33:57"
-          >
-            <NavButton active href="/sandbox" transitionTypes={["site-page"]}>
-              Projects
-            </NavButton>
-            <NavButton href="/sandbox" transitionTypes={["site-page"]}>
-              Journal
-            </NavButton>
-            <NavButton>Information</NavButton>
-          </nav>
-        </SandboxSubsection>
-      );
-    case "breadcrumb-control":
-      return (
-        <SandboxSubsection title="Project breadcrumb and adjacent controls">
-          <BreadcrumbControl
-            ariaLabel={projectPageControl.ariaLabel}
-            levels={projectPageControl.levels}
-            nextHref={projectPageControl.nextHref}
-            previousHref={projectPageControl.previousHref}
-          />
-        </SandboxSubsection>
-      );
-    case "icon-buttons":
-      return (
-        <SandboxSubsection title="Previous and next">
-          <div className="flex gap-8">
-            <IconButton aria-label="Previous" href="/sandbox" icon="←" />
-            <IconButton aria-label="Next" href="/sandbox" icon="→" />
-          </div>
-        </SandboxSubsection>
-      );
-    case "figure-cards":
-      return (
-        <>
-          <SandboxSubsection title="Project states">
-            <div className="grid gap-16 md:grid-cols-[repeat(2,346px)] 2xl:grid-cols-[repeat(5,346px)]">
-              {(
-                ["rest", "hover", "pressed", "focused", "disabled"] as const
-              ).map((state) => (
-                <div className="grid gap-8" key={state}>
-                  <div className="h-[449px]">
-                    <FigureCard
-                      index="002"
-                      state={state}
-                      title="Project Name"
-                    />
-                  </div>
-                  <p className="font-mono text-label-small text-on-surface-secondary">
-                    {state}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </SandboxSubsection>
-
-          <SandboxSubsection title="Journal sizing">
-            <div className="grid gap-8 md:w-[346px]">
-              <div className="h-[449px]">
-                <FigureCard index="002" title="Entry Name" variant="journal" />
-              </div>
-              <p className="font-mono text-label-small text-on-surface-secondary">
-                journal
-              </p>
-            </div>
-          </SandboxSubsection>
-        </>
-      );
-    case "detail-template":
-      return (
-        <SandboxSubsection title="Project block sequence: description, figure, gallery, text">
-          <DetailArticle>
-            <DetailBlockRenderer blocks={detailBlocks} headingLevel="h3" />
-          </DetailArticle>
-        </SandboxSubsection>
-      );
-    case "detail-description":
-      return (
-        <SandboxSubsection title="Description">
-          <div className="max-w-[704px]">
-            <DetailDescription
-              description={detailDescriptionCopy}
-              headingLevel="h3"
-              index="002"
-              title="Project Name"
-            />
-          </div>
-        </SandboxSubsection>
-      );
-    case "detail-figure":
-      return (
-        <>
-          <SandboxSubsection title="Figure with caption">
-            <div className="max-w-[704px]">
-              <DetailFigure
-                media={{
-                  caption: "Caption",
-                  tone: "neutral",
-                }}
-                priority
-              />
-            </div>
-          </SandboxSubsection>
-
-          <SandboxSubsection title="Figure without caption">
-            <div className="max-w-[704px]">
-              <DetailFigure
-                media={{
-                  caption: "Hidden caption",
-                  tone: "blue",
-                }}
-                showCaption={false}
-              />
-            </div>
-          </SandboxSubsection>
-        </>
-      );
-    case "detail-gallery":
-      return (
-        <SandboxSubsection title="Two-up gallery">
-          <div className="max-w-[704px]">
-            <DetailGallery
-              items={[
-                {
-                  media: {
-                    caption: "Caption",
-                    tone: "neutral",
-                  },
-                },
-                {
-                  media: {
-                    caption: "Hidden caption",
-                    tone: "dark",
-                  },
-                  showCaption: false,
-                },
-              ]}
-            />
-          </div>
-        </SandboxSubsection>
-      );
-    case "detail-text-block":
-      return (
-        <SandboxSubsection title="Text block">
-          <div className="max-w-[704px]">
-            <DetailTextBlock body={detailDescriptionCopy} />
-          </div>
-        </SandboxSubsection>
-      );
-    case "detail-block-renderer":
-      return (
-        <SandboxSubsection title="Journal block sequence: figure, description, text">
-          <DetailArticle>
-            <DetailBlockRenderer
-              blocks={journalDetailBlocks}
-              headingLevel="h3"
-            />
-          </DetailArticle>
-        </SandboxSubsection>
-      );
-    case "project-media":
-      return (
-        <SandboxSubsection
-          marker={<DeprecatedTag />}
-          title="Media figure and feature media"
-        >
-          <div className="grid max-w-[688px] gap-24">
-            <ProjectMediaFigure media={archiveMedia.neutral} />
-            <ProjectFeatureMedia
-              label="Feature media"
-              media={{
-                caption: "Feature placeholder with a default frame",
-                tone: "dark",
-              }}
-            />
-          </div>
-        </SandboxSubsection>
-      );
-    case "archive-layouts":
-      return (
-        <SandboxSubsection
-          marker={<DeprecatedTag />}
-          title="Pair, grid, compare, mosaic, and text"
-        >
-          <div className="grid max-w-[688px] gap-32">
-            <ProjectMediaPair
-              items={[
-                {
-                  caption: "Pair left",
-                  tone: "neutral",
-                },
-                {
-                  caption: "Pair right",
-                  tone: "blue",
-                },
-              ]}
-            />
-            <ProjectMediaGrid
-              columns={4}
-              items={[
-                {
-                  caption: "Grid A",
-                  tone: "neutral",
-                },
-                {
-                  caption: "Grid B",
-                  tone: "dark",
-                },
-                {
-                  caption: "Grid C",
-                  tone: "blue",
-                },
-                {
-                  caption: "Grid D",
-                  tone: "green",
-                },
-              ]}
-            />
-            <ProjectCompareRow
-              before={{
-                caption: "Before",
-                tone: "dark",
-              }}
-              after={{
-                caption: "After",
-                tone: "green",
-              }}
-            />
-            <ProjectMosaic
-              items={[
-                {
-                  caption: "Mosaic A",
-                  tone: "blue",
-                },
-                {
-                  caption: "Mosaic B",
-                  tone: "neutral",
-                },
-                {
-                  caption: "Mosaic C",
-                  tone: "dark",
-                },
-                {
-                  caption: "Mosaic D",
-                  tone: "green",
-                },
-              ]}
-            />
-            <ProjectTextBlock body="Text interstitials keep short notes aligned with the archive rhythm." />
-          </div>
-        </SandboxSubsection>
-      );
-    case "block-renderer":
-      return (
-        <SandboxSubsection
-          marker={<DeprecatedTag />}
-          title="Composed archive block sequence"
-        >
-          <div className="max-w-[688px]">
-            <ProjectBlockRenderer blocks={archiveBlocks} />
-          </div>
-        </SandboxSubsection>
-      );
-    case "information-modal":
-      return (
-        <SandboxSubsection title="Modal trigger">
-          <button
-            className="state-layer pressable rounded-sm bg-surface-raised px-8 py-4 font-mono text-label-medium"
-            onClick={onOpenModal}
-            type="button"
-          >
-            Open Information
-          </button>
-        </SandboxSubsection>
-      );
-    case "footer":
-      return (
-        <SandboxSubsection title="Site footer">
-          <Footer />
-        </SandboxSubsection>
-      );
-    default:
-      return renderSandboxPageBody(defaultPageId, onOpenModal);
-  }
-}
 
 const interactionTokens = [
   [
@@ -1053,7 +945,7 @@ function ButtonBenchPage({ onOpenModal }: { onOpenModal: () => void }) {
             note="ComponentPrimitives · bg-surface-raised, label-medium, min-h-28"
             name="NavButton"
           >
-            <NavButton active>Projects</NavButton>
+            <NavButton active>Work</NavButton>
             <NavButton>Journal</NavButton>
           </ShippedButtonRow>
 
@@ -1066,7 +958,7 @@ function ButtonBenchPage({ onOpenModal }: { onOpenModal: () => void }) {
           </ShippedButtonRow>
 
           <ShippedButtonRow
-            note="BreadcrumbLevelItem · no fill, 28×28, aria-expanded drives the selected layer"
+            note="Breadcrumb trigger · no fill, 28×28, aria-expanded drives the selected layer"
             name="Disclosure trigger"
           >
             <button
@@ -1155,6 +1047,42 @@ function ShippedButtonRow({
   );
 }
 
+function SandboxBreadcrumb({ sections }: { sections: NavSection[] }) {
+  const currentItemHref = sections[0].items[0]?.href;
+  const adjacent = adjacentItems(sections, currentItemHref);
+
+  return (
+    <BreadcrumbControlV2
+      ariaLabel="Sandbox breadcrumb navigation"
+      currentItemHref={currentItemHref}
+      currentSectionId={sections[0].id}
+      nextHref={adjacent?.nextHref}
+      previousHref={adjacent?.previousHref}
+      sections={sections}
+    />
+  );
+}
+
+function BreadcrumbControlV2Sandbox() {
+  return (
+    <>
+      <SandboxSubsection title="Full page preview">
+        <SiteLink
+          className="state-layer pressable inline-flex min-h-28 w-fit items-center justify-center rounded-sm bg-surface-raised px-8 py-4 font-mono text-label-medium text-on-surface-primary"
+          href="/sandbox/breadcrumb-preview"
+          transitionTypes={["site-page"]}
+        >
+          Open breadcrumb preview
+        </SiteLink>
+      </SandboxSubsection>
+
+      <SandboxSubsection title="Section and item levels, with adjacent controls">
+        <SandboxBreadcrumb sections={sandboxSections} />
+      </SandboxSubsection>
+    </>
+  );
+}
+
 function InteractionStatesPage() {
   return (
     <>
@@ -1207,7 +1135,7 @@ function InteractionStatesPage() {
               >
                 Label
               </button>
-              <NavButton previewState={state}>Projects</NavButton>
+              <NavButton previewState={state}>Work</NavButton>
               <IconButton
                 aria-label={`Previous item, ${state} state`}
                 href="/sandbox"
@@ -1366,14 +1294,12 @@ function ReducedMotionNotice() {
 
 function SandboxSidePanel({
   activePage,
-  navGroups,
   nextTheme,
   onToggleTheme,
   onSelectPage,
   theme,
 }: {
   activePage: string;
-  navGroups: SandboxNavGroup[];
   nextTheme: SandboxTheme;
   onToggleTheme: () => void;
   onSelectPage: (pageId: string) => void;
@@ -1394,7 +1320,6 @@ function SandboxSidePanel({
         </div>
         <SandboxNav
           activePage={activePage}
-          navGroups={navGroups}
           onSelectPage={onSelectPage}
           orientation="vertical"
         />
@@ -1405,14 +1330,12 @@ function SandboxSidePanel({
 
 function SandboxMobileNav({
   activePage,
-  navGroups,
   nextTheme,
   onToggleTheme,
   onSelectPage,
   theme,
 }: {
   activePage: string;
-  navGroups: SandboxNavGroup[];
   nextTheme: SandboxTheme;
   onToggleTheme: () => void;
   onSelectPage: (pageId: string) => void;
@@ -1433,7 +1356,6 @@ function SandboxMobileNav({
         </div>
         <SandboxNav
           activePage={activePage}
-          navGroups={navGroups}
           onSelectPage={onSelectPage}
           orientation="horizontal"
         />
@@ -1466,12 +1388,10 @@ function ThemeToggle({
 
 function SandboxNav({
   activePage,
-  navGroups,
   onSelectPage,
   orientation,
 }: {
   activePage: string;
-  navGroups: SandboxNavGroup[];
   onSelectPage: (pageId: string) => void;
   orientation: "horizontal" | "vertical";
 }) {
@@ -1486,7 +1406,7 @@ function SandboxNav({
           : "grid gap-24"
       }
     >
-      {navGroups.map((group) => (
+      {specimenGroups.map((group) => (
         <div
           className={isHorizontal ? "grid min-w-max gap-8" : "grid gap-8"}
           key={group.label}
@@ -1495,23 +1415,23 @@ function SandboxNav({
             {group.label}
           </p>
           <div className={isHorizontal ? "flex gap-6" : "grid gap-2"}>
-            {group.items.map((item) => (
+            {group.items.map((specimen) => (
               <a
                 aria-current={
-                  activePage === item.href.slice(1) ? "page" : undefined
+                  activePage === specimen.id ? "page" : undefined
                 }
                 className="state-layer pressable rounded-sm px-8 py-6 font-mono text-label-small text-on-surface-primary"
                 data-selected={
-                  activePage === item.href.slice(1) ? "true" : undefined
+                  activePage === specimen.id ? "true" : undefined
                 }
-                href={item.href}
-                key={item.href}
+                href={`#${specimen.id}`}
+                key={specimen.id}
                 onClick={(event) => {
                   event.preventDefault();
-                  onSelectPage(item.href.slice(1));
+                  onSelectPage(specimen.id);
                 }}
               >
-                {item.label}
+                {specimen.label}
               </a>
             ))}
           </div>
@@ -1570,13 +1490,5 @@ function SandboxSubsection({
       </div>
       <div className="min-w-0 overflow-x-auto pb-2">{children}</div>
     </section>
-  );
-}
-
-function DeprecatedTag() {
-  return (
-    <span className="rounded-sm bg-surface-raised px-6 py-2 font-mono text-label-small text-on-surface-secondary">
-      Deprecated
-    </span>
   );
 }

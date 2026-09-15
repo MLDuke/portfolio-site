@@ -1,0 +1,24 @@
+{
+  "theme": {
+    "media-tone": {
+      "neutral": {
+        "$type": "color",
+        "$value": "{global.color.neutral.1}",
+        "$description": "Placeholder surface for media with no image. Ported from the detail-page value #dadada."
+      },
+      "dark": {
+        "$type": "color",
+        "$value": "{global.color.neutral.7}",
+        "$description": "Ported from the detail-page value #424853."
+      },
+      "blue": {
+        "$type": "color",
+        "$value": "{global.color.blue.3}"
+      },
+      "green": {
+        "$type": "color",
+        "$value": "{global.color.green.2}"
+      }
+    }
+  }
+}

@@ -6,6 +6,7 @@ import {
 } from "../../components/DetailTemplate";
 import { PortfolioPageShell } from "../../components/PortfolioPageShell";
 import { projects } from "../../data/portfolio";
+import { routes } from "../../data/routes";
 
 type ProjectPageProps = {
   params: Promise<{
@@ -33,7 +34,7 @@ export async function generateMetadata({
     };
   }
 
-  const url = `/projects/${project.slug}`;
+  const url = routes.project(project.slug);
 
   return {
     title: project.title,
@@ -62,7 +63,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     <PortfolioPageShell
       active="projects"
       contentSpacing="compact"
-      currentProjectSlug={project.slug}
+      currentItemHref={routes.project(project.slug)}
     >
       <DetailArticle>
         <DetailBlockRenderer blocks={project.blocks} />

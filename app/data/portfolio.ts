@@ -1,20 +1,7 @@
-import { createDetailContent } from "./detailContent";
+import { createDetailContent } from "./detailContent.ts";
 import type { DetailBlock, Media } from "./detailContent";
 
 export type { DetailBlock, DetailFigureConfig, Media } from "./detailContent";
-
-/**
- * @deprecated Project and journal detail templates now use composable
- * DetailBlock entries. Keep this only for deprecated sandbox archive examples.
- */
-export type ProjectBlock =
-  | { type: "feature"; media: Media; label?: string }
-  | { type: "single"; media: Media }
-  | { type: "pair"; items: [Media, Media] }
-  | { type: "grid"; columns: 2 | 3 | 4; items: Media[] }
-  | { type: "compare"; before: Media; after: Media }
-  | { type: "mosaic"; items: Media[] }
-  | { type: "text"; body: string };
 
 export type Project = {
   slug: string;
@@ -33,9 +20,10 @@ export type JournalEntry = {
   blocks: DetailBlock[];
 };
 
-export { journalEntries } from "./journal.generated";
+export { journalEntries } from "./journal.generated.ts";
 
-const bodyPlaceholder =
+/** Seed copy for the unwritten case studies. Also drives the sandbox specimens. */
+export const placeholderBody =
   "This UI component provides a reusable building block for common interface patterns. It is designed to support clear content, consistent styling, and predictable behavior across screens. Flexible properties make it easy to adapt the component to different contexts and states. Use it to speed up design work while keeping the overall experience cohesive.";
 
 export const projects: Project[] = [
@@ -43,11 +31,11 @@ export const projects: Project[] = [
     slug: "project-name",
     title: "Project Name",
     index: "002",
-    description: bodyPlaceholder,
+    description: placeholderBody,
     blocks: createDetailContent({
       title: "Project Name",
       index: "002",
-      description: bodyPlaceholder,
+      description: placeholderBody,
       blocks: [
         {
           type: "figure",
@@ -82,7 +70,7 @@ export const projects: Project[] = [
         },
         {
           type: "text",
-          body: bodyPlaceholder,
+          body: placeholderBody,
         },
       ],
     }),
@@ -91,11 +79,11 @@ export const projects: Project[] = [
     slug: "project-two",
     title: "Project Name",
     index: "002",
-    description: bodyPlaceholder,
+    description: placeholderBody,
     blocks: createDetailContent({
       title: "Project Name",
       index: "002",
-      description: bodyPlaceholder,
+      description: placeholderBody,
       blocks: [
         {
           type: "figure",
@@ -136,11 +124,11 @@ export const projects: Project[] = [
     slug: "project-three",
     title: "Project Name",
     index: "002",
-    description: bodyPlaceholder,
+    description: placeholderBody,
     blocks: createDetailContent({
       title: "Project Name",
       index: "002",
-      description: bodyPlaceholder,
+      description: placeholderBody,
       blocks: [
         {
           type: "figure",
@@ -170,9 +158,23 @@ export const projects: Project[] = [
   },
 ];
 
-export const aboutLinks = [
-  { label: "Are.na", href: "https://www.are.na/" },
-  { label: "Linkedin", href: "https://www.linkedin.com/" },
-  { label: "Email", href: "mailto:hello@example.com" },
-  { label: "Resume", href: "/resume.pdf" },
+export type AboutLink = {
+  group: "connect" | "contact";
+  href: string;
+  label: string;
+};
+
+/**
+ * `group` is carried on each link rather than implied by position, so
+ * reordering this array cannot silently move a link to the other heading.
+ */
+export const aboutLinks: AboutLink[] = [
+  { group: "connect", label: "Are.na", href: "https://www.are.na/" },
+  { group: "connect", label: "Linkedin", href: "https://www.linkedin.com/" },
+  { group: "contact", label: "Email", href: "mailto:hello@example.com" },
+  { group: "contact", label: "Resume", href: "/resume.pdf" },
 ];
+
+export function aboutLinksIn(group: AboutLink["group"]) {
+  return aboutLinks.filter((link) => link.group === group);
+}
