@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getPriorityMediaBlockIndex } from "../data/detailContent";
+import { isUnoptimizedImage, mediaToneColor } from "./media";
 import type {
   DetailBlock,
   DetailFigureConfig,
@@ -19,13 +20,6 @@ type DetailArticleProps = {
  * level to keep the document outline intact.
  */
 export type DetailHeadingLevel = "h1" | "h2" | "h3";
-
-const toneClasses = {
-  neutral: "bg-[#dadada]",
-  dark: "bg-[#424853]",
-  blue: "bg-[var(--color-blue-3)]",
-  green: "bg-[var(--color-green-2)]",
-} satisfies Record<NonNullable<Media["tone"]>, string>;
 
 const markdownComponents: Components = {
   a({ children, href }) {
@@ -271,17 +265,16 @@ function DetailMediaFrame({
   priority: boolean;
   variant: "wide" | "gallery";
 }) {
-  const tone = media.tone ?? "neutral";
   const className = [
     "relative w-full overflow-hidden rounded-[6px]",
     variant === "gallery"
       ? "aspect-[704/401] sm:aspect-[340/401]"
       : "aspect-[704/401]",
-    toneClasses[tone],
   ].join(" ");
+  const style = { backgroundColor: mediaToneColor(media.tone) };
 
   if (!media.src) {
-    return <div aria-hidden="true" className={className} />;
+    return <div aria-hidden="true" className={className} style={style} />;
   }
 
   const alt = media.alt?.trim();
@@ -291,7 +284,7 @@ function DetailMediaFrame({
   }
 
   return (
-    <div className={className}>
+    <div className={className} style={style}>
       <Image
         alt={alt}
         className="object-cover"
@@ -317,8 +310,4 @@ function MarkdownContent({ body }: { body: string }) {
       </ReactMarkdown>
     </div>
   );
-}
-
-function isUnoptimizedImage(src: string) {
-  return src.toLowerCase().endsWith(".gif");
 }

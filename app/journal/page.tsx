@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { FigureCard } from "../components/FigureCard";
 import { PortfolioPageShell } from "../components/PortfolioPageShell";
 import { journalEntries } from "../data/portfolio";
+import { routes } from "../data/routes";
 
 const title = "Journal";
 const description = "Journal entries from Matthew Duke Design.";
@@ -10,12 +11,12 @@ export const metadata: Metadata = {
   title,
   description,
   alternates: {
-    canonical: "/journal",
+    canonical: routes.journal,
   },
   openGraph: {
     title,
     description,
-    url: "/journal",
+    url: routes.journal,
     type: "website",
   },
 };
@@ -39,7 +40,7 @@ export default function JournalPage() {
       >
         {journalEntries.map((entry) => (
           <FigureCard
-            href={`/journal/${entry.slug}`}
+            href={routes.journalEntry(entry.slug)}
             index={entry.index}
             key={entry.slug}
             media={entry.cardMedia}

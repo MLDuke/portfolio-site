@@ -1,47 +1,41 @@
 "use client";
 
 import { useState } from "react";
-import { createCollectionPageControl } from "../data/pageControl";
-import { projects } from "../data/portfolio";
+import { adjacentItems, siteSections } from "../data/siteNavigation";
+import { routes } from "../data/routes";
 import { AboutModal } from "./AboutModal";
-import {
-  FullNav,
-  NavButton,
-} from "./ComponentPrimitives";
-import type { PageControlConfig } from "../data/pageControl";
+import { BreadcrumbControlV2 } from "./BreadcrumbControlV2";
+import { FullNav, NavButton } from "./ComponentPrimitives";
 
 type PortfolioNavProps = {
   active: "projects" | "journal" | "information";
-  currentProjectSlug?: string;
-  pageControl?: PageControlConfig | null;
+  currentItemHref?: string;
 };
 
 const navItems = [
-  { label: "Projects", href: "/", key: "projects" },
-  { label: "Journal", href: "/journal", key: "journal" },
+  { label: "Work", href: routes.work, key: "projects" },
+  { label: "Journal", href: routes.journal, key: "journal" },
 ] as const;
 
-export function PortfolioNav({
-  active,
-  currentProjectSlug,
-  pageControl,
-}: PortfolioNavProps) {
+export function PortfolioNav({ active, currentItemHref }: PortfolioNavProps) {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
-  const projectPageControl = createCollectionPageControl({
-    ariaLabel: "Project navigation",
-    currentSlug: currentProjectSlug,
-    itemHref: (project) => `/projects/${project.slug}`,
-    items: projects,
-    root: {
-      href: "/",
-      label: "Work",
-    },
-  });
-  const visiblePageControl = pageControl ?? projectPageControl;
+  const adjacent = adjacentItems(siteSections, currentItemHref);
 
   return (
     <>
-      <FullNav pageControl={visiblePageControl}>
+      <FullNav
+        breadcrumb={
+          <BreadcrumbControlV2
+            ariaLabel="Portfolio breadcrumb navigation"
+            className="order-last w-full justify-center md:col-span-12 md:col-start-1 md:row-start-2 xl:order-none xl:col-span-4 xl:col-start-5 xl:row-start-1"
+            currentItemHref={currentItemHref}
+            currentSectionId={active === "journal" ? "journal" : "work"}
+            nextHref={adjacent?.nextHref}
+            previousHref={adjacent?.previousHref}
+            sections={siteSections}
+          />
+        }
+      >
         {navItems.map((item) => (
           <NavButton
             active={active === item.key}

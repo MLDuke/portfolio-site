@@ -13,7 +13,7 @@ test("home page renders portfolio navigation and project links", async ({
   await page.goto("/");
 
   await expect(page).toHaveTitle(/Matthew Duke Design/);
-  await expect(page.getByRole("link", { name: "Projects" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Work" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Journal" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Information" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Project Name" }).first()).toBeVisible();
@@ -70,7 +70,7 @@ test.describe("portfolio page shell", () => {
       // vacuously.
       const label = page
         .getByRole("navigation", { name: "Primary navigation" })
-        .getByRole("link", { name: "Projects" });
+        .getByRole("link", { name: "Work" });
       const restingSize = await fontSizeOf(label);
 
       await page.addStyleTag({
@@ -114,7 +114,7 @@ test.describe("portfolio page shell", () => {
 
   test("primary navigation exposes the active route", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("link", { name: "Projects" })).toHaveAttribute(
+    await expect(page.getByRole("link", { name: "Work" })).toHaveAttribute(
       "aria-current",
       "page",
     );
@@ -134,19 +134,18 @@ test.describe("portfolio page shell", () => {
     });
   }
 
-  test("project breadcrumb control follows the desktop breakpoint", async ({
+  test("project breadcrumb control stays present at every breakpoint", async ({
     page,
   }) => {
     await page.setViewportSize({ height: 844, width: 390 });
     await page.goto("/projects/project-name");
-    await expect(
-      page.getByRole("navigation", { name: "Project navigation" }),
-    ).toBeHidden();
+    const breadcrumb = page.getByRole("navigation", {
+      name: "Portfolio breadcrumb navigation",
+    });
+    await expect(breadcrumb).toBeVisible();
 
     await page.setViewportSize({ height: 1024, width: 768 });
-    await expect(
-      page.getByRole("navigation", { name: "Project navigation" }),
-    ).toBeVisible();
+    await expect(breadcrumb).toBeVisible();
   });
 
   test("project breadcrumb control is centered in the header grid", async ({
@@ -158,7 +157,7 @@ test.describe("portfolio page shell", () => {
     const centers = await page.evaluate(() => {
       const header = document.querySelector("header");
       const breadcrumb = document.querySelector(
-        'header nav[aria-label="Project navigation"]',
+        'header nav[aria-label="Portfolio breadcrumb navigation"]',
       );
 
       if (!header || !breadcrumb) {

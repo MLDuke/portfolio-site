@@ -1,6 +1,4 @@
 import type { ReactNode } from "react";
-import type { PageControlConfig } from "../data/pageControl";
-import { BreadcrumbLevelItem } from "./BreadcrumbLevelItem";
 import type { InteractionState } from "./interactionState";
 import { SiteLink } from "./SiteLink";
 
@@ -107,25 +105,20 @@ export function IconButton({
   );
 }
 
-export type {
-  BreadcrumbLevel,
-  BreadcrumbOption,
-  PageControlConfig,
-} from "../data/pageControl";
-
 type FullNavProps = {
   brandHref?: string;
   brandLabel?: string;
+  /** The breadcrumb to seat in the centre column. Omitted on pages without one. */
+  breadcrumb?: ReactNode;
   children: ReactNode;
-  pageControl?: PageControlConfig | null;
   primaryNavAriaLabel?: string;
 };
 
 export function FullNav({
   brandHref = "/",
   brandLabel = "M.D.",
+  breadcrumb,
   children,
-  pageControl,
   primaryNavAriaLabel = "Primary navigation",
 }: FullNavProps) {
   return (
@@ -143,14 +136,7 @@ export function FullNav({
         {brandLabel}
       </SiteLink>
 
-      {pageControl ? (
-        <BreadcrumbControl
-          ariaLabel={pageControl.ariaLabel}
-          levels={pageControl.levels}
-          nextHref={pageControl.nextHref}
-          previousHref={pageControl.previousHref}
-        />
-      ) : (
+      {breadcrumb ?? (
         <div className="hidden xl:col-span-4 xl:col-start-5 xl:row-start-1 xl:block" />
       )}
 
@@ -163,43 +149,5 @@ export function FullNav({
         <div className="flex flex-wrap items-center gap-2">{children}</div>
       </nav>
     </header>
-  );
-}
-
-export function BreadcrumbControl({
-  ariaLabel,
-  levels,
-  nextHref,
-  previousHref,
-}: PageControlConfig) {
-  return (
-    <nav
-      aria-label={ariaLabel}
-      className="hidden w-full max-w-[448px] min-w-0 items-center justify-center gap-12 justify-self-center font-mono text-label-medium md:col-span-12 md:col-start-1 md:row-start-2 md:flex xl:col-span-4 xl:col-start-5 xl:row-start-1"
-      data-figma-component="Breadcrumb control"
-      data-node-id="36:281"
-    >
-      <IconButton
-        aria-label="Previous item"
-        href={previousHref}
-        icon="←"
-        transitionTypes={["site-page"]}
-      />
-      <div className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-sm">
-        {levels.map((level, index) => (
-          <BreadcrumbLevelItem
-            isCurrent={index === levels.length - 1}
-            key={`${level.href}-${index}`}
-            level={level}
-          />
-        ))}
-      </div>
-      <IconButton
-        aria-label="Next item"
-        href={nextHref}
-        icon="→"
-        transitionTypes={["site-page"]}
-      />
-    </nav>
   );
 }

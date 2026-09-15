@@ -1,7 +1,8 @@
 "use client";
 
-import { aboutLinks } from "../data/portfolio";
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { aboutLinksIn } from "../data/portfolio";
+import { useDismissable } from "./useDismissable";
 
 type AboutModalProps = {
   onClose: () => void;
@@ -15,8 +16,10 @@ export function AboutModal({ onClose }: AboutModalProps) {
   const previousActiveElementRef = useRef<HTMLElement | null>(null);
   const titleId = useId();
 
-  const close = () => {
-    if (isClosing) {
+  // Guarded by a ref rather than the isClosing state so the timer is scheduled
+  // exactly once: a state updater can run twice under StrictMode.
+  const close = useCallback(() => {
+    if (closeTimeoutRef.current) {
       return;
     }
 
@@ -25,8 +28,9 @@ export function AboutModal({ onClose }: AboutModalProps) {
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
+
     closeTimeoutRef.current = setTimeout(onClose, reduceMotion ? 0 : 150);
-  };
+  }, [onClose]);
 
   useEffect(() => {
     previousActiveElementRef.current =
@@ -45,13 +49,12 @@ export function AboutModal({ onClose }: AboutModalProps) {
     };
   }, []);
 
+  // The dialog is `fixed inset-0`, so "outside" is never reachable — this is
+  // the Escape half of the contract, shared with the breadcrumb panels.
+  useDismissable({ containerRef: dialogRef, isOpen: true, onDismiss: close });
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        close();
-        return;
-      }
-
       if (event.key !== "Tab" || !dialogRef.current) {
         return;
       }
@@ -133,7 +136,7 @@ export function AboutModal({ onClose }: AboutModalProps) {
 
         <p>Connect</p>
         <div className="grid gap-16 text-[#d9dfe7]">
-          {aboutLinks.slice(0, 2).map((link) => (
+          {aboutLinksIn("connect").map((link) => (
             <a
               className="focus-ring rounded-sm underline underline-offset-2"
               href={link.href}
@@ -148,7 +151,7 @@ export function AboutModal({ onClose }: AboutModalProps) {
 
         <p>Contact</p>
         <div className="grid gap-16 text-[#d9dfe7]">
-          {aboutLinks.slice(2).map((link) => (
+          {aboutLinksIn("contact").map((link) => (
             <a
               className="focus-ring rounded-sm underline underline-offset-2"
               href={link.href}

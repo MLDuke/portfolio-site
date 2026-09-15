@@ -11,7 +11,6 @@
  * so a fresh checkout can never deploy entries whose images 404.
  */
 import {
-  existsSync,
   mkdtempSync,
   readdirSync,
   rmSync,
@@ -25,7 +24,7 @@ import { fileURLToPath } from "node:url";
 import {
   buildEntries,
   copyEntryMedia,
-  missingGeneratedMedia,
+  resolveJournalBuild,
   writeGeneratedFile,
 } from "./journal-contract.mjs";
 
@@ -48,8 +47,20 @@ async function main() {
   const workDir = mkdtempSync(path.join(tmpdir(), "portfolio-journal-"));
 
   try {
-    const sourceRoot = await fetchSource(workDir);
-    const entries = buildEntries(sourceRoot, {
+    const outcome = resolveJournalBuild({
+      generatedFile: GENERATED_FILE,
+      root: ROOT,
+      ...(await loadSource(workDir)),
+    });
+
+    if (outcome.action === "keep") {
+      console.warn(
+        `${outcome.reason}; keeping existing ${path.relative(ROOT, GENERATED_FILE)}`,
+      );
+      return;
+    }
+
+    const entries = buildEntries(outcome.sourceRoot, {
       sourceBlobBase: SOURCE_BLOB_BASE,
     });
 
@@ -63,28 +74,21 @@ async function main() {
       sourceBlobBase: SOURCE_BLOB_BASE,
     });
     console.log(`journal.generated.ts written - ${entries.length} entries`);
+  } finally {
+    rmSync(workDir, { force: true, recursive: true });
+  }
+}
+
+/** Reachability is an I/O concern; what to do about it is not. */
+async function loadSource(workDir) {
+  try {
+    return { sourceRoot: await fetchSource(workDir) };
   } catch (error) {
-    if (error instanceof SourceUnavailableError && existsSync(GENERATED_FILE)) {
-      const missing = missingGeneratedMedia({
-        generatedFile: GENERATED_FILE,
-        root: ROOT,
-      });
-
-      if (missing.length > 0) {
-        throw new Error(
-          `${error.message}; cannot keep the existing journal data because its media is missing: ${missing.join(", ")}`,
-        );
-      }
-
-      console.warn(
-        `${error.message}; keeping existing ${path.relative(ROOT, GENERATED_FILE)}`,
-      );
-      return;
+    if (error instanceof SourceUnavailableError) {
+      return { unavailableReason: error.message };
     }
 
     throw error;
-  } finally {
-    rmSync(workDir, { force: true, recursive: true });
   }
 }
 
