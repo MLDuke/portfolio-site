@@ -2,7 +2,7 @@
 
 ### Issue tracker
 
-Issues and specs for this repo live in GitHub Issues and use the `gh` CLI. See `docs/agents/issue-tracker.md`.
+Issues and specs for this repo live in Linear (team `Mduke`, label `portfolio-site`) and use the Linear MCP tools. See `docs/agents/issue-tracker.md`.
 
 ### Domain docs
 
