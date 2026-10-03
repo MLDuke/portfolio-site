@@ -2,19 +2,19 @@
 /**
  * Emit CSS custom properties from the GTC token set.
  *
- * Reads global/ and theme/ (DTCG JSON), writes tokens.css. globals.css @imports
- * that file, so the token JSON is the single source of truth for colour,
- * spacing, radius, typography, motion and elevation primitives.
+ * Reads tokens/global and tokens/theme (DTCG JSON), writes dist/tokens.css.
+ * Consumers @import that file, so the token JSON is the single source of truth
+ * for colour, spacing, radius, typography, motion and elevation primitives.
  */
 import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { compileTokenCss } from "./compiler.mjs";
 
-const ROOT = dirname(fileURLToPath(import.meta.url));
-const result = compileTokenCss(ROOT);
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const result = compileTokenCss(join(ROOT, "tokens"));
 
-writeFileSync(join(ROOT, "tokens.css"), result.css);
+writeFileSync(join(ROOT, "dist", "tokens.css"), result.css);
 console.log(
-  `tokens.css written — ${result.globalCount} global, ${result.themeCount} theme tokens`,
+  `dist/tokens.css written — ${result.globalCount} global, ${result.themeCount} theme tokens`,
 );

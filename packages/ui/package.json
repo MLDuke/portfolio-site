@@ -1,0 +1,17 @@
+{
+  "name": "@mlduke/ui",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "files": ["dist", "tokens"],
+  "exports": {
+    "./tokens.css": "./dist/tokens.css",
+    "./tokens/*": "./tokens/*"
+  },
+  "sideEffects": ["*.css"],
+  "scripts": {
+    "build": "node scripts/build-css.mjs",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
