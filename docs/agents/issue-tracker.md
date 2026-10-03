@@ -1,45 +1,49 @@
-# Issue tracker: GitHub
+# Issue tracker: Linear
 
-Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all operations.
+Issues and specs for this repo live in **Linear** (workspace `mduke`, team `Mduke`, issue keys `MDU-<n>`), not GitHub Issues. Use the Linear MCP tools (`mcp__linear__*`). Don't use `gh issue` — the old GitHub issues are closed and only kept for history.
+
+One Linear workspace and team covers several repos, so **always scope to this repo with the `portfolio-site` label** (in the `repo` label group) when you list issues, and always apply it when you create one.
 
 ## Conventions
 
-- **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line bodies.
-- **Read an issue**: `gh issue view <number> --comments`, filtering comments by `jq` and also fetching labels.
-- **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` with appropriate `--label` and `--state` filters.
-- **Comment on an issue**: `gh issue comment <number> --body "..."`
-- **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
-- **Close**: `gh issue close <number> --comment "..."`
+- **Create an issue**: `save_issue` with `team: "Mduke"`, `title`, `description` (markdown, real newlines), `labels: ["portfolio-site", ...]`, and `project` when one applies. Type labels: `Feature`, `Bug`, `Improvement`, `Chore`.
+- **Read an issue**: `get_issue` with `id: "MDU-<n>"` and `includeRelations: true`, plus `list_comments` for the discussion.
+- **List issues**: `list_issues` with `team: "Mduke"`, `label: "portfolio-site"`, and `state` / `project` / `parentId` filters as needed.
+- **Comment on an issue**: `save_comment` on the issue.
+- **Apply / remove labels**: `save_issue` with `id` plus `addLabels` / `removeLabels`. Don't pass `labels` unless you mean to replace the whole set.
+- **Close**: `save_issue` with `state: "Done"` (or `"Canceled"`), after a `save_comment` explaining the outcome.
 
-Infer the repo from `git remote -v` - `gh` does this automatically when run inside a clone.
+## Labels and statuses
+
+- `ready-for-agent`: fully specced, so you can pick it up unattended.
+- `needs-human`: manual work like dashboards, secrets or decisions. Never attempt these; surface them to the user.
+- Statuses: `Backlog` (idea, not yet specced), `Todo` (specced and ready), `In Progress` (a Conductor workspace or branch exists), `In Review` (PR open), `Done` (merged), `Canceled`, `Duplicate`.
+
+## Branches and PRs
+
+Each issue gets one Conductor workspace, one branch and one PR. Put the lowercase issue key in the branch name (`mdu-12-short-slug`, or the `gitBranchName` that `get_issue` returns). Also put `MDU-12` in the PR title or body. Linear's GitHub integration then links the PR and moves the issue to In Review when the PR opens and to Done when it merges. Don't set those two statuses by hand. When you start work, set the issue to `In Progress` yourself.
 
 ## Pull requests as a triage surface
 
 **PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `/triage` reads this flag.)_
 
-When set to `yes`, PRs run through the same labels and states as issues, using the `gh pr` equivalents:
-
-- **Read a PR**: `gh pr view <number> --comments` and `gh pr diff <number>` for the diff.
-- **List external PRs for triage**: `gh pr list --state open --json number,title,body,labels,author,authorAssociation,comments` then keep only `authorAssociation` of `CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, or `NONE` (drop `OWNER`/`MEMBER`/`COLLABORATOR`).
-- **Comment / label / close**: `gh pr comment`, `gh pr edit --add-label`/`--remove-label`, `gh pr close`.
-
-GitHub shares one number space across issues and PRs, so a bare `#42` may be either - resolve with `gh pr view 42` and fall back to `gh issue view 42`.
+When set to `yes`, read PRs with `gh pr view` / `gh pr diff`, and file any accepted request as a Linear issue (labelled `portfolio-site`) that links the PR.
 
 ## When a skill says "publish to the issue tracker"
 
-Create a GitHub issue.
+Create a Linear issue as described above.
 
 ## When a skill says "fetch the relevant ticket"
 
-Run `gh issue view <number> --comments`.
+Run `get_issue` with the `MDU-<n>` key (and `includeRelations: true`), then `list_comments`.
 
 ## Wayfinding operations
 
-Used by `/wayfinder`. The **map** is a single issue with **child** issues as tickets.
+Used by `/wayfinder`. The **map** is a single issue, and its **child** issues are the tickets.
 
-- **Map**: a single issue labelled `wayfinder:map`, holding the Notes / Decisions-so-far / Fog body. `gh issue create --label wayfinder:map`.
-- **Child ticket**: an issue linked to the map as a GitHub sub-issue (`gh api` on the sub-issues endpoint). Where sub-issues aren't enabled, add the child to a task list in the map body and put `Part of #<map>` at the top of the child body. Labels: `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Once claimed, the ticket is assigned to the driving dev.
-- **Blocking**: GitHub's **native issue dependencies** - the canonical, UI-visible representation. Add an edge with `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`, where `<blocker-db-id>` is the blocker's numeric **database id** (`gh api repos/<owner>/<repo>/issues/<n> --jq .id`, _not_ the `#number` or `node_id`). GitHub reports `issue_dependencies_summary.blocked_by` (open blockers only - the live gate). Where dependencies aren't available, fall back to a `Blocked by: #<n>, #<n>` line at the top of the child body. A ticket is unblocked when every blocker is closed.
-- **Frontier query**: list the map's open children (`gh issue list --state open`, scoped to the map's sub-issues / task list), drop any with an open blocker (`issue_dependencies_summary.blocked_by > 0`, or an open issue in the `Blocked by` line) or an assignee; first in map order wins.
-- **Claim**: `gh issue edit <n> --add-assignee @me` - the session's first write.
-- **Resolve**: `gh issue comment <n> --body "<answer>"`, then `gh issue close <n>`, then append a context pointer (gist + link) to the map's Decisions-so-far.
+- **Map**: a Linear issue labelled `wayfinder:map` (plus `portfolio-site`), holding the Notes / Decisions-so-far / Fog body. Put it in the relevant Linear project if there is one.
+- **Child ticket**: a sub-issue of the map (`save_issue` with `parentId: "<map key>"`), labelled `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`) plus `portfolio-site`. If a `wayfinder:*` label doesn't exist yet, create it with `save_issue_label` (workspace-level). Once claimed, the ticket is assigned to the driving dev.
+- **Blocking**: Linear's native **blocked-by** relation (`save_issue` with `blockedBy: ["MDU-<n>"]`). Read it back with `get_issue` and `includeRelations: true`. A ticket is unblocked when every blocker is `Done` or `Canceled`.
+- **Frontier query**: `list_issues` with `parentId: "<map key>"` and an unstarted `state`, then drop any ticket that has an open blocker or an assignee. The first remaining ticket in map order wins.
+- **Claim**: `save_issue` with `assignee: "me"` and `state: "In Progress"`. This is the session's first write.
+- **Resolve**: `save_comment` with the answer, then `save_issue` with `state: "Done"`, then append a context pointer (gist + link) to the map's Decisions-so-far using `save_issue` with `patch`.
