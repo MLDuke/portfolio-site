@@ -4,10 +4,9 @@
   "private": true,
   "scripts": {
     "setup": "sh scripts/setup.sh",
-    "tokens": "node app/tokens/build-css.mjs",
     "journal": "node scripts/build-journal.mjs",
     "dev": "next dev",
-    "prebuild": "npm run tokens && npm run journal",
+    "prebuild": "npm run journal",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -18,6 +17,7 @@
     "playwright:install": "playwright install"
   },
   "dependencies": {
+    "@mlduke/ui": "github:MLDuke/ui#v0.1.0",
     "gray-matter": "^4.0.3",
     "next": "^16.3.0",
     "react": "^19.2.7",
