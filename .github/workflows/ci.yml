@@ -1,0 +1,75 @@
+name: CI
+
+# Every job runs on every pull request, with no path filters: the repo is small,
+# and a change to packages/ui has to be checked against both apps.
+on:
+  pull_request:
+  push:
+    branches: [main, monorepo]
+  workflow_dispatch:
+
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Test
+        run: npm test -w packages/ui
+
+      - name: dist/tokens.css is up to date
+        run: npm run build -w packages/ui && git diff --exit-code packages/ui/dist/
+
+  sketchbook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # Entry structure, the sketch contract, and media weight.
+      - name: Validate entries
+        run: npm run validate -w apps/sketchbook
+
+      # Covers playground/src and every entries/*/src, then vite.config.ts and
+      # the *.test.ts files separately — see playground/tsconfig*.json.
+      - name: Typecheck
+        run: npm run typecheck -w apps/sketchbook
+
+      # node:test over scripts/**/*.test.mjs and entries/*/src/**/*.test.ts.
+      - name: Test
+        run: npm test -w apps/sketchbook
+
+  portfolio:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint -w apps/portfolio
+
+      - name: Unit tests
+        run: npm run test:unit -w apps/portfolio
+
+      # `prebuild` runs `npm run journal` first.
+      - name: Build
+        run: npm run build -w apps/portfolio
