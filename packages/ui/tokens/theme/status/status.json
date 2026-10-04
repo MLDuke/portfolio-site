@@ -1,0 +1,40 @@
+{
+  "theme": {
+    "status": {
+      "warning": {
+        "base": {
+          "$type": "color",
+          "$value": "{global.color.amber.2}",
+          "$extensions": { "mode": { "light": "{global.color.amber.2}", "dark": "{global.color.amber.2}" } }
+        },
+        "on": {
+          "$type": "color",
+          "$value": "{global.color.neutral.10}",
+          "$extensions": { "mode": { "light": "{global.color.neutral.10}", "dark": "{global.color.neutral.10}" } }
+        },
+        "border": {
+          "$type": "color",
+          "$value": "{global.color.amber.5}",
+          "$extensions": { "mode": { "light": "{global.color.amber.5}", "dark": "{global.color.amber.4}" } }
+        }
+      },
+      "error": {
+        "base": {
+          "$type": "color",
+          "$value": "{global.color.red.5}",
+          "$extensions": { "mode": { "light": "{global.color.red.5}", "dark": "{global.color.red.5}" } }
+        },
+        "on": {
+          "$type": "color",
+          "$value": "{global.color.neutral.0}",
+          "$extensions": { "mode": { "light": "{global.color.neutral.0}", "dark": "{global.color.neutral.0}" } }
+        },
+        "border": {
+          "$type": "color",
+          "$value": "{global.color.red.5}",
+          "$extensions": { "mode": { "light": "{global.color.red.5}", "dark": "{global.color.red.4}" } }
+        }
+      }
+    }
+  }
+}
