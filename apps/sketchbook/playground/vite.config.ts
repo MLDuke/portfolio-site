@@ -27,10 +27,11 @@ export default defineConfig(({ command, mode }) => {
     },
 
     server: {
-      // Conductor allocates a stable port per local workspace; fall back to
-      // Vite's default when run outside Conductor.
-      port: Number(process.env.CONDUCTOR_PORT) || 5173,
-      strictPort: Boolean(process.env.CONDUCTOR_PORT),
+      // Conductor gives each local workspace ten ports and the portfolio dev
+      // server takes the first, so the run script passes this one in
+      // $SKETCHBOOK_PORT. Fall back to Vite's default when it is unset.
+      port: Number(process.env.SKETCHBOOK_PORT) || 5173,
+      strictPort: Boolean(process.env.SKETCHBOOK_PORT),
       fs: { allow: [repoRoot] },
     },
 

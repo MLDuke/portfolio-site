@@ -9,7 +9,7 @@ what must not be removed.
 - Files are `NNNN-kebab-title.md`, numbered in the order they were decided, and
   dated by the commit that introduced the decision.
 - Don't rewrite an accepted ADR when the decision changes. Add a new one, and set
-  the old one's status to `Superseded by NNNN`. Fix typos and broken links in place.
+  the old one's status to `Superseded by NNNN`. Fix typos and broken links in place. 0001 and 0006 were also amended in place when Sketchbook joined the monorepo, and say so in their status lines.
 - Format: `Status`, then Context, Decision, Consequences.
 
 | # | Title | Status |
@@ -19,7 +19,7 @@ what must not be removed.
 | [0003](0003-vite-fs-allow-repo-root.md) | Vite serves from the repo root (`server.fs.allow`) | Accepted |
 | [0004](0004-build-time-overlay-defines.md) | Dev overlays are toggled by build-time `define` booleans | Accepted |
 | [0005](0005-vercel-framework-null.md) | `vercel.json` sets `framework: null` | Accepted |
-| [0006](0006-conductor-port-from-env.md) | `CONDUCTOR_PORT` drives the dev port; Conductor passes only `--host` | Accepted |
+| [0006](0006-conductor-port-from-env.md) | `SKETCHBOOK_PORT` drives the dev port; Conductor passes only `--host` | Accepted |
 | [0007](0007-separate-tsconfigs.md) | Separate tsconfigs for browser, node and test code | Accepted |
 | [0008](0008-new-entry-two-input-paths.md) | `new-entry.mjs` keeps both input paths | Accepted |
 | [0009](0009-node-test-over-vitest.md) | `node:test` instead of Vitest | Accepted |
