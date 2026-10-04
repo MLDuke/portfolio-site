@@ -8,6 +8,7 @@ import type {
   DetailBlock,
   DetailFigureConfig,
   Media,
+  SourceFile,
 } from "../data/detailContent";
 
 type DetailArticleProps = {
@@ -174,24 +175,58 @@ export function DetailTextBlock({ body }: { body: string }) {
   );
 }
 
-export function DetailSourceLink({
-  href,
-  label,
+/**
+ * A code sketch's source, shown on the page instead of linked to GitHub: the
+ * README as Markdown, then each file as a native disclosure. `<details>` gives
+ * keyboard toggling (Enter and Space) and the open state for free; the summary
+ * takes the shared state layer and focus ring. No syntax highlighting.
+ */
+export function DetailSource({
+  files,
+  headingLevel,
+  readme,
 }: {
-  href: string;
-  label: string;
+  files: SourceFile[];
+  headingLevel: DetailHeadingLevel;
+  readme: string;
 }) {
+  const sourceLevel = headingLevelNumber(headingLevel) + 1;
+
   return (
-    <p className="font-mono text-label-medium text-on-surface-secondary">
-      <a
-        className="underline decoration-current/40 underline-offset-4 hover:decoration-current focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-border-focus)]"
-        href={href}
-        rel="noreferrer"
-        target="_blank"
+    <section
+      aria-labelledby="source-heading"
+      className="grid min-w-0 grid-cols-1 gap-16"
+      data-testid="journal-source"
+    >
+      <LevelHeading
+        className="text-body-medium text-on-surface-secondary"
+        id="source-heading"
+        level={sourceLevel}
       >
-        {label}
-      </a>
-    </p>
+        Source
+      </LevelHeading>
+      <MarkdownContent
+        body={readme}
+        components={readmeComponents(sourceLevel)}
+      />
+      {files.length > 0 ? (
+        <div className="grid grid-cols-1 gap-8">
+          {files.map((file) => (
+            <details
+              className="rounded-[6px] bg-surface-raised"
+              key={file.path}
+            >
+              <summary className="state-layer list-inside rounded-[6px] px-12 py-8 font-mono text-label-medium text-on-surface-primary">
+                {file.path}
+              </summary>
+              <pre className="overflow-x-auto px-12 pb-12 pt-4 font-mono text-label-medium text-on-surface-primary">
+                <code>{file.contents}</code>
+              </pre>
+            </details>
+          ))}
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -235,12 +270,13 @@ export function DetailBlockRenderer({
                 priority={index === priorityMediaIndex}
               />
             );
-          case "sourceLink":
+          case "source":
             return (
-              <DetailSourceLink
-                href={block.href}
+              <DetailSource
+                files={block.files}
+                headingLevel={headingLevel}
                 key={`${block.type}-${index}`}
-                label={block.label}
+                readme={block.readme}
               />
             );
           case "text":
@@ -302,10 +338,72 @@ function DetailMediaFrame({
   );
 }
 
-function MarkdownContent({ body }: { body: string }) {
+const headingTags = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
+
+/** A heading for a 1-based level, capped at h6. */
+function LevelHeading({
+  children,
+  className,
+  id,
+  level,
+}: {
+  children?: ReactNode;
+  className?: string;
+  id?: string;
+  level: number;
+}) {
+  const Tag = headingTags[Math.min(level, headingTags.length) - 1];
+
+  return (
+    <Tag className={className} id={id}>
+      {children}
+    </Tag>
+  );
+}
+
+function headingLevelNumber(level: DetailHeadingLevel) {
+  return Number(level.slice(1));
+}
+
+/**
+ * A README is written as its own document, so its `# Title` would become a
+ * second h1 on the page. Nest its headings under the "Source" heading instead,
+ * one level per README level, capped at h6.
+ */
+function readmeComponents(sourceLevel: number): Components {
+  const nested = (readmeLevel: number) =>
+    function ReadmeHeading({ children }: { children?: ReactNode }) {
+      return (
+        <LevelHeading
+          className="text-body-medium"
+          level={sourceLevel + readmeLevel}
+        >
+          {children}
+        </LevelHeading>
+      );
+    };
+
+  return {
+    ...markdownComponents,
+    h1: nested(1),
+    h2: nested(2),
+    h3: nested(3),
+    h4: nested(4),
+    h5: nested(5),
+    h6: nested(6),
+  };
+}
+
+function MarkdownContent({
+  body,
+  components = markdownComponents,
+}: {
+  body: string;
+  components?: Components;
+}) {
   return (
     <div className="grid gap-4 text-body-small text-on-surface-secondary">
-      <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+      <ReactMarkdown components={components} remarkPlugins={[remarkGfm]}>
         {body}
       </ReactMarkdown>
     </div>
