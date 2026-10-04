@@ -1,6 +1,6 @@
 # sketchbook
 
-Raw lab notebook for design and code explorations — static images, GIFs, small UI code snippets. This repo is the source of truth for everything; [portfolio-site](https://github.com/MLDuke/portfolio-site)'s `/journal` section pulls in only the entries marked `publish: true`.
+Raw lab notebook for design and code explorations — static images, GIFs, small UI code snippets. It lives in `apps/sketchbook` of the [portfolio-site](https://github.com/MLDuke/portfolio-site) monorepo and is the source of truth for every entry; the portfolio's `/journal` section is built from `entries/` in the same checkout and includes only the entries marked `publish: true`. Run the commands below from this folder, or from the repo root with `-w apps/sketchbook`.
 
 Adding an entry: [`docs/authoring-sketches.md`](docs/authoring-sketches.md) is
 the full guide — conventions, dependency policy, and an index of the invariants
@@ -85,12 +85,12 @@ state: media weight and extensions, the folder name, and the sketch contract —
 `src/index.*` that exists must have a default export. `npm run typecheck` covers `playground/src` and every
 `entries/*/src` under `strict`.
 
-Both run in CI on every pull request (`.github/workflows/ci.yml`), and `validate`
-runs again ahead of the deploy hook, so a half-filled entry blocks the rebuild
-rather than shipping a blank figure — or crashing `portfolio-site`'s build, which
-throws on media that has a `src` but no `alt`.
+Both run in CI on every pull request (the root `.github/workflows/ci.yml`), so a
+half-filled entry is caught before the merge that would publish it, rather than
+shipping a blank figure — or crashing `portfolio-site`'s build, which throws on
+media that has a `src` but no `alt`.
 
-Everything defaults to unpublished — most entries can just stay private-by-convention in this public repo. Publishing is a one-line, one-push action; nothing else needs to change in `portfolio-site` for it to show up (see `.github/workflows/deploy-portfolio.yml`, which needs a `VERCEL_DEPLOY_HOOK_URL` secret set once `portfolio-site` has one).
+Everything defaults to unpublished — most entries can just stay private-by-convention in this public repo. Publishing is a one-line, one-push action: a push to `main` rebuilds the portfolio directly, and nothing else needs to change in `apps/portfolio` for the entry to show up.
 
 ## Playground
 
@@ -116,8 +116,8 @@ a lazy chunk: the dev server only compiles the one you open, and startup stays
 flat as the collection grows. Sketches can call `useDialKit` directly.
 
 If a sketch genuinely needs its own dependency, add a `package.json` in its
-folder and register it under `workspaces` in the root `package.json` — the
-playground picks it up the same way.
+folder and register it under `workspaces` in the root `package.json`
+(`apps/sketchbook/entries/<entry>`) — the playground picks it up the same way.
 
 ### Dev overlays
 
@@ -132,8 +132,8 @@ all — unless re-enabled per build:
 | `ENABLE_AGENTATION=true` | ship the annotation toolbar in the build |
 
 Set them independently as Vercel project env vars, or inline for a local build
-(`ENABLE_AGENTATION=true npm run build:playground`). A gitignored repo-root
-`.env` is also read — see `.env.example`.
+(`ENABLE_AGENTATION=true npm run build:playground`). A gitignored `.env` in
+`apps/sketchbook` is also read — see `.env.example`.
 
 Note: a sketch that imports `useDialKit` still bundles the dialkit *runtime* into
 its own chunk regardless of the toggle — the toggle only controls the panel UI.

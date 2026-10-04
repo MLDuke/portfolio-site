@@ -2,7 +2,7 @@
 
 Issues and specs for this repo live in **Linear** (workspace `mduke`, team `Mduke`, issue keys `MDU-<n>`), not GitHub Issues. Use the Linear MCP tools (`mcp__linear__*`). Don't use `gh issue` — the old GitHub issues are closed and only kept for history.
 
-One Linear workspace and team covers several repos, so **always scope to this repo with the `portfolio-site` label** (in the `repo` label group) when you list issues, and always apply it when you create one.
+One Linear workspace and team covers several repos, so **always scope to this repo with the `portfolio-site` label** (in the `repo` label group) when you list issues, and always apply it when you create one. The repo is a monorepo, so the label covers `apps/portfolio`, `apps/sketchbook` and `packages/ui` alike. The old `sketchbook` label is retired: don't apply it. Name the app or package in the title or description instead.
 
 ## Conventions
 
