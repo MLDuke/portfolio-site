@@ -18,5 +18,5 @@ yarn-error.log*
 pnpm-debug.log*
 
 .DS_Store
-.codex/config.toml
-.conductor/settings.local.toml
+**/.codex/config.toml
+**/.conductor/settings.local.toml
