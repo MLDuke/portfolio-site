@@ -1,0 +1,21 @@
+{
+  "name": "portfolio-site-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev:portfolio": "npm run dev -w apps/portfolio",
+    "dev:sketchbook": "npm run dev -w apps/sketchbook",
+    "build:portfolio": "npm run build -w apps/portfolio",
+    "build:sketchbook": "npm run build:playground -w apps/sketchbook",
+    "test": "npm run test:unit -w apps/portfolio && npm test -w apps/sketchbook && npm test -w packages/ui"
+  },
+  "allowScripts": {
+    "unrs-resolver@1.12.2": true
+  }
+}
