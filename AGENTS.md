@@ -8,6 +8,10 @@ Issues and specs for this repo live in Linear (team `Mduke`, label `portfolio-si
 
 This is a single-context repo: read `CONTEXT.md` at the repo root and relevant ADRs under `docs/adr/` when they exist. See `docs/agents/domain.md`.
 
+## Design tokens
+
+The GTC token set (colour, spacing, type, motion, the interaction contract) lives in the public [`MLDuke/ui`](https://github.com/MLDuke/ui) repo as `@mlduke/ui`, a git-tag dependency. `app/globals.css` imports `@mlduke/ui/tokens.css`. Its `@theme` block, the `--text-*--font-weight-emphasized` aliases and the `.sandbox-theme` `--color-*` re-pointing are this repo's Tailwind bridge, and they stay here. To change a token, edit it in `MLDuke/ui`, tag a release, then bump the tag in `package.json`.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
-/* Design tokens — generated from app/tokens (GTC token set).
-   Regenerate with: node app/tokens/build-css.mjs
+/* Design tokens — the GTC token set from @mlduke/ui (github.com/MLDuke/ui).
+   Token edits happen there; pick them up by bumping the tag in package.json.
 
    Imported into `base` rather than unlayered: the interaction tokens below
    (--state-layer-*, --focus-ring-color) are re-pointed by the accent-surface /
    modal-surface utilities, and an unlayered :root declaration would outrank
    every layered rule, including those. */
-@import "./tokens/tokens.css" layer(base);
+@import "@mlduke/ui/tokens.css" layer(base);
 
 @theme {
   --font-sans: var(--typography-font-family-sans);
@@ -15,7 +15,7 @@
 
   /* 1 spacing unit = 1/16rem, i.e. 1px at the default root size but scaling with
      the user's font-size preference. Tailwind p-* / m-* / gap-* / size-* resolve
-     against this; scale steps live in app/tokens/global/size-unit. */
+     against this; scale steps live in @mlduke/ui tokens/global/size-unit. */
   --spacing: var(--size-unit-1);
 
   --radius-none: var(--radius-0);
@@ -43,7 +43,7 @@
   --color-accent-b-base: var(--accent-b-base);
   --color-accent-b-on-accent: var(--accent-b-on-accent);
 
-  /* Text styles — sizes / line-heights / weights from app/tokens/global/typography */
+  /* Text styles — sizes / line-heights / weights from @mlduke/ui tokens/global/typography */
   --text-display-large: var(--typography-font-size-display-large);
   --text-display-large--line-height: var(--typography-line-height-display-large);
   --text-display-large--letter-spacing: 0;
@@ -102,7 +102,7 @@
     /* Every primitive and semantic token — colour, spacing, radius, typography,
        motion, elevation, and the interaction contract (--interaction-*,
        --state-layer-*, --focus-ring-*, --content-disabled) — is generated into
-       tokens.css from app/tokens. See the @import at the top of this file.
+       tokens.css by @mlduke/ui. See the @import at the top of this file.
 
        These weight aliases stay here because Tailwind's --text-<size>--<prop>
        shape is not a token path the build can emit. */
@@ -128,8 +128,8 @@
   /* Tailwind substitutes the --color-* aliases where they are declared, which
      is :root, so descendants inherit the resolved value rather than re-reading
      the semantic tokens. A nested theme scope therefore has to re-point them at
-     its own tokens. The tokens themselves come from tokens.css, which already
-     declares both sandbox scopes. */
+     its own tokens. The tokens themselves come from tokens.css, which declares
+     them on any [data-theme] element. */
   .sandbox-theme[data-theme] {
     --color-surface-base: var(--surface-base);
     --color-surface-raised: var(--surface-raised);
