@@ -1,10 +1,14 @@
 # @mlduke/ui
 
-Shared UI for MLDuke's projects. v0.1 is the design tokens: the source of truth
+Shared UI for MLDuke's projects. So far it's the design tokens, the source of truth
 for visual primitives, as a [GTC](https://buninux.com/design-tokens) token set
-(Global / Theme / Component) in DTCG JSON, compiled to CSS custom properties.
+(Global / Theme / Component) in DTCG JSON, compiled to CSS custom properties. It
+also ships the IBM Plex fonts the typography tokens name.
 
-The code is public to read, but no licence has been granted, so all rights are reserved.
+The code is public to read, but no licence has been granted, so all rights are
+reserved. The exception is the font files under `fonts/`. IBM Plex is © IBM Corp.
+and licensed under the SIL Open Font License 1.1, whose text is in
+[`fonts/OFL.txt`](fonts/OFL.txt) and travels with the files.
 
 ## Consuming
 
@@ -12,7 +16,7 @@ Install from a git tag. There is no registry release, and the generated CSS is
 committed, so installing doesn't run a build:
 
 ```
-npm i github:MLDuke/ui#v0.1.0
+npm i github:MLDuke/ui#v0.2.0
 ```
 
 Import the tokens once, before any styles that read them:
@@ -31,11 +35,25 @@ on any element to open a nested scope. A `data-theme="light"` element inside a
 dark page flips back. The package doesn't set `color-scheme`; set it alongside
 `data-theme` if you want native controls and scrollbars to follow.
 
-**Fonts.** The package doesn't load fonts. The font-family tokens read
+**Fonts.** The font-family tokens read
 `var(--font-ibm-plex-sans), ui-sans-serif, system-ui, sans-serif` (and
-`--font-ibm-plex-mono` for mono). Set those two variables (for example with
-`next/font` or `@fontsource`) to get IBM Plex, or leave them unset to fall back to
-system fonts.
+`--font-ibm-plex-mono` for mono). The package ships IBM Plex Sans and IBM Plex Mono
+at weights 400, 500, 600 and 700, normal style, latin subset, as woff2. Load them in
+one of two ways:
+
+- Import `@mlduke/ui/fonts.css` alongside `tokens.css`. It declares one
+  `@font-face` per file and sets both variables. Bundlers such as Vite and Next
+  resolve its relative `url()`s and emit the files as hashed assets.
+- Use your own font loader, such as `next/font/local`, pointed at
+  `@mlduke/ui/fonts/*.woff2`, and have it set `--font-ibm-plex-sans` and
+  `--font-ibm-plex-mono`. Don't also import `fonts.css`, or the fonts load twice.
+
+Leave the variables unset to fall back to system fonts. The files are IBM Plex Sans
+1.1.0 and IBM Plex Mono 2.5.0 from IBM's releases at
+[github.com/IBM/plex](https://github.com/IBM/plex), taken from IBM's "Latin1" split
+and renamed (`IBMPlexSans-Regular-Latin1.woff2` → `IBMPlexSans-Regular.woff2`).
+`fonts.css` uses the same `unicode-range` as IBM's split CSS. Characters outside
+it, such as the arrows `←` and `→`, render in the fallback font.
 
 **Versioning.** Semver over the token names, since a token's CSS variable is
 its public API. Removing or renaming a token is a **major** bump. Adding a token
@@ -60,6 +78,8 @@ tokens/
   component/        (not tokenised yet)
 scripts/          compiler.mjs + build-css.mjs
 dist/tokens.css   generated, committed
+fonts/            IBM Plex woff2 files + OFL.txt
+fonts.css         hand-written @font-face rules for fonts/
 ```
 
 All dimensional values are **px** in the JSON — GTC's factual scale keys require
@@ -97,7 +117,8 @@ npm test
 ```
 
 The token compiler test validates the local DTCG shape that `build-css.mjs`
-accepts and checks representative CSS output.
+accepts and checks representative CSS output. The fonts test checks that
+`fonts.css` and `fonts/` list the same files.
 
 ## The interaction contract
 
