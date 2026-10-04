@@ -12,6 +12,8 @@ This is a single-context repo: read `CONTEXT.md` at the repo root and relevant A
 
 The GTC token set (colour, spacing, type, motion, the interaction contract) lives in the public [`MLDuke/ui`](https://github.com/MLDuke/ui) repo as `@mlduke/ui`, a git-tag dependency. `app/globals.css` imports `@mlduke/ui/tokens.css`. Its `@theme` block, the `--text-*--font-weight-emphasized` aliases and the `.sandbox-theme` `--color-*` re-pointing are this repo's Tailwind bridge, and they stay here. To change a token, edit it in `MLDuke/ui`, tag a release, then bump the tag in `package.json`.
 
+The package also ships the IBM Plex woff2 files. `app/layout.tsx` loads them with `next/font/local` from `node_modules/@mlduke/ui/fonts/`, not through the package's `fonts.css`, which would load them twice. If a tag bump adds, removes or renames a font file, update the `src` lists there.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know
