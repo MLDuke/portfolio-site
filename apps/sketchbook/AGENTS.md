@@ -1,7 +1,9 @@
 # AGENTS.md
 
-Lab notebook of design/code sketches. Each sketch is a folder under `entries/`;
-a local Vite app (`playground/`) renders them all.
+Lab notebook of design/code sketches, in `apps/sketchbook` of the monorepo. Each
+sketch is a folder under `entries/`; a local Vite app (`playground/`) renders
+them all. Run the commands below from this folder, or from the repo root with
+`-w apps/sketchbook`. Install only at the repo root (`npm ci`).
 
 Rules first, then the path. Rationale lives in
 [`docs/authoring-sketches.md`](docs/authoring-sketches.md); the frontmatter
@@ -11,8 +13,9 @@ either here — link to them. Domain terms: [`CONTEXT.md`](CONTEXT.md).
 ## Hard rules
 
 - **Never set `publish: true`.** It's the only outward-facing action in the repo:
-  a push to `main` fires a deploy hook that rebuilds the public portfolio site.
-  Publishing is the author's call, always. Ask.
+  a push to `main` rebuilds the public portfolio site directly, with no step
+  between the merge and production. Publishing is the author's call, always.
+  Ask.
 - **Never suggest or configure a public playground deploy without access
   control.** This repo is public and most entries are unpublished drafts; a
   plain deploy exposes every one of them.
@@ -30,7 +33,7 @@ either here — link to them. Domain terms: [`CONTEXT.md`](CONTEXT.md).
 | `npm run validate` | entry structure, sketch contract, media weight |
 | `npm run typecheck` | `playground/src` **and** every `entries/*/src` |
 | `npm test` | `node:test` over `scripts/**/*.test.mjs` and `entries/*/src/**/*.test.ts` |
-| `npm run dev` | playground at `localhost:5173` |
+| `npm run dev` | playground at `localhost:5173` (`$SKETCHBOOK_PORT` overrides) |
 | `npm run build:playground` | static build to `playground/dist/` |
 
 ## Adding a sketch
@@ -68,19 +71,21 @@ export default function Sketch() {
 
 ## Dependencies
 
-`react`, `motion` and `dialkit` are hoisted at the repo root — just import them.
-Beyond that, **ask before installing**: adding to root deps changes every future
-sketch's baseline, and a one-off belongs in a per-entry workspace instead.
+`react`, `motion` and `dialkit` come from this app's `package.json` and are
+hoisted to the root `node_modules` — just import them. Beyond that, **ask before
+installing**: adding to this app's deps changes every future sketch's baseline,
+and a one-off belongs in a per-entry workspace instead.
 
 ## Issue tracker
 
-Issues live in Linear (team `Mduke`, label `sketchbook`), not GitHub Issues —
+Issues live in Linear (team `Mduke`, label `portfolio-site`), not GitHub Issues —
 use the Linear MCP tools. See
-[`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md).
+[`docs/agents/issue-tracker.md`](../../docs/agents/issue-tracker.md) at the repo
+root.
 
 ## Machinery — read before touching
 
-`playground/`, `scripts/`, `vercel.json` and `.github/workflows/` carry
+`playground/`, `scripts/`, `vercel.json` and the root `.github/workflows/` carry
 invariants that aren't obvious from the code, and unwinding one breaks the whole
 collection rather than a single sketch. Each is a decision record in
 [`docs/adr/`](docs/adr/README.md); read the one for what you're touching, found

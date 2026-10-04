@@ -162,16 +162,16 @@ A sketch that has logic worth pinning — layout maths, say — puts it in a sib
 module with no DOM in it and tests that, next to it in `src/`. Test sources must
 be erasable-only TypeScript and import siblings with the `.ts` extension.
 
-All three run in `.github/workflows/ci.yml` on every pull request.
-`.github/workflows/deploy-portfolio.yml` runs `validate` again on push to `main`
-before firing the deploy hook, so a broken published entry blocks the rebuild
-instead of failing inside `portfolio-site`'s build.
+All three run in the root `.github/workflows/ci.yml` on every pull request, so a
+broken published entry is caught before the merge instead of failing inside
+`portfolio-site`'s build.
 
 ## Publishing
 
 Flipping `publish: true` and pushing to `main` is the whole publish action: CI
-validates, the deploy hook fires, `portfolio-site` rebuilds and pulls the entry
-into `/journal`. Nothing else has to change in either repo.
+validates the pull request, and the push to `main` rebuilds `portfolio-site`
+directly, which builds the entry into `/journal` from `apps/sketchbook/entries`.
+Nothing else has to change in either app.
 
 Why it's a flag on `main`, and why an agent never flips it, is in
 [ADR 0001](adr/0001-publish-flag-on-main.md).
@@ -183,20 +183,20 @@ so put Vercel Deployment Protection or Cloudflare Access in front of it first.
 
 ## Machinery
 
-Load-bearing details in `playground/`, `scripts/` and the workflows. Each looks
+Load-bearing details in `playground/`, `scripts/` and the root workflows. Each looks
 removable and isn't. One line per decision record saying what to leave alone; the
 reasoning, and what breaks otherwise, is in the ADR, so read it before changing
 the thing.
 
-- [0001](adr/0001-publish-flag-on-main.md) — the `validate` step ahead of the
-  deploy hook, and the rule that only the author sets `publish: true`.
+- [0001](adr/0001-publish-flag-on-main.md) — `validate` in CI before the merge
+  that publishes, and the rule that only the author sets `publish: true`.
 - [0002](adr/0002-three-vite-globs.md) — notes and media globs eager, sketch
   glob lazy, and all three literal.
 - [0003](adr/0003-vite-fs-allow-repo-root.md) — `server.fs.allow: [repoRoot]`.
 - [0004](adr/0004-build-time-overlay-defines.md) — the `define` booleans, never
   runtime env reads.
 - [0005](adr/0005-vercel-framework-null.md) — `framework: null` in `vercel.json`.
-- [0006](adr/0006-conductor-port-from-env.md) — `CONDUCTOR_PORT` in
+- [0006](adr/0006-conductor-port-from-env.md) — `SKETCHBOOK_PORT` in
   `vite.config.ts`, and no `--port` in the Conductor script.
 - [0007](adr/0007-separate-tsconfigs.md) — three tsconfigs, and no `@types/node`
   in the browser project.
