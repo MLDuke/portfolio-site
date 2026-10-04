@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "setup": "sh scripts/setup.sh",
     "journal": "node scripts/build-journal.mjs",
     "dev": "next dev",
     "prebuild": "npm run journal",
