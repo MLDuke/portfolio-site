@@ -17,7 +17,7 @@
     "playwright:install": "playwright install"
   },
   "dependencies": {
-    "@mlduke/ui": "github:MLDuke/ui#v0.1.0",
+    "@mlduke/ui": "github:MLDuke/ui#v0.2.0",
     "gray-matter": "^4.0.3",
     "next": "^16.3.0",
     "react": "^19.2.7",
