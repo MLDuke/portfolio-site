@@ -18,5 +18,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 .DS_Store
+.context/
+.mcp.json
 **/.codex/config.toml
 **/.conductor/settings.local.toml
