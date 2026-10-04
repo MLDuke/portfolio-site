@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
-/* Design tokens — the GTC token set from @mlduke/ui (github.com/MLDuke/ui).
-   Token edits happen there; pick them up by bumping the tag in package.json.
+/* Design tokens — the GTC token set from @mlduke/ui (packages/ui, a workspace
+   of this repo). Edit tokens there and rebuild dist/tokens.css; there is no
+   version to bump.
 
    Imported into `base` rather than unlayered: the interaction tokens below
    (--state-layer-*, --focus-ring-color) are re-pointed by the accent-surface /

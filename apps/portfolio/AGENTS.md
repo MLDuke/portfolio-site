@@ -1,18 +1,10 @@
-## Agent skills
-
-### Issue tracker
-
-Issues and specs for this repo live in Linear (team `Mduke`, label `portfolio-site`) and use the Linear MCP tools. See `docs/agents/issue-tracker.md`.
-
-### Domain docs
-
-This is a single-context repo: read `CONTEXT.md` at the repo root and relevant ADRs under `docs/adr/` when they exist. See `docs/agents/domain.md`.
-
 ## Design tokens
 
-The GTC token set (colour, spacing, type, motion, the interaction contract) lives in the public [`MLDuke/ui`](https://github.com/MLDuke/ui) repo as `@mlduke/ui`, a git-tag dependency. `app/globals.css` imports `@mlduke/ui/tokens.css`. Its `@theme` block, the `--text-*--font-weight-emphasized` aliases and the `.sandbox-theme` `--color-*` re-pointing are this repo's Tailwind bridge, and they stay here. To change a token, edit it in `MLDuke/ui`, tag a release, then bump the tag in `package.json`.
+The GTC token set (colour, spacing, type, motion, the interaction contract) lives in `packages/ui` as `@mlduke/ui`, an npm workspace of this repo. Edit tokens in place: change the JSON under `packages/ui/tokens/`, run `npm run build -w packages/ui`, and commit the regenerated `packages/ui/dist/tokens.css` with it. There is no release or tag to bump.
 
-The package also ships the IBM Plex woff2 files. `app/layout.tsx` loads them with `next/font/local` from `node_modules/@mlduke/ui/fonts/`, not through the package's `fonts.css`, which would load them twice. If a tag bump adds, removes or renames a font file, update the `src` lists there.
+`app/globals.css` imports `@mlduke/ui/tokens.css`. Its `@theme` block, the `--text-*--font-weight-emphasized` aliases and the `.sandbox-theme` `--color-*` re-pointing are this app's Tailwind bridge, and they stay here, not in `packages/ui`.
+
+The package also ships the IBM Plex woff2 files. `app/layout.tsx` loads them with `next/font/local` from the root `node_modules/@mlduke/ui/fonts/` (a symlink to `packages/ui/fonts/`), not through the package's `fonts.css`, which would load them twice. If a font file is added, removed or renamed in `packages/ui/fonts/`, update the `src` lists there.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
