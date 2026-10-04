@@ -15,6 +15,7 @@
     "node": ">=22.18"
   },
   "dependencies": {
+    "@mlduke/ui": "*",
     "agentation": "^3.0.2",
     "dialkit": "^1.4.3",
     "motion": "^13.2.0",
