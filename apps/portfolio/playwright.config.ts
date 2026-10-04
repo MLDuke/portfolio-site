@@ -17,6 +17,12 @@ export default defineConfig({
   },
   webServer: {
     command: `PORT=${port} npm run dev`,
+    // The e2e suite builds its journal from tests/fixtures/sketchbook, which
+    // holds a published code entry, so it never depends on (or publishes)
+    // anything in apps/sketchbook. The `pretest:e2e*` scripts set the same
+    // variable; `predev` regenerates the journal under this env. A dev server
+    // you already have running is reused and will not have the fixture.
+    env: { JOURNAL_SOURCE_ROOT: "tests/fixtures/sketchbook" },
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
