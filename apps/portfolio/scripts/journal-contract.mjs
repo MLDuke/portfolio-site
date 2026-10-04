@@ -14,9 +14,7 @@ export function buildEntries(sourceRoot, { sourceBlobBase }) {
   const entriesDir = path.join(sourceRoot, "entries");
 
   if (!existsSync(entriesDir)) {
-    console.warn("Sketchbook has no entries/ directory; writing an empty journal.");
-
-    return [];
+    throw new Error(`Sketchbook has no entries/ directory at ${entriesDir}.`);
   }
 
   const published = readdirSync(entriesDir)
@@ -36,42 +34,6 @@ export function buildEntries(sourceRoot, { sourceBlobBase }) {
   return published.map((entry, index) =>
     toJournalEntry(entry, index, { sourceBlobBase }),
   );
-}
-
-/**
- * Decide what a build does with the journal, given whether the source was
- * reachable. This is the whole of the contract documented in build-journal.mjs:
- * a source that cannot be reached keeps the committed data, but only if that
- * data's media is still on disk; content that violates the schema always fails.
- *
- * Returns the outcome rather than writing it, so the caller owns the I/O and a
- * test can assert the decision without a network or a filesystem.
- */
-export function resolveJournalBuild({
-  generatedFile,
-  root,
-  sourceRoot,
-  unavailableReason,
-}) {
-  if (unavailableReason === undefined) {
-    return { action: "regenerate", sourceRoot };
-  }
-
-  if (!existsSync(generatedFile)) {
-    throw new Error(
-      `${unavailableReason}; no generated journal data to fall back on`,
-    );
-  }
-
-  const missing = missingGeneratedMedia({ generatedFile, root });
-
-  if (missing.length > 0) {
-    throw new Error(
-      `${unavailableReason}; cannot keep the existing journal data because its media is missing: ${missing.join(", ")}`,
-    );
-  }
-
-  return { action: "keep", reason: unavailableReason };
 }
 
 export function copyEntryMedia(entry, publicJournalDir) {
@@ -94,7 +56,7 @@ export function copyEntryMedia(entry, publicJournalDir) {
 
 /**
  * `sourceMedia` and `sourceDir` only exist to drive copyEntryMedia, and
- * `sourceDir` points into the throwaway tarball checkout. Strip them here
+ * `sourceDir` is an absolute path on the build machine. Strip them here
  * rather than at the copy step so the serialized shape is guaranteed by the
  * function that writes it, not by call order.
  */
@@ -118,20 +80,6 @@ export const journalEntries: JournalEntry[] = ${JSON.stringify(published, null, 
 `;
 
   writeFileSync(generatedFile, generated);
-}
-
-export function missingGeneratedMedia({ generatedFile, root }) {
-  const generated = readFileSync(generatedFile, "utf8");
-
-  const referenced = new Set(
-    [...generated.matchAll(/"src": "(\/journal\/[^"]+)"/g)].map(
-      (match) => match[1],
-    ),
-  );
-
-  return [...referenced].filter(
-    (src) => !existsSync(path.join(root, "public", src)),
-  );
 }
 
 function readEntry(entriesDir, entryFolder) {
