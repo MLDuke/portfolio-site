@@ -47,16 +47,15 @@ test("builds journal entries from published sketchbook content", () => {
     ].join("\n"),
   );
 
-  const entries = buildEntries(root, {
-    sourceBlobBase: "https://example.com/sketchbook/blob/main",
-  });
+  const entries = buildEntries(root);
 
   assert.equal(entries.length, 1);
   assert.equal(entries[0].index, "001");
   assert.equal(entries[0].cardMedia.src, "/journal/entry-one/cover.png");
   assert.equal(entries[0].blocks[0].type, "description");
   assert.equal(entries[0].blocks[1].type, "figure");
-  assert.equal(entries[0].blocks[2].type, "sourceLink");
+  assert.equal(entries[0].blocks[2].type, "source");
+  assert.equal(entries[0].blocks[2].readme, "# Demo");
 
   copyEntryMedia(entries[0], publicJournalDir);
   assert.equal(
@@ -64,10 +63,7 @@ test("builds journal entries from published sketchbook content", () => {
     true,
   );
 
-  writeGeneratedFile(entries, {
-    generatedFile,
-    sourceBlobBase: "https://example.com/sketchbook/blob/main",
-  });
+  writeGeneratedFile(entries, { generatedFile });
 
   const generated = readFileSync(generatedFile, "utf8");
 
@@ -81,10 +77,7 @@ test("keeps build-only fields out of the generated file without a copy step", ()
 
   writeGeneratedFile(
     [{ slug: "entry-one", sourceDir: "/tmp/checkout", sourceMedia: [] }],
-    {
-      generatedFile,
-      sourceBlobBase: "https://example.com/sketchbook/blob/main",
-    },
+    { generatedFile },
   );
 
   assert.doesNotMatch(readFileSync(generatedFile, "utf8"), /sourceDir|\/tmp/);
@@ -116,9 +109,7 @@ test("rejects media paths that escape the entry directory", () => {
 
   assert.throws(
     () =>
-      buildEntries(root, {
-        sourceBlobBase: "https://example.com/sketchbook/blob/main",
-      }),
+      buildEntries(root),
     /media src must be relative and stay within the entry/,
   );
 });
@@ -128,9 +119,7 @@ test("a source without an entries directory is a hard error", () => {
 
   assert.throws(
     () =>
-      buildEntries(root, {
-        sourceBlobBase: "https://example.com/sketchbook/blob/main",
-      }),
+      buildEntries(root),
     /Sketchbook has no entries\/ directory/,
   );
 });
@@ -148,9 +137,7 @@ test("unpublished entries are left out", () => {
   );
 
   assert.deepEqual(
-    buildEntries(root, {
-      sourceBlobBase: "https://example.com/sketchbook/blob/main",
-    }),
+    buildEntries(root),
     [],
   );
 });

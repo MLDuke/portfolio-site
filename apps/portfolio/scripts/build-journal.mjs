@@ -23,25 +23,29 @@ import {
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const GENERATED_FILE = path.join(ROOT, "app/data/journal.generated.ts");
 const PUBLIC_JOURNAL_DIR = path.join(ROOT, "public/journal");
-const SKETCHBOOK_ROOT = path.resolve(ROOT, "../sketchbook");
-const SOURCE_BLOB_BASE =
-  process.env.SKETCHBOOK_SOURCE_BLOB_BASE ??
-  "https://github.com/MLDuke/portfolio-site/blob/main/apps/sketchbook";
+/**
+ * JOURNAL_SOURCE_ROOT points the build at a different sketchbook root (a folder
+ * with an entries/ directory), resolved from apps/portfolio. It exists only so
+ * the e2e suite can build the journal from tests/fixtures/sketchbook. Leave it
+ * unset everywhere else and the journal comes from apps/sketchbook.
+ */
+const SKETCHBOOK_ROOT = process.env.JOURNAL_SOURCE_ROOT
+  ? path.resolve(ROOT, process.env.JOURNAL_SOURCE_ROOT)
+  : path.resolve(ROOT, "../sketchbook");
 
 function main() {
-  const entries = buildEntries(SKETCHBOOK_ROOT, {
-    sourceBlobBase: SOURCE_BLOB_BASE,
-  });
+  if (process.env.JOURNAL_SOURCE_ROOT) {
+    console.log(`journal source override: ${SKETCHBOOK_ROOT}`);
+  }
+
+  const entries = buildEntries(SKETCHBOOK_ROOT);
 
   rmSync(PUBLIC_JOURNAL_DIR, { force: true, recursive: true });
   for (const entry of entries) {
     copyEntryMedia(entry, PUBLIC_JOURNAL_DIR);
   }
 
-  writeGeneratedFile(entries, {
-    generatedFile: GENERATED_FILE,
-    sourceBlobBase: SOURCE_BLOB_BASE,
-  });
+  writeGeneratedFile(entries, { generatedFile: GENERATED_FILE });
   console.log(`journal.generated.ts written - ${entries.length} entries`);
 }
 

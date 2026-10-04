@@ -10,11 +10,13 @@ export type DetailFigureConfig = {
   showCaption?: boolean;
 };
 
+export type SourceFile = { path: string; contents: string };
+
 export type DetailBlock =
   | { type: "description"; body: string; index: string; title: string }
   | ({ type: "figure" } & DetailFigureConfig)
   | { type: "gallery"; items: [DetailFigureConfig, DetailFigureConfig] }
-  | { type: "sourceLink"; href: string; label: string }
+  | { type: "source"; readme: string; files: SourceFile[] }
   | { type: "text"; body: string };
 
 type DetailContentInput = {
