@@ -1,6 +1,6 @@
 # @mlduke/ui
 
-Shared UI for MLDuke's projects. So far it's the design tokens, the source of truth
+Shared UI for the apps in this monorepo. So far it's the design tokens, the source of truth
 for visual primitives, as a [GTC](https://buninux.com/design-tokens) token set
 (Global / Theme / Component) in DTCG JSON, compiled to CSS custom properties. It
 also ships the IBM Plex fonts the typography tokens name.
@@ -12,12 +12,16 @@ and licensed under the SIL Open Font License 1.1, whose text is in
 
 ## Consuming
 
-Install from a git tag. There is no registry release, and the generated CSS is
-committed, so installing doesn't run a build:
+`@mlduke/ui` is an npm workspace (`packages/ui`) of this repo, not a published
+package. An app lists it in its own `package.json` with the wildcard range:
 
+```json
+"@mlduke/ui": "*"
 ```
-npm i github:MLDuke/ui#v0.2.0
-```
+
+A root `npm ci` links it into `node_modules/@mlduke/ui`, so edits to the tokens
+show up in every app without a reinstall. The generated CSS is committed, so
+consuming it doesn't run a build.
 
 Import the tokens once, before any styles that read them:
 
@@ -55,10 +59,18 @@ and renamed (`IBMPlexSans-Regular-Latin1.woff2` → `IBMPlexSans-Regular.woff2`)
 `fonts.css` uses the same `unicode-range` as IBM's split CSS. Characters outside
 it, such as the arrows `←` and `→`, render in the fallback font.
 
-**Versioning.** Semver over the token names, since a token's CSS variable is
-its public API. Removing or renaming a token is a **major** bump. Adding a token
-is a **minor** bump. Changing a value without renaming it is a **patch**. Each
-consumer pins a tag and upgrades on its own schedule.
+**Versioning.** There are no tags, releases or version bumps: every app builds
+against the `packages/ui` in the same commit, and the `version` field in
+`package.json` stays as it is. A token's CSS variable is still its public API, so
+a change that removes or renames one has to update every consumer in the same pull
+request. Adding a token, or changing a value without renaming it, needs nothing
+else.
+
+**Consumer-neutral.** Nothing in `ui` names a selector, class or path from one
+app. A token says what it is for (`--focus-ring-color`), never who uses it. An app
+wires tokens to its own selectors and utilities in its own stylesheet, and when
+a token needs a note about a framework's behaviour, describe the behaviour, not
+an app.
 
 ## Layout
 
@@ -103,8 +115,7 @@ CSS variable name = token path minus the group segment, joined with `-`:
 `theme.accent.a.base` → `--accent-a-base`, `global.typography.font-size.body-medium`
 → `--typography-font-size-body-medium`.
 
-One name is deliberately not `--shadow-*`, for Tailwind consumers such as
-portfolio-site. Tailwind inlines `@theme` shadow values into the generated utility
+One name is deliberately not `--shadow-*`, for Tailwind consumers. Tailwind inlines `@theme` shadow values into the generated utility
 at build time, so `@theme` has to alias `--shadow-raised` to a *different* var
 that flips per theme. `theme.elevation.*` is that var — naming
 it `theme.shadow.*` would produce `--shadow-raised`, which Tailwind has already
@@ -131,11 +142,10 @@ are theme tokens like any other. Two of them bend the usual shape:
 - `global.state-layer.on-light` / `.on-dark` name the surface they sit on, not
   the theme they belong to. The light theme takes `on-light` and the dark theme
   takes `on-dark`, but a surface that paints its own fill regardless of page
-  theme (portfolio-site's `accent-surface` and `modal-surface`) reaches for the
-  primitive directly.
+  theme reaches for the primitive directly.
 
 If your stylesheet uses cascade layers, import `tokens.css` into a low layer
-(portfolio-site uses `layer(base)`), not unlayered. A surface that re-points
+(`@import "@mlduke/ui/tokens.css" layer(base);`), not unlayered. A surface that re-points
 `--state-layer-*` or `--focus-ring-color` does it from a layered rule, and an
 unlayered `:root` declaration outranks every layered rule. A dark modal on a
 light page would then keep the light state layers.
