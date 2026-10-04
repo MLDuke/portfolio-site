@@ -1,40 +1,19 @@
 {
-  "name": "portfolio-site",
-  "version": "0.1.0",
+  "name": "portfolio-site-monorepo",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
-    "setup": "sh scripts/setup.sh",
-    "journal": "node scripts/build-journal.mjs",
-    "dev": "next dev",
-    "prebuild": "npm run journal",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "test:unit": "node --test \"tests/*.test.{mjs,mts}\"",
-    "test:e2e": "playwright test",
-    "test:e2e:headed": "playwright test --headed",
-    "test:e2e:ui": "playwright test --ui",
-    "playwright:install": "playwright install"
-  },
-  "dependencies": {
-    "@mlduke/ui": "github:MLDuke/ui#v0.2.0",
-    "gray-matter": "^4.0.3",
-    "next": "^16.3.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.62.1",
-    "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "^26.1.1",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "eslint": "^9.39.5",
-    "eslint-config-next": "^16.3.0",
-    "tailwindcss": "^4.3.3",
-    "typescript": "^6.0.3"
+    "dev:portfolio": "npm run dev -w apps/portfolio",
+    "dev:sketchbook": "npm run dev -w apps/sketchbook",
+    "build:portfolio": "npm run build -w apps/portfolio",
+    "build:sketchbook": "npm run build:playground -w apps/sketchbook",
+    "test": "npm run test:unit -w apps/portfolio && npm test -w apps/sketchbook && npm test -w packages/ui"
   },
   "allowScripts": {
     "unrs-resolver@1.12.2": true

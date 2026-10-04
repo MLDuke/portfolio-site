@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "content": {
+      "disabled": {
+        "$type": "number",
+        "$value": "{global.color.opacity.38}",
+        "$extensions": { "mode": {
+          "light": "{global.color.opacity.38}",
+          "dark":  "{global.color.opacity.38}"
+        } }
+      }
+    }
+  }
+}

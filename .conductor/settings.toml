@@ -1,23 +1,67 @@
 "$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
 
 [scripts]
+# One install at the repo root covers every workspace (apps/*, packages/*), then
+# registers the agentation MCP bridge for this workspace (local only).
 setup = "sh scripts/setup.sh"
 archive = """
-rm -rf .next
-sh .conductor/reap-agentation.sh
+rm -rf apps/portfolio/.next
+sh scripts/reap-agentation.sh
 """
+# Safe because both dev servers take their ports from $CONDUCTOR_PORT, which is
+# unique per workspace.
 run_mode = "concurrent"
 
-[scripts.run.dev]
+# Conductor gives each local workspace ten ports, $CONDUCTOR_PORT through
+# $CONDUCTOR_PORT+9, and none in cloud workspaces. The two dev servers can't
+# share one, so the portfolio takes $CONDUCTOR_PORT and the playground takes
+# $CONDUCTOR_PORT+1. Both are hidden in cloud workspaces.
+
+# The portfolio dev server. Reaps orphaned agentation-mcp processes first: they
+# are shared across workspaces and outlive a torn-down workspace.
+[scripts.run.portfolio]
 available_in = ["local"]
-command = "sh .conductor/reap-agentation.sh && npm run dev -- --port \"$CONDUCTOR_PORT\""
+command = "sh scripts/reap-agentation.sh && npm run dev -w apps/portfolio -- --port \"$CONDUCTOR_PORT\""
 default = true
 icon = "play"
 
+# The Sketchbook playground dev server. playground/vite.config.ts reads its port
+# from $SKETCHBOOK_PORT (not $CONDUCTOR_PORT, which the portfolio owns) and
+# derives strictPort from it, so a clash fails loudly instead of drifting to
+# another port. Pass the variable rather than --port: the config falls back to
+# 5173 outside Conductor, and --port would override that (ADR 0006 in
+# apps/sketchbook/docs/adr/). --host is the one thing the config doesn't cover:
+# it pins the bind address to IPv4, since Vite's `localhost` default can resolve
+# to ::1. Press Run once; Conductor does not autostart it.
+[scripts.run.playground]
+available_in = ["local"]
+command = "SKETCHBOOK_PORT=$((CONDUCTOR_PORT + 1)) npm run dev -w apps/sketchbook -- --host 127.0.0.1"
+icon = "flask-conical"
+
+# The Sketchbook gates CI runs on every pull request. Kept as separate buttons
+# because they fail for different reasons (a malformed entry vs. a type error),
+# and a combined command would hide the second behind the first. Neither needs
+# $CONDUCTOR_PORT, so both stay available in cloud workspaces too.
+[scripts.run.validate]
+command = "npm run validate -w apps/sketchbook"
+icon = "shield-check"
+
+# Covers playground/src and every entries/*/src, then vite.config.ts separately
+# (see apps/sketchbook/playground/tsconfig.json and tsconfig.node.json).
+[scripts.run.typecheck]
+command = "npm run typecheck -w apps/sketchbook"
+icon = "type"
+
 [scripts.run.lint]
-command = "npm run lint"
+command = "npm run lint -w apps/portfolio"
 icon = "test-tube"
 
+# Builds both apps: the portfolio (journal included) and the playground.
 [scripts.run.build]
-command = "npm run build"
+command = "npm run build:portfolio && npm run build:sketchbook"
 icon = "package"
+
+# `npm run new -w apps/sketchbook` is deliberately omitted. It accepts `--title` /
+# `--type` and works in the non-interactive shell run scripts get, but a run
+# script is a fixed command, so there's nowhere to supply the one thing that
+# differs per entry. Run it from a terminal, or pass the flags from an agent.

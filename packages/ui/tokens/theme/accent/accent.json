@@ -1,0 +1,30 @@
+{
+  "theme": {
+    "accent": {
+      "a": {
+        "base": {
+          "$type": "color",
+          "$value": "{global.color.green.3}",
+          "$extensions": { "mode": { "light": "{global.color.green.3}", "dark": "{global.color.green.2}" } }
+        },
+        "on-accent": {
+          "$type": "color",
+          "$value": "{global.color.neutral.10}",
+          "$extensions": { "mode": { "light": "{global.color.neutral.10}", "dark": "{global.color.neutral.10}" } }
+        }
+      },
+      "b": {
+        "base": {
+          "$type": "color",
+          "$value": "{global.color.blue.3}",
+          "$extensions": { "mode": { "light": "{global.color.blue.3}", "dark": "{global.color.blue.2}" } }
+        },
+        "on-accent": {
+          "$type": "color",
+          "$value": "{global.color.neutral.10}",
+          "$extensions": { "mode": { "light": "{global.color.neutral.10}", "dark": "{global.color.neutral.10}" } }
+        }
+      }
+    }
+  }
+}

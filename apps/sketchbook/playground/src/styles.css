@@ -1,0 +1,253 @@
+/* The playground shell reads @mlduke/ui tokens (loaded in main.tsx, themed by
+   data-theme="dark" on <html>). Sketches never do: .canvas below is literal and
+   src/stage-isolation.ts unsets every token variable inside it. Values with no
+   matching token stay local and are listed as candidates in the MDU-22 PR. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--surface-base);
+  color: var(--on-surface-primary);
+  font-family: var(--typography-font-family-sans);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+code {
+  font-family: var(--typography-font-family-mono);
+  font-size: 0.9em;
+  background: var(--surface-raised);
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-4);
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 264px 1fr;
+  height: 100%;
+}
+
+/* Sidebar ------------------------------------------------------------------ */
+.sidebar {
+  border-right: 1px solid var(--color-neutral-8);
+  overflow-y: auto;
+  padding: var(--size-unit-16) 0;
+}
+
+.sidebar__brand {
+  display: block;
+  padding: 0 var(--size-unit-16) var(--size-unit-12);
+  font-weight: var(--typography-font-weight-semibold);
+  letter-spacing: 0.02em;
+  color: var(--color-neutral-3);
+}
+
+.sidebar__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar__list a {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-unit-2);
+  padding: var(--size-unit-8) var(--size-unit-16);
+  border-left: 2px solid transparent;
+}
+
+.sidebar__list a:hover {
+  background: var(--surface-raised);
+}
+
+.sidebar__list a.is-active {
+  background: var(--surface-raised);
+  border-left-color: var(--accent-b-base);
+}
+
+.sidebar__title {
+  font-size: var(--typography-font-size-body-small);
+}
+
+.sidebar__meta {
+  font-size: 11px;
+  color: var(--color-neutral-3);
+}
+
+/* Main ------------------------------------------------------------------- */
+.main {
+  overflow-y: auto;
+  padding: var(--size-unit-40);
+}
+
+.stage__head h1 {
+  margin: 0 0 var(--size-unit-4);
+  font-size: 22px;
+}
+
+.stage__meta {
+  margin: 0;
+  font-size: var(--typography-font-size-label-small);
+  color: var(--color-neutral-3);
+}
+
+.stage__desc {
+  margin: var(--size-unit-12) 0 0;
+  max-width: 60ch;
+  color: var(--on-surface-primary);
+}
+
+/* The stage a sketch renders into. Every value here is a literal on purpose.
+   The sketch contract promises a dark background, 32px padding, a border and
+   min-height 240px, and sketches inherit font and colour from this box, so
+   none of it may point at a token or follow the shell's font. */
+.canvas {
+  margin-top: 28px;
+  padding: 32px;
+  background: #16181d;
+  border: 1px solid #262a31;
+  border-radius: 12px;
+  min-height: 240px;
+  color: #e7e9ee;
+  font: normal 400 medium/normal ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: normal;
+}
+
+.canvas__loading {
+  color: #9aa0ac;
+  font-size: 13px;
+}
+
+.media {
+  margin-top: var(--size-unit-28);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--size-unit-20);
+}
+
+.media figure {
+  margin: 0;
+  max-width: 480px;
+}
+
+.media img {
+  display: block;
+  max-width: 100%;
+  border: 1px solid var(--color-neutral-8);
+  border-radius: var(--radius-8);
+}
+
+.media figcaption {
+  margin-top: var(--size-unit-6);
+  font-size: var(--typography-font-size-label-small);
+  color: var(--color-neutral-3);
+}
+
+.note {
+  margin-top: var(--size-unit-28);
+  max-width: 68ch;
+  white-space: pre-wrap;
+  color: var(--color-neutral-3);
+  font-size: var(--typography-font-size-body-small);
+  line-height: 1.6;
+}
+
+.panel {
+  margin-top: var(--size-unit-24);
+  padding: 14px var(--size-unit-16);
+  background: var(--surface-raised);
+  border: 1px solid var(--color-neutral-8);
+  border-radius: var(--radius-8);
+  font-size: 13px;
+  color: var(--color-neutral-3);
+  white-space: pre-wrap;
+}
+
+.panel--warn {
+  border-color: var(--status-warning-border);
+  color: var(--color-amber-1);
+}
+
+.panel--error {
+  border-color: var(--status-error-border);
+  color: var(--color-red-2);
+  overflow-x: auto;
+}
+
+/* Index ---------------------------------------------------------------- */
+.index h1 {
+  margin: 0 0 var(--size-unit-8);
+  font-size: var(--typography-font-size-display-large);
+}
+
+.index__lead {
+  margin: 0 0 var(--size-unit-28);
+  color: var(--color-neutral-3);
+}
+
+.index__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 18px;
+}
+
+.index__grid a {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-unit-6);
+}
+
+.index__thumb {
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  background: var(--surface-raised);
+  border: 1px solid var(--color-neutral-8);
+  border-radius: 10px;
+  overflow: hidden;
+  color: var(--color-neutral-3);
+  font-size: var(--typography-font-size-label-small);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.index__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.index__title {
+  font-size: var(--typography-font-size-body-small);
+}
+
+.index__meta {
+  font-size: 11px;
+  color: var(--color-neutral-3);
+}
+
+.index__warn {
+  font-size: 11px;
+  color: var(--color-amber-1);
+}
