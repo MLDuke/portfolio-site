@@ -1,0 +1,42 @@
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+
+[scripts]
+setup = "npm install"
+run_mode = "concurrent"
+
+# The playground dev server. playground/vite.config.ts derives both port and
+# strictPort from $CONDUCTOR_PORT — so each local workspace gets a stable,
+# non-colliding port, and neither flag is repeated here (passing --port on the
+# CLI would override the config's 5173 fallback and hard-fail wherever the var
+# is unset). Hidden in cloud workspaces, which don't set it. --host is the one
+# piece the config doesn't cover: it pins the bind address to IPv4, since Vite's
+# `localhost` default can resolve to ::1. This is the closest thing to "a server
+# that's up while the workspace is active" — press Run once; Conductor does not
+# autostart it.
+[scripts.run.dev]
+command = "npm run dev -- --host 127.0.0.1"
+available_in = [ "local" ]
+default = true
+icon = "play"
+
+# The two gates CI runs on every pull request (.github/workflows/ci.yml). Kept
+# as separate buttons because they fail for different reasons — a malformed
+# entry vs. a type error — and a combined command would hide the second behind
+# the first. Neither needs $CONDUCTOR_PORT, so both stay available in cloud
+# workspaces too.
+#
+# `npm run validate` also runs ahead of the deploy hook on push to main.
+[scripts.run.validate]
+command = "npm run validate"
+icon = "shield-check"
+
+# Covers playground/src and every entries/*/src, then vite.config.ts separately
+# — see playground/tsconfig.json and tsconfig.node.json.
+[scripts.run.typecheck]
+command = "npm run typecheck"
+icon = "type"
+
+# `npm run new` is deliberately omitted, and still is now that it accepts
+# `--title` / `--type` and works in the non-interactive shell run scripts get: a
+# run script is a fixed command, so there's nowhere to supply the one thing that
+# differs per entry. Run it from a terminal, or pass the flags from an agent.
