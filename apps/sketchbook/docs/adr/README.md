@@ -9,14 +9,14 @@ what must not be removed.
 - Files are `NNNN-kebab-title.md`, numbered in the order they were decided, and
   dated by the commit that introduced the decision.
 - Don't rewrite an accepted ADR when the decision changes. Add a new one, and set
-  the old one's status to `Superseded by NNNN`. Fix typos and broken links in place. 0001 and 0006 were also amended in place when Sketchbook joined the monorepo, and say so in their status lines.
+  the old one's status to `Superseded by NNNN`. Fix typos and broken links in place. 0001 and 0006 were also amended in place when Sketchbook joined the monorepo, and 0003 was revised in place for it (MDU-24); their status lines say so.
 - Format: `Status`, then Context, Decision, Consequences.
 
 | # | Title | Status |
 | --- | --- | --- |
 | [0001](0001-publish-flag-on-main.md) | Publishing is `publish: true` on main, and only the author flips it | Accepted |
 | [0002](0002-three-vite-globs.md) | Three Vite globs: notes and media eager, sketches lazy, all literal | Accepted |
-| [0003](0003-vite-fs-allow-repo-root.md) | Vite serves from the repo root (`server.fs.allow`) | Accepted |
+| [0003](0003-vite-fs-allow-repo-root.md) | Vite serves from the workspace root (`server.fs.allow`) | Accepted |
 | [0004](0004-build-time-overlay-defines.md) | Dev overlays are toggled by build-time `define` booleans | Accepted |
 | [0005](0005-vercel-framework-null.md) | `vercel.json` sets `framework: null` | Accepted |
 | [0006](0006-conductor-port-from-env.md) | `SKETCHBOOK_PORT` drives the dev port; Conductor passes only `--host` | Accepted |

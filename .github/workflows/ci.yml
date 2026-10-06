@@ -52,6 +52,33 @@ jobs:
       - name: Test
         run: npm test -w apps/sketchbook
 
+      # A build passes even when `server.fs.allow` is too narrow, so start the dev
+      # server and ask it for a font from packages/ui. A 403 here means the allow
+      # list no longer covers the workspace root — see apps/sketchbook/docs/adr/0003.
+      - name: Dev server serves packages/ui fonts
+        env:
+          SKETCHBOOK_PORT: 5199
+        run: |
+          npm run dev -w apps/sketchbook > "$RUNNER_TEMP/vite.log" 2>&1 &
+          url="http://localhost:$SKETCHBOOK_PORT"
+          for _ in $(seq 30); do
+            curl -sf -o /dev/null "$url/" && break
+            sleep 1
+          done
+          if ! curl -sf -o /dev/null "$url/"; then
+            echo "::error::Playground dev server did not start within 30s"
+            cat "$RUNNER_TEMP/vite.log"
+            exit 1
+          fi
+          font="$url/@fs$PWD/packages/ui/fonts/IBMPlexSans-Regular.woff2"
+          status=$(curl -s -o /dev/null -w '%{http_code}' "$font")
+          if [ "$status" != 200 ]; then
+            echo "::error::GET $font returned $status, expected 200. server.fs.allow in apps/sketchbook/playground/vite.config.ts must cover packages/ui."
+            cat "$RUNNER_TEMP/vite.log"
+            exit 1
+          fi
+          echo "IBMPlexSans-Regular.woff2 served with $status"
+
   portfolio:
     runs-on: ubuntu-latest
     steps:
