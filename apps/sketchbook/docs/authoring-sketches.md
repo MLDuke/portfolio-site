@@ -192,7 +192,7 @@ the thing.
   that publishes, and the rule that only the author sets `publish: true`.
 - [0002](adr/0002-three-vite-globs.md) — notes and media globs eager, sketch
   glob lazy, and all three literal.
-- [0003](adr/0003-vite-fs-allow-repo-root.md) — `server.fs.allow: [repoRoot]`.
+- [0003](adr/0003-vite-fs-allow-repo-root.md) — `server.fs.allow` set to the workspace root.
 - [0004](adr/0004-build-time-overlay-defines.md) — the `define` booleans, never
   runtime env reads.
 - [0005](adr/0005-vercel-framework-null.md) — `framework: null` in `vercel.json`.

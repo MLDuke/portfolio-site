@@ -1,17 +1,15 @@
 import { fileURLToPath } from "node:url";
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig, loadEnv, searchForWorkspaceRoot } from "vite";
 import react from "@vitejs/plugin-react";
 
-// The playground is its own Vite root (this folder), but it reads sketch source
-// and notes from ../entries and the Entry module from ../scripts/lib,
-// so the dev server has to be allowed to serve files from the repo root.
-const repoRoot = fileURLToPath(new URL("..", import.meta.url));
+// .env is read from apps/sketchbook, one level up from this Vite root.
+const appRoot = fileURLToPath(new URL("..", import.meta.url));
 
 export default defineConfig(({ command, mode }) => {
   const dev = command === "serve";
   // process.env wins so Vercel / inline `ENABLE_X=true npm run build:playground`
-  // override a repo-root .env used for local testing.
-  const env = { ...loadEnv(mode, repoRoot, ""), ...process.env };
+  // override an apps/sketchbook .env used for local testing.
+  const env = { ...loadEnv(mode, appRoot, ""), ...process.env };
   const overlayOn = (name: string) => dev || env[name] === "true";
 
   return {
@@ -32,7 +30,12 @@ export default defineConfig(({ command, mode }) => {
       // $SKETCHBOOK_PORT. Fall back to Vite's default when it is unset.
       port: Number(process.env.SKETCHBOOK_PORT) || 5173,
       strictPort: Boolean(process.env.SKETCHBOOK_PORT),
-      fs: { allow: [repoRoot] },
+      // The playground is its own Vite root (this folder), but it reads sketch
+      // source and notes from ../entries and the Entry module from
+      // ../scripts/lib, and @mlduke/ui's fonts live in packages/ui, outside
+      // apps/sketchbook. Setting fs.allow replaces Vite's default, so allow the
+      // whole monorepo root explicitly.
+      fs: { allow: [searchForWorkspaceRoot(process.cwd())] },
     },
 
     build: {
