@@ -8,11 +8,10 @@ slug: "dot-raster"
 type: code
 publish: true
 # media: one item per image/GIF. src is relative to this entry folder;
-# alt is required once src is set. To fill it in, drop the [] below and
-# uncomment the example under it:
-media: []
-#   - src: "scroll-snap.gif"
-#     alt: "Scroll snap prototype moving between image panels"
+# alt is required once src is set.
+media:
+  - src: "dot-raster.gif"
+    alt: "A grid of small grey dots on a dark background, where swollen blue dots form wide diagonal bands that sweep and curve across the grid"
 sourcePath: "src/"  # path to the source file(s), relative to this entry folder
 ---
 
