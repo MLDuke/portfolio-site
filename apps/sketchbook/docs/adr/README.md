@@ -28,3 +28,4 @@ what must not be removed.
 | [0012](0012-lowercase-media-extensions.md) | Media extensions are lowercase only | Accepted |
 | [0013](0013-folder-name-equals-date-slug.md) | The folder name must equal `<date>-<slug>` | Accepted |
 | [0014](0014-sketch-internals-stay-in-entry.md) | Sketch internals stay in the entry until a second sketch needs them | Accepted |
+| [0015](0015-thumbnail-outside-media.md) | Thumbnails are a generated `thumbnail.png`, outside `media:` | Accepted |

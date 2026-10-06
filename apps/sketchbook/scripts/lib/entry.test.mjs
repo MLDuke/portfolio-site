@@ -9,6 +9,7 @@ import {
   MEDIA_EXTENSIONS,
   MEDIA_WARN_BYTES,
   SOURCE_EXTENSIONS,
+  THUMBNAIL_FILE,
   entryDirName,
   findSourceFile,
   isEntryType,
@@ -22,7 +23,7 @@ import {
 
 const DIR = "2026-09-03-spring-grid";
 const GOOD_SOURCE = "export default function Sketch() {\n  return null;\n}\n";
-const CODE_FILES = ["index.md", "src/index.tsx"];
+const CODE_FILES = ["index.md", "src/index.tsx", "thumbnail.png"];
 
 // index.md text from raw `key: value` pairs; a value of undefined omits the key.
 // Values are written as they'd appear in the file, quotes and all, so tests can
@@ -81,6 +82,7 @@ describe("a valid entry", () => {
       media: [],
       sourcePath: "src/",
       sourceFile: "src/index.tsx",
+      thumbnail: "thumbnail.png",
       note: "Body text.",
     });
   });
@@ -315,6 +317,36 @@ describe("default export check", () => {
   });
 });
 
+describe("thumbnail", () => {
+  const withoutThumbnail = (files) => files.filter((f) => f !== THUMBNAIL_FILE);
+
+  test("is read from the folder listing, not from frontmatter", () => {
+    assert.equal(read().entry.thumbnail, THUMBNAIL_FILE);
+    assert.equal(read({ files: withoutThumbnail(CODE_FILES) }).entry.thumbnail, undefined);
+    assert.equal(read({ files: [...CODE_FILES, "src/thumbnail.png"] }).entry.thumbnail, THUMBNAIL_FILE);
+    assert.equal(read({ files: ["index.md", "src/index.tsx", "src/thumbnail.png"] }).entry.thumbnail, undefined);
+  });
+
+  test("its absence warns on a code or mixed entry with a sketch, drafts included", () => {
+    for (const type of ["code", "mixed"]) {
+      for (const publish of ["false", "true"]) {
+        const { problems } = read({
+          indexMd: indexMd({ type, publish, description: '"d"', media: MEDIA_LIST }),
+          files: [...withoutThumbnail(CODE_FILES), "spring.gif"],
+        });
+        assert.deepEqual(summarize(problems), ["warning:no-thumbnail"], `${type}, publish: ${publish}`);
+      }
+    }
+  });
+
+  test("its absence is fine with no sketch yet, on an image entry, or in a partial listing", () => {
+    assert.deepEqual(read({ files: ["index.md", "src/.gitkeep"], source: undefined }).problems, []);
+    const image = read({ indexMd: indexMd({ type: "image", sourcePath: undefined }), files: ["index.md"], source: undefined });
+    assert.deepEqual(image.problems, []);
+    assert.deepEqual(read({ files: withoutThumbnail(CODE_FILES), partial: true }).problems, []);
+  });
+});
+
 describe("source file rule", () => {
   test("finds src/index.<ext> for each extension", () => {
     for (const ext of SOURCE_EXTENSIONS) {
@@ -511,7 +543,7 @@ describe("round trip", () => {
       const { entry, problems } = readEntry({
         dir: DIR,
         indexMd: `${written}\nBody\n`,
-        files: asFiles(["index.md", "spring.gif", "second.png", "src/index.tsx"]),
+        files: asFiles(["index.md", "spring.gif", "second.png", "src/index.tsx", "thumbnail.png"]),
         source: GOOD_SOURCE,
       });
       assert.deepEqual(problems, []);

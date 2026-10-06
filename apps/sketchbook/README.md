@@ -73,7 +73,7 @@ No tags/categories for now — add them later if the collection grows enough to 
 1. Build the sketch wherever's fastest (this doesn't need to happen in this repo).
 2. `npm run new` — prompts for a title and type, creates the dated entry folder and frontmatter stub (plus `src/` if the type needs it). Pass `--title "…" --type image|code|mixed` to skip the prompts, which is also what makes it work in a non-interactive shell.
 3. Drop in media, and source under `src/` if applicable.
-4. Fill in `index.md`.
+4. Fill in `index.md`. For `code` and `mixed`, run `npm run thumbnails -- <date>-<slug>` to make the entry's card on the playground index (`thumbnail.png`, never published — see the [guide](docs/authoring-sketches.md#thumbnails)).
 5. When it's ready to share, flip `publish: true`, run `npm run validate && npm run typecheck`, and push to `main`.
 
 `npm run validate` checks every entry. Drafts only need to be well-formed;

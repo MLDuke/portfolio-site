@@ -76,6 +76,9 @@ function Stage({ sketch }: { sketch: Sketch }) {
 
   return (
     <article className="stage">
+      <a className="stage__back" href="#/">
+        ← sketchbook
+      </a>
       <header className="stage__head">
         <h1>{titleOf(sketch)}</h1>
         <p className="stage__meta">{metaOf(sketch, sketch.publish ? ["published"] : [])}</p>
@@ -142,7 +145,9 @@ function Index() {
       </p>
       <ul className="index__grid">
         {sketches.map((s) => {
-          const thumb = s.media.find((m) => m.url)?.url;
+          // The generated thumbnail shows what the stage renders; listed media
+          // stands in for entries without one (image entries, mostly).
+          const thumb = s.thumbnailUrl ?? s.media.find((m) => m.url)?.url;
           return (
             <li key={s.dir}>
               <a href={`#/${s.dir}`}>
@@ -176,25 +181,6 @@ export function App() {
 
   return (
     <div className="app">
-      <nav className="sidebar">
-        <a className="sidebar__brand" href="#/">
-          sketchbook
-        </a>
-        <ul className="sidebar__list">
-          {sketches.map((s) => (
-            <li key={s.dir}>
-              <a
-                href={`#/${s.dir}`}
-                className={s.dir === route ? "is-active" : undefined}
-              >
-                <span className="sidebar__title">{titleOf(s)}</span>
-                <span className="sidebar__meta">{metaOf(s)}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
       <main className="main">{current ? <Stage sketch={current} /> : <Index />}</main>
 
       <DevOverlays />

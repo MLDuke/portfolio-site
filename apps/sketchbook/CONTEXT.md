@@ -30,7 +30,13 @@ for the portfolio card and meta tags.
 
 **Media**
 The image and GIF files that sit beside `index.md` and are listed under `media:`.
-Source code is not media.
+Source code is not media, and neither is the thumbnail.
+
+**Thumbnail**
+`thumbnail.png` beside `index.md`: a generated screenshot of a `code` or `mixed`
+entry's stage, shown as its card on the playground index. Never listed under
+`media:` and never published. See
+[ADR 0015](docs/adr/0015-thumbnail-outside-media.md).
 
 **Sketch contract**
 The one requirement on a sketch: `src/index.*` must default-export a React
@@ -74,8 +80,8 @@ and drafts are visible in it. "Unpublished" is a fine synonym for draft.
 
 **Problem**
 One finding about an entry: a level (`error` or `warning`), a `code`, a message
-and the file it concerns. Only errors fail `npm run validate`; the one warning is
-a media file over 2 MB.
+and the file it concerns. Only errors fail `npm run validate`; the two warnings
+are a media file over 2 MB and a missing thumbnail.
 
 **Structural check**
 A check that runs on every entry, drafts included, because the fault is broken
