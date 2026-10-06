@@ -18,6 +18,8 @@ export interface SketchMedia extends EntryMedia {
  */
 export interface Sketch extends Omit<Entry, "media"> {
   media: SketchMedia[];
+  /** Resolved bundler URL of the entry's thumbnail, when it has one. */
+  thumbnailUrl?: string;
   /** Everything wrong with the entry, as judged by the Entry module. */
   problems: Problem[];
   /**
@@ -85,6 +87,7 @@ export const sketches: Sketch[] = Object.entries(noteFiles)
         ...m,
         url: m.src ? mediaFiles[prefix + m.src] : undefined,
       })),
+      thumbnailUrl: entry.thumbnail ? mediaFiles[prefix + entry.thumbnail] : undefined,
       problems,
       load: entry.sourceFile ? sketchModules[prefix + entry.sourceFile] : undefined,
     };

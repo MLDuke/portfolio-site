@@ -21,6 +21,7 @@ entries/2026-09-03-spring-grid/
   index.md            # frontmatter + a short note
   spring-grid.gif     # media, co-located
   src/index.tsx       # code | mixed only — the sketch itself
+  thumbnail.png       # code | mixed only — generated card for the playground index
 ```
 
 The date prefix is not decoration: entries sort chronologically in GitHub's file
@@ -57,9 +58,11 @@ feeds the journal card and the page meta/OG tags on `portfolio-site`, so it's
 written for someone who hasn't opened the entry. It's deliberately authored
 rather than derived from the first line of the note.
 
-**5. Check it.**
+**5. Check it.** For `code` and `mixed`, regenerate the thumbnail first. It's the
+entry's card on the playground index (see *Thumbnails*).
 
 ```sh
+npm run thumbnails -- <date>-<slug>
 npm run validate && npm run typecheck && npm test
 ```
 
@@ -76,7 +79,7 @@ the playground's CSS custom properties. The playground is a viewer, not a
 framework: README's contract with `portfolio-site` is that it *links out to a
 file here*, so a sketch that reads `var(--line)` breaks the moment someone opens
 it anywhere else. The cost is that colors are eyeballed against the dark stage —
-`entries/2026-09-03-spring-grid/src/index.tsx` carries a comment saying so.
+`entries/2026-10-03-dot-raster/src/index.tsx` carries a comment saying so.
 
 **The stage is already styled.** `.canvas` in `playground/src/styles.css` gives
 every sketch a dark panel background, 32px of padding, a border and
@@ -89,8 +92,8 @@ sketch genuinely hurts to read, not before — these are notebook pages. Moving
 helpers *out* of the entry is a different matter: see
 [ADR 0014](adr/0014-sketch-internals-stay-in-entry.md).
 
-**Dial panel labels match the entry title.** `useDialKit("Spring grid", …)` in an
-entry titled *Spring grid*. With several sketches open, the label is the only
+**Dial panel labels match the entry title.** `useDialKitController("Dot raster", …)`
+in an entry titled *Dot raster*. With several sketches open, the label is the only
 thing telling you which panel belongs to what.
 
 **Seeded randomness.** `pseudoRandom(i + seed * 997)` rather than `Math.random()`.
@@ -127,6 +130,17 @@ heavier than that, the answer is external hosting, not raising the ceiling.
 `alt` is required on any media item with a `src`: `portfolio-site` throws at
 build time without it, so `validate` catches it here where the error makes sense.
 
+## Thumbnails
+
+A `code` or `mixed` entry's card on the playground index is `thumbnail.png`, a
+screenshot of its stage that `npm run thumbnails -- <dir>` takes in a headless
+browser. It isn't media: leave it out of `media:`, and it is never published.
+Regenerate it when the sketch changes, in the same commit, and only then, because
+an animated sketch gives a slightly different picture on every run. If the
+picture catches an intro animation mid-way, pass `--wait <ms>`. The first run
+needs `npx playwright install chromium`. Why it works this way:
+[ADR 0015](adr/0015-thumbnail-outside-media.md).
+
 ## What gets checked, and where
 
 The rules themselves live in `scripts/lib/entry.mjs`
@@ -144,8 +158,9 @@ back. They split into two tiers:
   disk with `alt` text, a `sourcePath` that isn't an empty directory, and an
   `src/index.*` that actually exists. Drafts are expected to be half-finished.
 
-Each problem is an error or a warning, and only errors fail the run. The one
-warning is media over 2 MB. The playground runs the same module over every
+Each problem is an error or a warning, and only errors fail the run. There are
+two warnings: media over 2 MB, and a `code` or `mixed` entry with a sketch but no
+`thumbnail.png`. The playground runs the same module over every
 entry, so a broken entry still renders there but carries its problems on its
 index card and its page, minus the checks that need file sizes, source text or a complete file listing.
 
@@ -212,3 +227,5 @@ the thing.
   extensions, in agreement with the literal glob.
 - [0013](adr/0013-folder-name-equals-date-slug.md) — the folder-name check,
   drafts included.
+- [0015](adr/0015-thumbnail-outside-media.md) — `thumbnail.png` kept out of
+  `media:`, and the overlays defined off in `scripts/thumbnails.mjs`.

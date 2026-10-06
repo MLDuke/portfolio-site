@@ -41,61 +41,24 @@ code {
 
 .app {
   display: grid;
-  grid-template-columns: 264px 1fr;
   height: 100%;
-}
-
-/* Sidebar ------------------------------------------------------------------ */
-.sidebar {
-  border-right: 1px solid var(--color-neutral-8);
-  overflow-y: auto;
-  padding: var(--size-unit-16) 0;
-}
-
-.sidebar__brand {
-  display: block;
-  padding: 0 var(--size-unit-16) var(--size-unit-12);
-  font-weight: var(--typography-font-weight-semibold);
-  letter-spacing: 0.02em;
-  color: var(--color-neutral-3);
-}
-
-.sidebar__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.sidebar__list a {
-  display: flex;
-  flex-direction: column;
-  gap: var(--size-unit-2);
-  padding: var(--size-unit-8) var(--size-unit-16);
-  border-left: 2px solid transparent;
-}
-
-.sidebar__list a:hover {
-  background: var(--surface-raised);
-}
-
-.sidebar__list a.is-active {
-  background: var(--surface-raised);
-  border-left-color: var(--accent-b-base);
-}
-
-.sidebar__title {
-  font-size: var(--typography-font-size-body-small);
-}
-
-.sidebar__meta {
-  font-size: 11px;
-  color: var(--color-neutral-3);
 }
 
 /* Main ------------------------------------------------------------------- */
 .main {
   overflow-y: auto;
   padding: var(--size-unit-40);
+}
+
+.stage__back {
+  display: inline-block;
+  margin-bottom: var(--size-unit-16);
+  font-size: var(--typography-font-size-label-small);
+  color: var(--color-neutral-3);
+}
+
+.stage__back:hover {
+  color: var(--on-surface-primary);
 }
 
 .stage__head h1 {

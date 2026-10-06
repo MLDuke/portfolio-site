@@ -35,6 +35,7 @@ either here — link to them. Domain terms: [`CONTEXT.md`](CONTEXT.md).
 | `npm test` | `node:test` over `scripts/**/*.test.mjs` and `entries/*/src/**/*.test.ts` |
 | `npm run dev` | playground at `localhost:5173` (`$SKETCHBOOK_PORT` overrides) |
 | `npm run build:playground` | static build to `playground/dist/` |
+| `npm run thumbnails -- <dir>…` | screenshot sketches into `thumbnail.png`; run via the `sketch-thumbnails` skill |
 
 ## Adding a sketch
 
@@ -42,8 +43,11 @@ either here — link to them. Domain terms: [`CONTEXT.md`](CONTEXT.md).
 2. For `code`/`mixed`: write `src/index.tsx`. For `image`: drop media beside
    `index.md` and list it under `media:`.
 3. Fill in `title`, `description` and the note body in `index.md`.
-4. `npm run validate && npm run typecheck && npm test`.
-5. Leave `publish: false`. Stop and hand it back.
+4. For `code`/`mixed`: run the `sketch-thumbnails` skill
+   ([`.agents/skills/sketch-thumbnails`](.agents/skills/sketch-thumbnails/SKILL.md)).
+   Run it again before any commit that changes a sketch.
+5. `npm run validate && npm run typecheck && npm test`.
+6. Leave `publish: false`. Stop and hand it back.
 
 ## The sketch contract
 

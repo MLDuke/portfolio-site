@@ -8,6 +8,8 @@ export const ENTRY_TYPES: readonly EntryType[];
 export const REQUIRED_FIELDS: readonly string[];
 export const MEDIA_EXTENSIONS: readonly string[];
 export const SOURCE_EXTENSIONS: readonly string[];
+/** The generated card image beside index.md: "thumbnail.png". Never media. */
+export const THUMBNAIL_FILE: string;
 export const MEDIA_WARN_BYTES: number;
 export const MEDIA_ERROR_BYTES: number;
 
@@ -50,6 +52,8 @@ export interface Entry {
   sourcePath: string | undefined;
   /** The sketch file, e.g. "src/index.tsx"; undefined if the entry has none yet. */
   sourceFile: string | undefined;
+  /** THUMBNAIL_FILE when the folder has one; undefined otherwise. */
+  thumbnail: string | undefined;
   /** Markdown body of index.md, after the frontmatter block. */
   note: string;
 }
@@ -70,6 +74,7 @@ export type ProblemCode =
   | "media-too-heavy"
   | "media-heavy"
   | "no-default-export"
+  | "no-thumbnail"
   // content: publish: true only
   | "no-description"
   | "no-media"
