@@ -6,7 +6,7 @@ description: "A dense grid of dots rasterizing a scalar field: swooping bands, r
 date: "2026-10-03"
 slug: "dot-raster"
 type: code
-publish: false
+publish: true
 # media: one item per image/GIF. src is relative to this entry folder;
 # alt is required once src is set. To fill it in, drop the [] below and
 # uncomment the example under it:
