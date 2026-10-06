@@ -91,3 +91,24 @@ export function layoutPanels(input: LayoutInput): Panel[] {
   }
   return panels;
 }
+
+// Where a canvas point lands in the full-size composition, which every panel
+// shows a scaled copy of: px from the composition's top-left, plus the scale
+// to divide canvas distances by. Null in a gap or outside every panel.
+export function panelAt(
+  panels: Panel[],
+  width: number,
+  height: number,
+  x: number,
+  y: number,
+): { x: number; y: number; scale: number } | null {
+  for (const { rect, scale } of panels) {
+    if (x < rect.x || x >= rect.x + rect.w || y < rect.y || y >= rect.y + rect.h) continue;
+    return {
+      x: (x - (rect.x + rect.w / 2)) / scale + width / 2,
+      y: (y - (rect.y + rect.h / 2)) / scale + height / 2,
+      scale,
+    };
+  }
+  return null;
+}

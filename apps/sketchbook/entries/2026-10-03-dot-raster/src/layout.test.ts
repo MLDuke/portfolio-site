@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { layoutPanels, MAX_PANELS } from "./layout.ts";
+import { layoutPanels, MAX_PANELS, panelAt } from "./layout.ts";
 import type { LayoutInput } from "./layout.ts";
 
 const base: LayoutInput = {
@@ -188,5 +188,30 @@ describe("early time", () => {
   it("starts every panel at t = 0 when lag is 0", () => {
     const panels = layoutPanels({ ...base, t: 0, lag: 0 });
     assert.ok(panels.every((p) => p.time === 0));
+  });
+});
+
+describe("panelAt", () => {
+  it("is the identity in single view", () => {
+    const panels = layoutPanels({ ...base, multiPanel: false });
+    assert.deepEqual(panelAt(panels, 800, 400, 123, 45), { x: 123, y: 45, scale: 1 });
+  });
+
+  it("maps a panel's centre to the composition's centre", () => {
+    // 2x2 with no gap: each panel is 400 x 200 at scale 0.5.
+    const panels = layoutPanels({ ...base, gap: 0 });
+    assert.deepEqual(panelAt(panels, 800, 400, 600, 300), { x: 400, y: 200, scale: 0.5 });
+    assert.deepEqual(panelAt(panels, 800, 400, 200, 100), { x: 400, y: 200, scale: 0.5 });
+  });
+
+  it("scales offsets from the panel centre up to composition px", () => {
+    const panels = layoutPanels({ ...base, gap: 0 });
+    // 10 px right of the top-left panel's centre is 20 px in the composition.
+    assert.deepEqual(panelAt(panels, 800, 400, 210, 100), { x: 420, y: 200, scale: 0.5 });
+  });
+
+  it("is null in the gap between panels", () => {
+    const panels = layoutPanels(base); // 24 px gap from x = 388 to 412
+    assert.equal(panelAt(panels, 800, 400, 400, 50), null);
   });
 });

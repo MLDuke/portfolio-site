@@ -1,8 +1,23 @@
 import { useEffect, useRef, useState } from "react";
-import type { CSSProperties, DragEvent } from "react";
+import type { CSSProperties, DragEvent, PointerEvent } from "react";
 import { useDialKitController } from "dialkit";
-import { createDotRenderer, SOURCES } from "./renderer.ts";
+import { layoutPanels, panelAt } from "./layout.ts";
+import {
+  agitatorAt,
+  createPushField,
+  createStripField,
+  MAX_AGITATORS,
+  PUSH_SHAPES,
+  pushAt,
+  pushStrip,
+  randomShapeAt,
+  stepPushField,
+  stepStripField,
+} from "./push.ts";
+import type { PushField, PushShape, StripAxis, StripField } from "./push.ts";
+import { createDotRenderer, IMAGE_MOTIONS, SOURCES } from "./renderer.ts";
 import type { DotRenderer } from "./renderer.ts";
+import exampleUrl from "./example.png";
 
 // Dot raster: a source makes a scalar field in [0,1] per grid cell, a render
 // mode turns that value into a dot radius + colour, and one WebGL2 <canvas>
@@ -11,9 +26,14 @@ import type { DotRenderer } from "./renderer.ts";
 //   source (band | ripple | interference | image) -> field(cell) -> v
 //   render (binary | halftone)                    -> v -> radius, colour
 //
-// This file is the React shell: dials, buttons, image loading and the frame
-// loop. layout.ts works out the panels (pure maths); renderer.ts owns WebGL
-// and the shader.
+// The image source can move: an ambient `motion` displaces where each dot
+// samples the picture over time, and pushes drag pixels around, with springs
+// pulling them home. The pointer pushes; so do `agitators`, seeded wanderers
+// that stir the picture on their own while it plays.
+//
+// This file is the React shell: dials, buttons, image loading, pointer input
+// and the frame loop. layout.ts works out the panels and push.ts the push
+// field (both pure maths); renderer.ts owns WebGL and the shader.
 //
 // Colours are literals rather than the playground's CSS variables so the
 // sketch survives being lifted out of this repo. They assume the dark stage.
@@ -73,9 +93,29 @@ export default function DotRaster() {
       seed: [7, 0, 50, 1],
     },
     image: {
-      invert: false,
+      invert: true,
       contrast: [1.2, 0, 3, 0.05],
       brightness: [0, -0.5, 0.5, 0.01],
+      motion: { type: "select", options: [...IMAGE_MOTIONS], default: "flow" },
+      amount: [10, 0, 80, 1],
+      scale: [260, 20, 800, 10],
+      speed: [0.1, -1, 1, 0.01],
+    },
+    push: {
+      // brush carries a round patch; rows and columns slide whole strips of
+      // the picture, `strip` dot rows (or columns) thick. random hops between
+      // the three, holding each for holdMin..holdMax seconds.
+      shape: { type: "select", options: [...PUSH_SHAPES, "random"], default: "brush" },
+      strip: [2, 1, 24, 1],
+      holdMin: [0.6, 0.1, 10, 0.1],
+      holdMax: [2.5, 0.1, 10, 0.1],
+      radius: [70, 10, 300, 5],
+      strength: [1, 0, 3, 0.05],
+      stiffness: [40, 5, 400, 5],
+      damping: [0.3, 0.05, 1.5, 0.01],
+      auto: true,
+      agitators: [2, 1, MAX_AGITATORS, 1],
+      pace: [0.12, 0, 0.6, 0.01],
     },
   });
 
@@ -86,6 +126,10 @@ export default function DotRaster() {
   const timeRef = useRef(0);
   const dragDepth = useRef(0);
   const loadToken = useRef(0);
+  const pushRef = useRef<PushField | null>(null);
+  const stripRef = useRef<Record<StripAxis, StripField | null>>({ rows: null, columns: null });
+  const pointer = useRef<{ x: number; y: number } | null>(null); // last position, canvas px
+  const loop = useRef<{ raf: number; last: number | null }>({ raf: 0, last: null });
 
   const [width, setWidth] = useState(0);
   const [playing, setPlaying] = useState(
@@ -99,12 +143,13 @@ export default function DotRaster() {
 
   const height = Math.max(STAGE_HEIGHT_MIN, Math.round(p.grid.height));
   const isImage = p.source === "image";
-  const animating = playing && !isImage;
+  const canPlay = !isImage || p.image.motion !== "still" || p.push.auto;
+  const animating = playing && canPlay;
 
   // Always-current snapshot for the rAF loop, which must not re-subscribe on
   // every dial tick.
-  const state = useRef({ p, width, height });
-  state.current = { p, width, height };
+  const state = useRef({ p, width, height, animating });
+  state.current = { p, width, height, animating };
 
   useEffect(() => {
     const el = containerRef.current;
@@ -126,6 +171,11 @@ export default function DotRaster() {
       onRestore: () => drawRef.current(),
     });
     rendererRef.current = renderer;
+    void loadImage(
+      fetch(exampleUrl).then((r) => r.blob()),
+      "example.png",
+      false,
+    );
     return () => {
       loadToken.current += 1; // a decode still in flight is now stale
       renderer?.destroy();
@@ -133,50 +183,146 @@ export default function DotRaster() {
     };
   }, []);
 
+  // The push field matches the composition; a resize starts a fresh one.
+  const pushField = (w: number, h: number) => {
+    const f = pushRef.current;
+    if (f && f.width === w && f.height === h) return f;
+    return (pushRef.current = w > 0 ? createPushField(w, h) : null);
+  };
+
+  // The strip field for an axis, sized in composition px (whole dot rows at
+  // full size); a resize or a new strip size starts a fresh one. Rows and
+  // columns are kept apart, so switching shape lets each spring home.
+  const stripField = (axis: StripAxis, w: number, h: number) => {
+    const { p } = state.current;
+    const f = stripRef.current[axis];
+    const size = Math.round(p.push.strip) * Math.max(2, p.grid.spacing);
+    if (f && f.width === w && f.height === h && f.size === size) return f;
+    return (stripRef.current[axis] = w > 0 ? createStripField(w, h, axis, size) : null);
+  };
+
+  // The shape pushing right now. random follows the play clock, so pausing
+  // holds its current pick.
+  const currentShape = (): PushShape => {
+    const { push } = state.current.p;
+    if (push.shape !== "random") return push.shape as PushShape;
+    return randomShapeAt(timeRef.current, push.holdMin, push.holdMax);
+  };
+
+  // One push, from the pointer or an agitator, into whichever shape is on.
+  // Positions and moves are composition px.
+  const applyPush = (x: number, y: number, dx: number, dy: number) => {
+    const { p, width: w, height: h } = state.current;
+    const shape = currentShape();
+    if (shape === "brush") {
+      const f = pushField(w, h);
+      if (f) pushAt(f, x, y, dx, dy, p.push.radius, p.push.strength);
+    } else {
+      const f = stripField(shape, w, h);
+      if (f) pushStrip(f, x, y, dx, dy, p.push.strength);
+    }
+  };
+
   const draw = () => {
     const { p, width: w, height: h } = state.current;
-    rendererRef.current?.render({ ...p, width: w, height: h }, timeRef.current);
+    const { rows, columns } = stripRef.current;
+    rendererRef.current?.render({ ...p, width: w, height: h }, timeRef.current, {
+      brush: pushField(w, h),
+      // A field from before a resize is left out: its strips no longer fit.
+      rows: rows && rows.width === w && rows.height === h ? rows : null,
+      columns: columns && columns.width === w && columns.height === h ? columns : null,
+    });
   };
   const drawRef = useRef(draw);
   drawRef.current = draw;
 
-  // Animation loop: runs only while playing on a moving source. Time only
-  // advances while it runs, so pausing freezes the phase and the first frame
-  // is always t = 0.
-  useEffect(() => {
-    if (!animating) return;
-    let raf = 0;
-    let last: number | null = null;
-    const tick = (now: number) => {
-      const dt = last === null ? 0 : Math.min(0.1, (now - last) / 1000);
-      last = now;
-      timeRef.current += dt;
-      drawRef.current();
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [animating]);
+  // One frame loop for two clocks. Time advances only while animating, so
+  // pausing freezes the phase and the first frame is always t = 0. The push
+  // springs run whenever they're unsettled, paused or not, since the pointer
+  // set them moving. The loop stops itself once neither needs it.
+  const tick = (now: number) => {
+    const l = loop.current;
+    const dt = l.last === null ? 0 : Math.min(0.1, (now - l.last) / 1000);
+    l.last = now;
+    const { p, width: w, height: h, animating } = state.current;
+    const t0 = timeRef.current;
+    if (animating) timeRef.current += dt;
+    // Agitators push by however far their path moved this frame, so they stop
+    // when time does.
+    if (animating && dt > 0 && p.source === "image" && p.push.auto) {
+      for (let i = 0; i < Math.round(p.push.agitators); i++) {
+        const a = agitatorAt(i, t0, w, h, p.push.pace);
+        const b = agitatorAt(i, timeRef.current, w, h, p.push.pace);
+        applyPush(b.x, b.y, b.x - a.x, b.y - a.y);
+      }
+    }
+    const { stiffness, damping } = p.push;
+    const { rows, columns } = stripRef.current;
+    // Every shape steps every frame, so switching shape lets the old one settle.
+    let pushing = pushRef.current ? stepPushField(pushRef.current, dt, stiffness, damping) : false;
+    if (rows && stepStripField(rows, dt, stiffness, damping)) pushing = true;
+    if (columns && stepStripField(columns, dt, stiffness, damping)) pushing = true;
+    drawRef.current();
+    if (animating || pushing) {
+      l.raf = requestAnimationFrame((t) => tickRef.current(t));
+    } else {
+      l.raf = 0;
+      l.last = null;
+    }
+  };
+  const tickRef = useRef(tick);
+  tickRef.current = tick;
+  const startLoop = () => {
+    if (!loop.current.raf) loop.current.raf = requestAnimationFrame((t) => tickRef.current(t));
+  };
 
-  // When nothing is animating, repaint on every render (dial change, resize,
-  // new image) instead of running a loop.
   useEffect(() => {
-    if (!animating) drawRef.current();
+    if (animating) startLoop();
+  }, [animating]);
+  useEffect(() => () => cancelAnimationFrame(loop.current.raf), []);
+
+  // When the loop is idle, repaint on every render (dial change, resize, new
+  // image) instead.
+  useEffect(() => {
+    if (!loop.current.raf) drawRef.current();
   });
 
-  async function loadFile(file: File | undefined) {
-    if (!file) return;
-    // Latest load wins: a decode that resolves after a newer load started (or
-    // after unmount) is dropped, and its bitmap closed.
+  // Hover pushes the picture: the pointer's movement since the last event is
+  // added to the field under it, in composition px so it lands the same in
+  // every panel.
+  const onPointerMove = (e: PointerEvent) => {
+    const { p, width: w, height: h } = state.current;
+    const box = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - box.left;
+    const y = e.clientY - box.top;
+    const prev = pointer.current;
+    pointer.current = { x, y };
+    if (!prev || p.source !== "image") return;
+    const panels = layoutPanels({ width: w, height: h, pitch: p.grid.spacing, ...p.panels, t: 0 });
+    const at = panelAt(panels, w, h, x, y);
+    if (!at) return;
+    applyPush(at.x, at.y, (x - prev.x) / at.scale, (y - prev.y) / at.scale);
+    startLoop();
+  };
+  const onPointerLeave = () => {
+    pointer.current = null;
+  };
+
+  // Latest load wins: one that resolves after a newer load started (or after
+  // unmount) is dropped, and its bitmap closed. The token is taken before the
+  // first await, so a slow example fetch can't overwrite a dropped image.
+  // `select` flips the source to image; the example preload leaves it alone.
+  async function loadImage(source: Blob | Promise<Blob>, name: string, select: boolean) {
     const token = ++loadToken.current;
-    if (!file.type.startsWith("image/")) {
-      setError("That file isn't an image");
-      return;
-    }
     try {
+      const blob = await source;
+      if (!blob.type.startsWith("image/")) {
+        if (token === loadToken.current) setError("That file isn't an image");
+        return;
+      }
       // Held in memory only: decoded to a bitmap (premultiplied, so transparent
       // pixels read as black) and uploaded to the GPU, never stored.
-      const bitmap = await createImageBitmap(file, { premultiplyAlpha: "premultiply" });
+      const bitmap = await createImageBitmap(blob, { premultiplyAlpha: "premultiply" });
       const renderer = rendererRef.current;
       if (token !== loadToken.current || !renderer) {
         bitmap.close();
@@ -184,13 +330,17 @@ export default function DotRaster() {
       }
       renderer.setImage(bitmap);
       bumpImage((v) => v + 1);
-      setImageName(file.name);
+      setImageName(name);
       setError(null);
-      setValue("source", "image");
+      if (select) setValue("source", "image");
     } catch {
       if (token === loadToken.current) setError("Couldn't read that image");
     }
   }
+
+  const loadFile = (file: File | undefined) => {
+    if (file) void loadImage(file, file.name, true);
+  };
 
   const onDragOver = (e: DragEvent) => {
     if (e.dataTransfer.types.includes("Files")) e.preventDefault();
@@ -208,7 +358,7 @@ export default function DotRaster() {
     e.preventDefault();
     dragDepth.current = 0;
     setDragging(false);
-    void loadFile(e.dataTransfer.files[0]);
+    loadFile(e.dataTransfer.files[0]);
   };
 
   const showHint = isImage && !imageName;
@@ -218,9 +368,9 @@ export default function DotRaster() {
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
         <button
           onClick={() => setPlaying((v) => !v)}
-          disabled={isImage}
-          title={isImage ? "Image source is still" : undefined}
-          style={{ ...buttonStyle, opacity: isImage ? 0.5 : 1, cursor: isImage ? "default" : "pointer" }}
+          disabled={!canPlay}
+          title={canPlay ? undefined : "Image motion is still and auto push is off"}
+          style={{ ...buttonStyle, opacity: canPlay ? 1 : 0.5, cursor: canPlay ? "pointer" : "default" }}
         >
           {animating ? "pause" : "play"}
         </button>
@@ -233,11 +383,11 @@ export default function DotRaster() {
           accept="image/*"
           hidden
           onChange={(e) => {
-            void loadFile(e.target.files?.[0]);
+            loadFile(e.target.files?.[0]);
             e.target.value = "";
           }}
         />
-        {(imageName || error) && (
+        {((isImage && imageName) || error) && (
           <span style={{ fontSize: 12, color: error ? "#e07a7a" : "#8a909e" }}>{error ?? imageName}</span>
         )}
       </div>
@@ -248,8 +398,12 @@ export default function DotRaster() {
         onDragEnter={onDragEnter}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
+        onPointerMove={onPointerMove}
+        onPointerLeave={onPointerLeave}
         style={{
           position: "relative",
+          // Touch drags push the picture instead of scrolling the page.
+          touchAction: isImage ? "none" : undefined,
           width: "100%",
           height,
           borderRadius: 8,
