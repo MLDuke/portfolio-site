@@ -10,6 +10,13 @@
    every layered rule, including those. */
 @import "@mlduke/ui/tokens.css" layer(base);
 
+/* The .state-layer, .pressable and .focus-ring classes, in @layer components.
+   `@import "tailwindcss"` above has already declared the layer order, so this
+   lands between base and utilities wherever it sits. A utility class on the
+   same element therefore beats these rules. Being plain CSS rather than
+   @utility, they take no Tailwind variants (`hover:state-layer`). */
+@import "@mlduke/ui/interaction.css";
+
 @theme {
   --font-sans: var(--typography-font-family-sans);
   --font-mono: var(--typography-font-family-mono);
@@ -168,27 +175,11 @@
 }
 
 @layer utilities {
-  .pressable {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-  }
-
   .modal-backdrop {
     background: rgb(0 6 17 / 0.24);
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .pressable {
-      transition-property: scale;
-      transition-duration: var(--interaction-duration);
-      transition-timing-function: var(--interaction-easing);
-    }
-
-    .pressable:active:not(:disabled, [aria-disabled="true"], [data-state="disabled"]),
-    .pressable[data-state="pressed"]:not(:disabled, [aria-disabled="true"]) {
-      scale: 0.96;
-    }
-
     html[data-site-page-transition="fallback"] .site-page-content {
       animation: site-page-enter 210ms ease-out both;
     }
@@ -208,76 +199,6 @@
     .modal-shell-closing {
       animation: modal-shell-exit 150ms ease-out both;
     }
-  }
-}
-
-@utility state-layer {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
-
-  /* Two stacked layers: ::before holds the persistent selected/current state,
-     ::after holds transient hover/press feedback. Because they composite,
-     hovering or pressing a selected control still reads as a change. Both sit
-     above the element background and below its content (z-index: -1 inside the
-     isolation context), so text and media stay untinted. */
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-color: transparent;
-    transition-property: background-color;
-    transition-duration: var(--interaction-duration);
-    transition-timing-function: var(--interaction-easing);
-  }
-
-  /* Resting state: selected / current. */
-  &:is(
-      [aria-current="page"],
-      [aria-selected="true"],
-      [aria-pressed="true"],
-      [aria-expanded="true"],
-      [data-selected="true"],
-      [data-state="selected"]
-    ):not(:disabled, [aria-disabled="true"], [data-state="disabled"])::before {
-    background-color: var(--state-layer-selected);
-  }
-
-  /* Transient state: hover. */
-  &:hover:not(:disabled, [aria-disabled="true"], [data-state="disabled"])::after,
-  &[data-state="hover"]:not(:disabled, [aria-disabled="true"])::after {
-    background-color: var(--state-layer-hover);
-  }
-
-  /* Transient state: pressed. Declared after hover so the pointer-down state
-     wins for as long as the pointer is held. */
-  &:active:not(:disabled, [aria-disabled="true"], [data-state="disabled"])::after,
-  &[data-state="pressed"]:not(:disabled, [aria-disabled="true"])::after {
-    background-color: var(--state-layer-pressed);
-  }
-
-  &:is(:disabled, [aria-disabled="true"], [data-state="disabled"]) {
-    cursor: default;
-    opacity: var(--content-disabled);
-  }
-
-  &:focus-visible,
-  &[data-state="focused"] {
-    outline: var(--focus-ring-width) solid var(--focus-ring-color);
-    outline-offset: var(--focus-ring-offset);
-  }
-}
-
-/* The same focus ring for controls that do not carry a state layer. */
-@utility focus-ring {
-  &:focus-visible,
-  &[data-state="focused"] {
-    outline: var(--focus-ring-width) solid var(--focus-ring-color);
-    outline-offset: var(--focus-ring-offset);
   }
 }
 
