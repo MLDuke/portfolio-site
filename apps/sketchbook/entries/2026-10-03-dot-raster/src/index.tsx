@@ -35,8 +35,8 @@ import exampleUrl from "./example.png";
 // and the frame loop. layout.ts works out the panels and push.ts the push
 // field (both pure maths); renderer.ts owns WebGL and the shader.
 //
-// Colours are literals rather than the playground's CSS variables so the
-// sketch survives being lifted out of this repo. They assume the dark stage.
+// Colours are literals, not @mlduke/ui tokens, so this file stays standalone.
+// They assume the dark stage.
 
 const STAGE_HEIGHT_MIN = 200;
 

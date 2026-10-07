@@ -57,7 +57,7 @@ _Avoid_: "the portfolio", which is `portfolio-site`.
 
 **Stage**
 The dark panel a sketch renders into: a styled background, padding, a border and a
-minimum height. Names disagree here. The guide says "the stage" for that panel,
+minimum height. `@mlduke/ui` tokens resolve inside it, in the dark theme. Names disagree here. The guide says "the stage" for that panel,
 which is `.canvas` in `playground/src/styles.css`, while the `Stage` component
 and `.stage` class in the playground are the whole entry page that contains it.
 

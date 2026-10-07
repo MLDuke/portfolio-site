@@ -1,6 +1,6 @@
 # 0014. Sketch internals stay in the entry until a second sketch needs them
 
-Status: Accepted · 2026-10-03
+Status: Accepted · 2026-10-03 · amended 2026-10-07 by [0016](0016-sketches-may-use-ui.md)
 
 ## Context
 Dot raster split into `renderer.ts` (WebGL2), `layout.ts` (pure panel maths, with

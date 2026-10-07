@@ -1,7 +1,7 @@
 /* The playground shell reads @mlduke/ui tokens (loaded in main.tsx, themed by
-   data-theme="dark" on <html>). Sketches never do: .canvas below is literal and
-   src/stage-isolation.ts unsets every token variable inside it. Values with no
-   matching token stay local and are listed as candidates in the MDU-22 PR. */
+   data-theme="dark" on <html>). Sketches may too: the tokens reach .canvas and
+   everything in it, in the same dark theme. Values with no matching token stay
+   local and are listed as candidates in the MDU-22 PR. */
 
 *,
 *::before,
@@ -81,7 +81,8 @@ code {
 /* The stage a sketch renders into. Every value here is a literal on purpose.
    The sketch contract promises a dark background, 32px padding, a border and
    min-height 240px, and sketches inherit font and colour from this box, so
-   none of it may point at a token or follow the shell's font. */
+   none of it may point at a token or follow the shell's font. Tokens are
+   available to the sketch inside it (ADR 0016), not to the box itself. */
 .canvas {
   margin-top: 28px;
   padding: 32px;

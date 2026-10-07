@@ -9,7 +9,7 @@ what must not be removed.
 - Files are `NNNN-kebab-title.md`, numbered in the order they were decided, and
   dated by the commit that introduced the decision.
 - Don't rewrite an accepted ADR when the decision changes. Add a new one, and set
-  the old one's status to `Superseded by NNNN`. Fix typos and broken links in place. 0001 and 0006 were also amended in place when Sketchbook joined the monorepo, and 0003 was revised in place for it (MDU-24); their status lines say so.
+  the old one's status to `Superseded by NNNN`. Fix typos and broken links in place. 0001 and 0006 were also amended in place when Sketchbook joined the monorepo, and 0003 was revised in place for it (MDU-24); their status lines say so. A new ADR that changes only part of an older one marks it `amended <date> by NNNN` and leaves its text alone, as 0016 does to 0014.
 - Format: `Status`, then Context, Decision, Consequences.
 
 | # | Title | Status |
@@ -27,5 +27,6 @@ what must not be removed.
 | [0011](0011-invalid-entries-render-with-problems.md) | Invalid entries render in the playground with their problems shown | Accepted |
 | [0012](0012-lowercase-media-extensions.md) | Media extensions are lowercase only | Accepted |
 | [0013](0013-folder-name-equals-date-slug.md) | The folder name must equal `<date>-<slug>` | Accepted |
-| [0014](0014-sketch-internals-stay-in-entry.md) | Sketch internals stay in the entry until a second sketch needs them | Accepted |
+| [0014](0014-sketch-internals-stay-in-entry.md) | Sketch internals stay in the entry until a second sketch needs them | Accepted, amended by 0016 |
 | [0015](0015-thumbnail-outside-media.md) | Thumbnails are a generated `thumbnail.png`, outside `media:` | Accepted |
+| [0016](0016-sketches-may-use-ui.md) | Sketches may use `@mlduke/ui`, and the stage no longer hides it | Accepted |
