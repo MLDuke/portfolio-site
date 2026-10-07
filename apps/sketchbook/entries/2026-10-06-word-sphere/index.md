@@ -6,7 +6,7 @@ description: "A sphere lit from one side and built from rows of words, after a 1
 date: "2026-10-06"
 slug: "word-sphere"
 type: code
-publish: false
+publish: true
 # media: one item per image/GIF. src is relative to this entry folder;
 # alt is required once src is set. To fill it in, drop the [] below and
 # uncomment the example under it:
