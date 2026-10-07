@@ -6,7 +6,7 @@ description: "A ball made of one word set in rows, after a 1970 Pirelli poster: 
 date: "2026-10-06"
 slug: "type-sphere"
 type: code
-publish: false
+publish: true
 # media: one item per image/GIF. src is relative to this entry folder;
 # alt is required once src is set. To fill it in, drop the [] below and
 # uncomment the example under it:
