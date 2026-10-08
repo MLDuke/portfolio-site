@@ -154,10 +154,11 @@ function toJournalEntry(entry, position) {
     throw new Error(`${entryFolder}: type must be image, code, or mixed.`);
   }
 
-  const mediaBlocks = mediaItems.map((media, mediaIndex) =>
-    toFigureBlock(entryDir, slug, media, mediaIndex),
+  const figures = mediaItems.map((media, mediaIndex) =>
+    toFigureConfig(entryDir, slug, media, mediaIndex),
   );
-  const firstMedia = mediaBlocks[0]?.media;
+  const mediaBlocks = pairIntoGalleries(figures);
+  const firstMedia = figures[0]?.media;
   const blocks = [
     {
       type: "description",
@@ -184,7 +185,31 @@ function toJournalEntry(entry, position) {
   };
 }
 
-function toFigureBlock(entryDir, slug, media, mediaIndex) {
+/**
+ * Pairs consecutive figures into two-up `gallery` blocks, in order. An odd
+ * figure at the end stays a `figure` block.
+ */
+function pairIntoGalleries(figures) {
+  const blocks = [];
+
+  for (let i = 0; i < figures.length; i += 2) {
+    const [first, second] = figures.slice(i, i + 2);
+
+    blocks.push(
+      second
+        ? { type: "gallery", items: [first, second] }
+        : { type: "figure", ...first },
+    );
+  }
+
+  return blocks;
+}
+
+/**
+ * One image as a `DetailFigureConfig`: the shape of a figure block without its
+ * `type`, and of each item in a gallery block.
+ */
+function toFigureConfig(entryDir, slug, media, mediaIndex) {
   const src = requireString(media?.src, `${slug}: media[${mediaIndex}].src`);
   const alt = requireString(media?.alt, `${slug}: media[${mediaIndex}].alt`);
   const source = resolveRelativePath(entryDir, src, `${slug}: media src`);
@@ -194,7 +219,6 @@ function toFigureBlock(entryDir, slug, media, mediaIndex) {
   }
 
   return {
-    type: "figure",
     media: {
       src: `/journal/${slug}/${toPublicPath(src)}`,
       alt,
