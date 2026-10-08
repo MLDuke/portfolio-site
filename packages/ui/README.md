@@ -3,7 +3,8 @@
 Shared UI for the apps in this monorepo. So far it's the design tokens, the source of truth
 for visual primitives, as a [GTC](https://buninux.com/design-tokens) token set
 (Global / Theme / Component) in DTCG JSON, compiled to CSS custom properties. It
-also ships the IBM Plex fonts the typography tokens name.
+also ships the IBM Plex fonts the typography tokens name, and the interaction
+classes (`interaction.css`) that apply the interaction tokens.
 
 The code is public to read, but no licence has been granted, so all rights are
 reserved. The exception is the font files under `fonts/`. IBM Plex is © IBM Corp.
@@ -92,6 +93,7 @@ scripts/          compiler.mjs + build-css.mjs
 dist/tokens.css   generated, committed
 fonts/            IBM Plex woff2 files + OFL.txt
 fonts.css         hand-written @font-face rules for fonts/
+interaction.css   hand-written .state-layer / .pressable / .focus-ring rules
 ```
 
 All dimensional values are **px** in the JSON — GTC's factual scale keys require
@@ -149,6 +151,47 @@ If your stylesheet uses cascade layers, import `tokens.css` into a low layer
 `--state-layer-*` or `--focus-ring-color` does it from a layered rule, and an
 unlayered `:root` declaration outranks every layered rule. A dark modal on a
 light page would then keep the light state layers.
+
+### `interaction.css`
+
+`@mlduke/ui/interaction.css` turns those tokens into three classes, so every
+consumer gets the same hover, pressed, selected, disabled and focus behaviour
+instead of its own copy:
+
+- `.state-layer` gives the element two stacked layers (`::before` for the
+  persistent selected/current state, `::after` for transient hover and press),
+  dims it to `--content-disabled` when disabled, and draws the focus ring on
+  `:focus-visible`. It sets `position: relative`, `isolation: isolate` and
+  `overflow: hidden`, which the layers need.
+- `.pressable` adds the 0.96 press scale (under `prefers-reduced-motion:
+  no-preference` only) and `touch-action: manipulation`.
+- `.focus-ring` is the focus ring alone, for a control that has no state layer.
+
+Selected is read from `aria-current="page"`, `aria-selected`, `aria-pressed`,
+`aria-expanded`, `data-selected="true"` or `data-state="selected"`. Disabled is
+`:disabled`, `aria-disabled="true"` or `data-state="disabled"`. A `data-state` of
+`hover`, `pressed` or `focused` forces that state without a pointer or key press,
+for specimens that need to show it statically.
+
+The file is plain CSS, imported after `tokens.css`:
+
+```css
+@import "@mlduke/ui/tokens.css" layer(base);
+@import "@mlduke/ui/interaction.css";
+```
+
+The rules sit in `@layer components`, so they rank above `base` and below
+`utilities`. A utility class on the same element beats them, so a `cursor-pointer`
+or `opacity-*` on a control that can be disabled has to be left off while it is. If your stylesheet declares
+its own layer order, put `components` between the layer holding `tokens.css` and
+your utilities. They are ordinary classes, not Tailwind `@utility` rules, so
+they take no variants: `hover:state-layer` does nothing.
+
+A surface that paints a fixed fill regardless of theme re-points
+`--state-layer-hover`, `--state-layer-pressed`, `--state-layer-selected` and
+`--focus-ring-color` for its descendants, to the `on-light` or `on-dark`
+primitives (`--state-layer-on-light-*`, `--state-layer-on-dark-*`). `ui` doesn't
+ship a class for that yet, because which surfaces need one is the consumer's call.
 
 ## Status colours
 

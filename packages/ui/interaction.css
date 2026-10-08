@@ -1,0 +1,98 @@
+/* The interaction contract as classes: a state layer (hover, pressed, selected,
+   disabled), a press scale and a focus ring, all driven by the --state-layer-*,
+   --focus-ring-*, --interaction-* and --content-disabled tokens in tokens.css.
+
+   Plain class rules in `@layer components`, so a utility class on the same
+   element (a `cursor-*`, `outline-*` or `scale-*` from Tailwind, say) outranks
+   them and can adjust one property without a specificity fight.
+
+   Each state has a `data-state` hook (hover, pressed, selected, focused,
+   disabled), so a specimen can hold a control in that state without a pointer. */
+
+@layer components {
+  .state-layer {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Two stacked layers: ::before holds the persistent selected/current state,
+     ::after holds transient hover/press feedback. Because they composite,
+     hovering or pressing a selected control still reads as a change. Both sit
+     above the element background and below its content (z-index: -1 inside the
+     isolation context), so text and media stay untinted. */
+  .state-layer::before,
+  .state-layer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: transparent;
+    transition-property: background-color;
+    transition-duration: var(--interaction-duration);
+    transition-timing-function: var(--interaction-easing);
+  }
+
+  /* Resting state: selected / current. */
+  .state-layer:is(
+      [aria-current="page"],
+      [aria-selected="true"],
+      [aria-pressed="true"],
+      [aria-expanded="true"],
+      [data-selected="true"],
+      [data-state="selected"]
+    ):not(:disabled, [aria-disabled="true"], [data-state="disabled"])::before {
+    background-color: var(--state-layer-selected);
+  }
+
+  /* Transient state: hover. */
+  .state-layer:hover:not(:disabled, [aria-disabled="true"], [data-state="disabled"])::after,
+  .state-layer[data-state="hover"]:not(:disabled, [aria-disabled="true"])::after {
+    background-color: var(--state-layer-hover);
+  }
+
+  /* Transient state: pressed. Declared after hover so the pointer-down state
+     wins for as long as the pointer is held. */
+  .state-layer:active:not(:disabled, [aria-disabled="true"], [data-state="disabled"])::after,
+  .state-layer[data-state="pressed"]:not(:disabled, [aria-disabled="true"])::after {
+    background-color: var(--state-layer-pressed);
+  }
+
+  .state-layer:is(:disabled, [aria-disabled="true"], [data-state="disabled"]) {
+    cursor: default;
+    opacity: var(--content-disabled);
+  }
+
+  .state-layer:focus-visible,
+  .state-layer[data-state="focused"] {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* The same focus ring for controls that do not carry a state layer. */
+  .focus-ring:focus-visible,
+  .focus-ring[data-state="focused"] {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .pressable {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pressable {
+      transition-property: scale;
+      transition-duration: var(--interaction-duration);
+      transition-timing-function: var(--interaction-easing);
+    }
+
+    .pressable:active:not(:disabled, [aria-disabled="true"], [data-state="disabled"]),
+    .pressable[data-state="pressed"]:not(:disabled, [aria-disabled="true"]) {
+      scale: 0.96;
+    }
+  }
+}

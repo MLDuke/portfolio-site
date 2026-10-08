@@ -4,9 +4,10 @@
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
-  "files": ["dist", "tokens", "fonts", "fonts.css"],
+  "files": ["dist", "tokens", "fonts", "fonts.css", "interaction.css"],
   "exports": {
     "./tokens.css": "./dist/tokens.css",
+    "./interaction.css": "./interaction.css",
     "./fonts.css": "./fonts.css",
     "./fonts/*": "./fonts/*",
     "./tokens/*": "./tokens/*"
