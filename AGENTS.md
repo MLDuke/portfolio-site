@@ -10,6 +10,7 @@ MLDuke's portfolio site, the lab notebook it publishes from, and the design toke
 | `apps/sketchbook` | Lab notebook of design and code sketches: `entries/`, plus a local Vite playground that renders them. |
 | `packages/ui` | `@mlduke/ui`: GTC design tokens and the IBM Plex fonts. Both apps consume it as a workspace. |
 | `.conductor/`, `scripts/` | Conductor settings, and the setup and agentation scripts they call. |
+| `docs/adr/` | Decisions that span apps. Sketchbook keeps its own in `apps/sketchbook/docs/adr/`. |
 | `docs/agents/` | How agent skills use the issue tracker and domain docs. |
 
 Each of these has its own `AGENTS.md` or `README.md` with rules for working inside it. Read it before you change anything there.

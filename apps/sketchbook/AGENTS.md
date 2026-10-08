@@ -61,8 +61,11 @@ export default function Sketch() {
 
 - **Default export or it doesn't render.** `validate` fails on a `src/index.*`
   without one, draft or not.
-- **Self-contained styling.** Inline styles with literal values. Do not use the
-  playground's CSS variables — a sketch has to survive being lifted out.
+- **Styling is your choice.** Inline styles with literal values still work. A
+  sketch may instead read `@mlduke/ui` tokens (`var(--surface-raised)`) and use
+  its controls; the stage already loads the tokens, in the dark theme. Don't
+  use the playground's own classes, and don't copy a control into the entry. See
+  [ADR 0016](docs/adr/0016-sketches-may-use-ui.md).
 - **The stage is already styled.** It gives you a dark background, 32px padding,
   a border and `min-height: 240px`. Never set a page background or
   full-viewport sizing.

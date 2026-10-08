@@ -74,12 +74,18 @@ entries stay that way — private-by-convention in a public repo. See *Publishin
 Conventions the code implies but doesn't enforce. The enforced ones are in
 *What gets checked*.
 
-**Self-contained styling.** Sketches use inline styles with literal values, not
-the playground's CSS custom properties. The playground is a viewer, not a
-framework: README's contract with `portfolio-site` is that it *links out to a
-file here*, so a sketch that reads `var(--line)` breaks the moment someone opens
-it anywhere else. The cost is that colors are eyeballed against the dark stage —
-`entries/2026-10-03-dot-raster/src/index.tsx` carries a comment saying so.
+**Styling is your choice.** A sketch may use inline styles with literal values,
+or read `@mlduke/ui` tokens, or mix them. The playground loads
+`@mlduke/ui/tokens.css` once in `main.tsx` and the stage sits under
+`data-theme="dark"` on `<html>`, so `var(--surface-raised)` resolves with no
+import in the sketch. To flip a region to the light theme, put
+`data-theme="light"` on one of the sketch's own elements. Controls come from
+`@mlduke/ui` too, not from a copy in the entry. The price is that a sketch using
+tokens or controls needs `@mlduke/ui` beside it, where a literal-only sketch is
+still one file you can lift out; README's contract with `portfolio-site` is only
+that it *links out to a file here*. Literal colours are eyeballed against the dark
+stage, and `entries/2026-10-03-dot-raster/src/index.tsx` carries a comment saying
+so. Why: [ADR 0016](adr/0016-sketches-may-use-ui.md).
 
 **The stage is already styled.** `.canvas` in `playground/src/styles.css` gives
 every sketch a dark panel background, 32px of padding, a border and
@@ -229,3 +235,6 @@ the thing.
   drafts included.
 - [0015](adr/0015-thumbnail-outside-media.md) — `thumbnail.png` kept out of
   `media:`, and the overlays defined off in `scripts/thumbnails.mjs`.
+- [0016](adr/0016-sketches-may-use-ui.md) — no token isolation in the stage:
+  leave `tokens.css` imported in `main.tsx` and don't reintroduce a reset of
+  `@mlduke/ui` variables inside `.canvas`.
