@@ -8,7 +8,7 @@
     "dev": "vite playground",
     "build:playground": "vite build playground",
     "preview:playground": "vite preview playground",
-    "test": "node --test \"scripts/**/*.test.mjs\" \"entries/*/src/**/*.test.ts\"",
+    "test": "node --test \"scripts/**/*.test.mjs\" \"entries/*/src/**/*.test.ts\" \"gate/*.test.ts\"",
     "typecheck": "tsc -p playground/tsconfig.json && tsc -p playground/tsconfig.node.json && tsc -p playground/tsconfig.test.json",
     "thumbnails": "node scripts/thumbnails.mjs"
   },

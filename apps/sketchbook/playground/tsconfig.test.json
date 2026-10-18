@@ -9,6 +9,6 @@
     "types": ["node"],
     "erasableSyntaxOnly": true
   },
-  "include": ["../entries/*/src/**/*.test.ts"],
+  "include": ["../entries/*/src/**/*.test.ts", "../gate/*.test.ts"],
   "exclude": []
 }

@@ -48,7 +48,8 @@ jobs:
       - name: Typecheck
         run: npm run typecheck -w apps/sketchbook
 
-      # node:test over scripts/**/*.test.mjs and entries/*/src/**/*.test.ts.
+      # node:test over scripts/**/*.test.mjs, entries/*/src/**/*.test.ts and
+      # gate/*.test.ts.
       - name: Test
         run: npm test -w apps/sketchbook
 

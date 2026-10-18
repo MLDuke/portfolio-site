@@ -197,10 +197,11 @@ Nothing else has to change in either app.
 Why it's a flag on `main`, and why an agent never flips it, is in
 [ADR 0001](adr/0001-publish-flag-on-main.md).
 
-Sharing an *unpublished* sketch is a different thing: `npm run build:playground`
-plus a Vercel preview gives you a URL, and you link to one sketch with the hash
-route. But a plain deploy exposes **every** entry in the repo, drafts included,
-so put Vercel Deployment Protection or Cloudflare Access in front of it first.
+Sharing an *unpublished* sketch is a different thing. The deployed playground
+exposes **every** entry in the repo, drafts included, so it sits behind a
+password gate ([ADR 0017](adr/0017-password-gate-in-routing-middleware.md)):
+anyone with the password sees the whole collection, and you link to one sketch
+with the hash route. There is no per-sketch link yet.
 
 ## Machinery
 
@@ -238,3 +239,6 @@ the thing.
 - [0016](adr/0016-sketches-may-use-ui.md) — no token isolation in the stage:
   leave `tokens.css` imported in `main.tsx` and don't reintroduce a reset of
   `@mlduke/ui` variables inside `.canvas`.
+- [0017](adr/0017-password-gate-in-routing-middleware.md) — `middleware.js` at
+  the app root, in JavaScript, and both gate variables set before any custom
+  domain is added.
