@@ -139,6 +139,21 @@ Note: a sketch that imports `useDialKit` still bundles the dialkit *runtime* int
 its own chunk regardless of the toggle — the toggle only controls the panel UI.
 With the panel off, such a sketch just renders at its default dial values.
 
+### Password gate
+
+The deployed playground is behind one shared password, checked by
+`middleware.js` before every request
+([ADR 0017](docs/adr/0017-password-gate-in-routing-middleware.md)). It needs two
+Vercel project env vars, and serves nothing until both are set:
+
+| env var | value |
+| --- | --- |
+| `SKETCHBOOK_PASSWORD` | the password; long beats clever |
+| `SKETCHBOOK_COOKIE_SECRET` | a random string that signs sessions (`openssl rand -hex 32`) |
+
+Changing either one signs everyone out. `/logout` signs you out. `npm run dev`
+doesn't run the gate.
+
 ### Sharing a sketch with your team
 
 `npm run build:playground` emits a static site to `playground/dist/` (gitignored).

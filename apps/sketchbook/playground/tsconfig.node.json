@@ -1,12 +1,15 @@
 {
-  // vite.config.ts only — the one file here that runs in Node rather than the
-  // browser. Kept as its own project so `@types/node` doesn't apply to
-  // playground/src and entries/*/src, where `setTimeout` must stay the DOM one
-  // and `process` genuinely isn't there at runtime.
+  // The files that run in Node rather than the browser: vite.config.ts, and the
+  // deployed password gate (middleware.js, gate/gate.js). Kept as its own project so
+  // `@types/node` doesn't apply to playground/src and entries/*/src, where
+  // `setTimeout` must stay the DOM one and `process` genuinely isn't there at
+  // runtime.
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "lib": ["ES2022"],
-    "types": ["node"]
+    "types": ["node"],
+    // middleware.js and gate/gate.js are typed with JSDoc.
+    "checkJs": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "../middleware.js", "../gate/gate.js"]
 }

@@ -20,7 +20,7 @@ what must not be removed.
 | [0004](0004-build-time-overlay-defines.md) | Dev overlays are toggled by build-time `define` booleans | Accepted |
 | [0005](0005-vercel-framework-null.md) | `vercel.json` sets `framework: null` | Accepted |
 | [0006](0006-conductor-port-from-env.md) | `SKETCHBOOK_PORT` drives the dev port; Conductor passes only `--host` | Accepted |
-| [0007](0007-separate-tsconfigs.md) | Separate tsconfigs for browser, node and test code | Accepted |
+| [0007](0007-separate-tsconfigs.md) | Separate tsconfigs for browser, node and test code | Accepted, amended by 0017 |
 | [0008](0008-new-entry-two-input-paths.md) | `new-entry.mjs` keeps both input paths | Accepted |
 | [0009](0009-node-test-over-vitest.md) | `node:test` instead of Vitest | Accepted |
 | [0010](0010-entry-module.md) | One Entry module, two adapters | Accepted |
@@ -30,3 +30,4 @@ what must not be removed.
 | [0014](0014-sketch-internals-stay-in-entry.md) | Sketch internals stay in the entry until a second sketch needs them | Accepted, amended by 0016 |
 | [0015](0015-thumbnail-outside-media.md) | Thumbnails are a generated `thumbnail.png`, outside `media:` | Accepted |
 | [0016](0016-sketches-may-use-ui.md) | Sketches may use `@mlduke/ui`, and the stage no longer hides it | Accepted |
+| [0017](0017-password-gate-in-routing-middleware.md) | A password gate in Routing Middleware guards the deployed playground | Accepted |

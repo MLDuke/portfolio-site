@@ -1,6 +1,6 @@
 # 0007. Separate tsconfigs for browser, node and test code
 
-Status: Accepted · 2026-09-17
+Status: Accepted · 2026-09-17 · amended 2026-10-18 by [0017](0017-password-gate-in-routing-middleware.md)
 
 ## Context
 Sketches run in the browser, `vite.config.ts` runs in Node, and tests run under
