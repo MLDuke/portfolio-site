@@ -156,16 +156,20 @@ doesn't run the gate.
 
 ### Sharing a sketch with your team
 
-`npm run build:playground` emits a static site to `playground/dist/` (gitignored).
-`vercel.json` points a Vercel project at it (`buildCommand`/`outputDirectory`
-preset), so pushing a branch gives a preview URL; link straight to one sketch
-with the hash route, e.g. `https://<deploy>/#/2026-08-31-scroll-snap-experiment`.
+`main` deploys to **`https://sketchbook.mlduke.design`**, the `sketchbook`
+Vercel project. Link straight to one sketch with the hash route, e.g.
+`https://sketchbook.mlduke.design/#/2026-08-31-scroll-snap-experiment`, and share
+the password with it. Pushing a branch gives a preview URL too, behind Vercel
+Authentication as well as the password.
 
-This repo is public and most entries are unpublished drafts, and a plain deploy
-exposes all of them. For team-only sharing, put access control in front —
-Vercel Deployment Protection (password / Vercel Authentication) or Cloudflare
-Access. Deploying the playground does not touch `portfolio-site`; the two are
-independent.
+`npm run build:playground` emits the same static site to `playground/dist/`
+(gitignored); `vercel.json` presets `buildCommand`/`outputDirectory` for it.
+
+This repo is public and most entries are unpublished drafts, and a deploy
+exposes all of them, so the password gate is the only lock on the subdomain:
+Vercel Authentication doesn't cover custom domains. Don't add another custom
+domain to the project without it. Deploying the playground does not touch the
+portfolio; the two are independent Vercel projects.
 
 ## What this repo does not do
 
