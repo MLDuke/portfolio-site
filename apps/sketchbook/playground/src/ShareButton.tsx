@@ -20,21 +20,20 @@ export function ShareButton({ dir }: { dir: string }) {
 
   async function share() {
     setState({ kind: "working" });
-    let url: string;
-    let expires: string;
+    const link = requestLink(dir);
     try {
-      const response = await fetch("/share", { method: "POST", body: new URLSearchParams({ dir }) });
-      if (!response.ok) throw new Error((await response.text()) || `HTTP ${response.status}`);
-      ({ url, expires } = (await response.json()) as { url: string; expires: string });
-    } catch (error) {
-      setState({ kind: "failed", message: error instanceof Error ? error.message : String(error) });
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      setState({ kind: "copied", expires });
+      // Hand the clipboard a pending value while the click still counts as a
+      // user gesture. Safari refuses a write that waits on the fetch first.
+      const text = link.then(({ url }) => new Blob([url], { type: "text/plain" }));
+      text.catch(() => {}); // a failed request is reported from `link` below
+      await navigator.clipboard.write([new ClipboardItem({ "text/plain": text })]);
+      setState({ kind: "copied", expires: (await link).expires });
     } catch {
-      setState({ kind: "shown", url, expires });
+      try {
+        setState({ kind: "shown", ...(await link) });
+      } catch (error) {
+        setState({ kind: "failed", message: error instanceof Error ? error.message : String(error) });
+      }
     }
   }
 
@@ -65,4 +64,10 @@ export function ShareButton({ dir }: { dir: string }) {
       )}
     </div>
   );
+}
+
+async function requestLink(dir: string): Promise<{ url: string; expires: string }> {
+  const response = await fetch("/share", { method: "POST", body: new URLSearchParams({ dir }) });
+  if (!response.ok) throw new Error((await response.text()) || `HTTP ${response.status}`);
+  return (await response.json()) as { url: string; expires: string };
 }

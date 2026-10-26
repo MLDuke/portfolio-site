@@ -4,8 +4,8 @@ import type { Sketch } from "./sketch";
 import { ShareButton } from "./ShareButton";
 
 // Share links are signed by the password gate (gate/gate.js), which only runs
-// on a deploy. `npm run dev` and `vite preview` have nothing to ask.
-const SHARE_LINKS = import.meta.env.PROD;
+// on a Vercel deploy. `npm run dev` and `vite preview` have nothing to ask.
+const SHARE_LINKS = __SHARE_LINKS_ENABLED__;
 
 // One React.lazy per sketch, memoised so navigating away and back does not throw
 // away the already-loaded chunk.
