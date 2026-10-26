@@ -30,4 +30,5 @@ what must not be removed.
 | [0014](0014-sketch-internals-stay-in-entry.md) | Sketch internals stay in the entry until a second sketch needs them | Accepted, amended by 0016 |
 | [0015](0015-thumbnail-outside-media.md) | Thumbnails are a generated `thumbnail.png`, outside `media:` | Accepted |
 | [0016](0016-sketches-may-use-ui.md) | Sketches may use `@mlduke/ui`, and the stage no longer hides it | Accepted |
-| [0017](0017-password-gate-in-routing-middleware.md) | A password gate in Routing Middleware guards the deployed playground | Accepted |
+| [0017](0017-password-gate-in-routing-middleware.md) | A password gate in Routing Middleware guards the deployed playground | Accepted, amended by 0018 |
+| [0018](0018-share-links.md) | Share links open one entry from a separate share build | Accepted |

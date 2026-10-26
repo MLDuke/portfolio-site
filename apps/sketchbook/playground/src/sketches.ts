@@ -1,34 +1,8 @@
 import type { ComponentType } from "react";
-import {
-  readEntry,
-  type Entry,
-  type EntryFile,
-  type EntryMedia,
-  type Problem,
-} from "../../scripts/lib/entry.mjs";
+import type { EntryFile } from "../../scripts/lib/entry.mjs";
+import { toSketch, type Sketch } from "./sketch";
 
-export interface SketchMedia extends EntryMedia {
-  /** Resolved bundler URL, present only when the file exists on disk. */
-  url?: string;
-}
-
-/**
- * An Entry as the Entry module read it (nothing defaulted: an invalid entry has
- * empty fields and `problems` says why), plus what the playground adds.
- */
-export interface Sketch extends Omit<Entry, "media"> {
-  media: SketchMedia[];
-  /** Resolved bundler URL of the entry's thumbnail, when it has one. */
-  thumbnailUrl?: string;
-  /** Everything wrong with the entry, as judged by the Entry module. */
-  problems: Problem[];
-  /**
-   * Dynamic import of the sketch's `src/index.*`, or undefined when the entry
-   * has no runnable source yet. Each one is a separate lazy chunk, so a sketch
-   * is only fetched and compiled when you open it.
-   */
-  load?: () => Promise<{ default: ComponentType }>;
-}
+export type { Sketch, SketchMedia } from "./sketch";
 
 // Notes and media are cheap and needed up front for the index, so eager. Sketch
 // modules stay lazy — that is what keeps startup flat as the collection grows.
@@ -74,22 +48,12 @@ export const sketches: Sketch[] = Object.entries(noteFiles)
   .map(([globPath, indexMd]): Sketch => {
     const dir = globPath.match(DIR_RE)![1];
     const prefix = `../../entries/${dir}/`;
-    const { entry, problems } = readEntry({
+    return toSketch({
       dir,
       indexMd,
       files: files.get(dir) ?? [],
-      partial: true,
+      urlFor: (path) => mediaFiles[prefix + path],
+      loaderFor: (path) => sketchModules[prefix + path],
     });
-
-    return {
-      ...entry,
-      media: entry.media.map((m) => ({
-        ...m,
-        url: m.src ? mediaFiles[prefix + m.src] : undefined,
-      })),
-      thumbnailUrl: entry.thumbnail ? mediaFiles[prefix + entry.thumbnail] : undefined,
-      problems,
-      load: entry.sourceFile ? sketchModules[prefix + entry.sourceFile] : undefined,
-    };
   })
   .sort((a, b) => b.date.localeCompare(a.date) || a.dir.localeCompare(b.dir));

@@ -6,7 +6,7 @@
     "new": "node scripts/new-entry.mjs",
     "validate": "node scripts/validate-entries.mjs",
     "dev": "vite playground",
-    "build:playground": "vite build playground",
+    "build:playground": "vite build playground && vite build playground --mode share",
     "preview:playground": "vite preview playground",
     "test": "node --test \"scripts/**/*.test.mjs\" \"entries/*/src/**/*.test.ts\" \"gate/*.test.ts\"",
     "typecheck": "tsc -p playground/tsconfig.json && tsc -p playground/tsconfig.node.json && tsc -p playground/tsconfig.test.json",

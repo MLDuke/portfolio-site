@@ -150,20 +150,28 @@ Vercel project env vars, and serves nothing until both are set:
 | --- | --- |
 | `SKETCHBOOK_PASSWORD` | the password; long beats clever |
 | `SKETCHBOOK_COOKIE_SECRET` | a random string that signs sessions (`openssl rand -hex 32`) |
+| `SKETCHBOOK_SHARE_SECRET` | a random string that signs share links; optional, and sharing is off without it |
 
-Changing either one signs everyone out. `/logout` signs you out. `npm run dev`
+Changing the password or the cookie secret signs everyone out. Changing the
+share secret voids every share link. `/logout` signs you out. `npm run dev`
 doesn't run the gate.
 
-### Sharing a sketch with your team
+### Sharing a sketch
 
 `main` deploys to **`https://sketchbook.mlduke.design`**, the `sketchbook`
-Vercel project. Link straight to one sketch with the hash route, e.g.
-`https://sketchbook.mlduke.design/#/2026-08-31-scroll-snap-experiment`, and share
-the password with it. Pushing a branch gives a preview URL too, behind Vercel
+Vercel project. Pushing a branch gives a preview URL too, behind Vercel
 Authentication as well as the password.
 
-`npm run build:playground` emits the same static site to `playground/dist/`
-(gitignored); `vercel.json` presets `buildCommand`/`outputDirectory` for it.
+- **With someone who has the password:** link straight to one entry with the
+  hash route, e.g.
+  `https://sketchbook.mlduke.design/#/2026-08-31-scroll-snap-experiment`.
+- **With anyone else:** open the entry and press **Copy share link**. The link
+  opens that one entry, and nothing else, for 180 days
+  ([ADR 0018](docs/adr/0018-share-links.md)).
+
+`npm run build:playground` emits the static site to `playground/dist/`
+(gitignored), with a share page per entry under `dist/s/`. `vercel.json` presets
+`buildCommand`/`outputDirectory` for it.
 
 This repo is public and most entries are unpublished drafts, and a deploy
 exposes all of them, so the password gate is the only lock on the subdomain:

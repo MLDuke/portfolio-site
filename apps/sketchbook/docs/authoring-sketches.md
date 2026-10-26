@@ -242,3 +242,6 @@ the thing.
 - [0017](adr/0017-password-gate-in-routing-middleware.md) — `middleware.js` at
   the app root, in JavaScript, and both gate variables set before any custom
   domain is added.
+- [0018](adr/0018-share-links.md) — the share build in `build:playground`,
+  `share.tsx` kept clear of `sketches.ts`, and the `/s/` layout agreed between
+  `share-pages.ts` and `gate.js`.

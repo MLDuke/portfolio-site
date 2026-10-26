@@ -1,40 +1,7 @@
-import {
-  Component,
-  Suspense,
-  lazy,
-  useEffect,
-  useState,
-  type ComponentType,
-  type ReactNode,
-} from "react";
-import { typeNeedsSource, type Problem } from "../../scripts/lib/entry.mjs";
-import { sketches, type Sketch } from "./sketches";
+import { useEffect, useState } from "react";
+import { sketches } from "./sketches";
+import { Stage, problemSummary, titleOf } from "./Stage";
 import { DevOverlays } from "./devtools";
-
-// One React.lazy per sketch, memoised so navigating away and back does not throw
-// away the already-loaded chunk.
-const lazyCache = new Map<string, ComponentType>();
-function lazyFor(sketch: Sketch): ComponentType | null {
-  if (!sketch.load) return null;
-  let C = lazyCache.get(sketch.dir);
-  if (!C) {
-    C = lazy(sketch.load);
-    lazyCache.set(sketch.dir, C);
-  }
-  return C;
-}
-
-// An invalid entry can be missing its title, date or type. Label it with what
-// is there rather than a blank link; its problems are shown alongside.
-const titleOf = (s: Sketch) => s.title || s.dir;
-const metaOf = (s: Sketch, extra: string[] = []) =>
-  [s.date, s.type, ...extra].filter(Boolean).join(" · ");
-
-function problemSummary(problems: Problem[]): string {
-  return problems
-    .map((p) => `${p.level}: ${p.file === "index.md" ? "" : `${p.file}: `}${p.message}`)
-    .join("\n");
-}
 
 function useHashRoute(): string {
   const [route, setRoute] = useState(() => currentRoute());
@@ -48,91 +15,6 @@ function useHashRoute(): string {
 
 function currentRoute(): string {
   return decodeURIComponent(window.location.hash.replace(/^#\/?/, ""));
-}
-
-class SketchBoundary extends Component<
-  { children: ReactNode },
-  { error: Error | null }
-> {
-  state = { error: null as Error | null };
-  static getDerivedStateFromError(error: Error) {
-    return { error };
-  }
-  render() {
-    if (this.state.error) {
-      return (
-        <pre className="panel panel--error">
-          {String(this.state.error.stack ?? this.state.error)}
-        </pre>
-      );
-    }
-    return this.props.children;
-  }
-}
-
-function Stage({ sketch }: { sketch: Sketch }) {
-  const Sketch = lazyFor(sketch);
-  const hasMedia = sketch.media.some((m) => m.url);
-
-  return (
-    <article className="stage">
-      <a className="stage__back" href="#/">
-        ← sketchbook
-      </a>
-      <header className="stage__head">
-        <h1>{titleOf(sketch)}</h1>
-        <p className="stage__meta">{metaOf(sketch, sketch.publish ? ["published"] : [])}</p>
-        {sketch.description && <p className="stage__desc">{sketch.description}</p>}
-      </header>
-
-      {sketch.problems.length > 0 && (
-        <pre className="panel panel--warn">
-          This entry has problems:
-          {"\n"}
-          {problemSummary(sketch.problems)}
-        </pre>
-      )}
-
-      {Sketch ? (
-        <div className="canvas">
-          {/* key remounts the sketch (and resets the boundary) on navigation */}
-          <SketchBoundary key={sketch.dir}>
-            <Suspense fallback={<div className="canvas__loading">loading sketch…</div>}>
-              <Sketch />
-            </Suspense>
-          </SketchBoundary>
-        </div>
-      ) : hasMedia ? (
-        <div className="media">
-          {sketch.media.map(
-            (m, i) =>
-              m.url && (
-                <figure key={i}>
-                  <img src={m.url} alt={m.alt ?? ""} loading="lazy" />
-                  {m.caption && <figcaption>{m.caption}</figcaption>}
-                </figure>
-              ),
-          )}
-        </div>
-      ) : (
-        <p className="panel">
-          {typeNeedsSource(sketch.type) ? (
-            <>
-              No <code>src/index.tsx</code> yet — add one that{" "}
-              <code>export default</code>s a React component.
-            </>
-          ) : (
-            <>
-              No media yet — drop a PNG/GIF next to <code>index.md</code> and list
-              it under <code>media:</code>.
-            </>
-          )}
-        </p>
-      )}
-
-      {sketch.note && <div className="note">{sketch.note}</div>}
-    </article>
-  );
 }
 
 function Index() {

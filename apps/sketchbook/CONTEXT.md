@@ -17,7 +17,7 @@ _Avoid_: "sketch", when you mean the whole folder.
 
 **Sketch**
 The runnable part of an entry: the React component that `src/index.*`
-default-exports. The playground's `Sketch` type in `playground/src/sketches.ts` is
+default-exports. The playground's `Sketch` type in `playground/src/sketch.ts` is
 broader: an Entry plus its problems and a lazy loader for the component. Where it
 matters, say "sketch component" for the first and "playground Sketch" for the
 second.
@@ -60,6 +60,12 @@ The dark panel a sketch renders into: a styled background, padding, a border and
 minimum height. `@mlduke/ui` tokens resolve inside it, in the dark theme. Names disagree here. The guide says "the stage" for that panel,
 which is `.canvas` in `playground/src/styles.css`, while the `Stage` component
 and `.stage` class in the playground are the whole entry page that contains it.
+
+**Share link**
+A signed link to one entry's share page, `/s/<dir>/?t=…`, that opens without
+the password for 180 days. The share page is the entry alone, built separately
+from the playground so it bundles nothing else. See
+[ADR 0018](docs/adr/0018-share-links.md).
 
 **Dial panel**
 The `dialkit` panel that lists the dials a sketch declares with `useDialKit`. Its
@@ -105,6 +111,8 @@ Code that gathers the Entry module's inputs from its own world and decides what 
 do with the problems, holding no schema knowledge. There are two. The **Node
 adapter** is `scripts/validate-entries.mjs`, which reads the filesystem and sets
 the exit code. The **Vite adapter** is `playground/src/sketches.ts`, which builds
-the same inputs from the Vite globs. Those two labels are descriptive; the code
-only says "adapter". `scripts/new-entry.mjs` is a caller of the module, not an
+the same inputs from the Vite globs, one entry at a time through `toSketch` in
+`playground/src/sketch.ts`. The share build feeds `toSketch` the same way, from
+one entry's imports. Those two labels are descriptive; the code only says
+"adapter". `scripts/new-entry.mjs` is a caller of the module, not an
 adapter.

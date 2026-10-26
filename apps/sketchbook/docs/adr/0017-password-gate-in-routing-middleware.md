@@ -1,6 +1,6 @@
 # 0017. A password gate in Routing Middleware guards the deployed playground
 
-Status: Accepted · 2026-10-18
+Status: Accepted · 2026-10-18 · amended 2026-10-26 by [0018](0018-share-links.md)
 
 ## Context
 The playground is going to be served from its own subdomain. A deploy exposes
