@@ -1,6 +1,8 @@
 // The password gate in front of the deployed playground. One shared password
-// gets a signed session cookie; every other request needs that cookie. See
-// docs/adr/0017-password-gate-in-routing-middleware.md.
+// gets a signed session cookie; every other request needs that cookie, except a
+// share link's page and what it loads. See
+// docs/adr/0017-password-gate-in-routing-middleware.md and
+// docs/adr/0018-share-links.md.
 //
 // This module is plain request-in, response-out so node:test can drive it. It
 // returns undefined to let a request through; middleware.js turns that into
@@ -12,6 +14,15 @@ import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
 export const SESSION_COOKIE = "sketchbook_session";
 const SESSION_SECONDS = 30 * 24 * 60 * 60;
+export const SHARE_SECONDS = 180 * 24 * 60 * 60;
+
+// The share build's output (playground/share-pages.ts): a page per entry, its
+// unfurl image, and hashed assets that only those pages name.
+const SHARE_PAGE = /^\/s\/([^/]+)\/(?:index\.html)?$/;
+const SHARE_OG_IMAGE = /^\/s\/[^/]+\/og\.[a-z]+$/;
+const SHARE_ASSETS = "/s/assets/";
+// An entry folder name, `<date>-<slug>` (ADR 0013).
+const ENTRY_DIR = /^\d{4}-\d{2}-\d{2}-[a-z0-9-]+$/;
 
 // Best effort: the counts live in one function instance's memory, so they
 // slow a guesser down rather than stop one. A long password is the real
@@ -21,7 +32,7 @@ const FAILURE_WINDOW_MS = 15 * 60 * 1000;
 const FAILURE_DELAY_MS = 1000;
 
 /**
- * @typedef {{ password?: string, secret?: string }} GateConfig
+ * @typedef {{ password?: string, secret?: string, shareSecret?: string }} GateConfig
  * @typedef {{ now?: () => number, delay?: (ms: number) => Promise<void> }} GateDeps
  * @typedef {(request: Request) => Promise<Response | undefined>} Gate
  */
@@ -31,8 +42,12 @@ const FAILURE_DELAY_MS = 1000;
  * @param {GateDeps} [deps]
  * @returns {Gate}
  */
-export function createGate({ password, secret }, { now = Date.now, delay = sleep } = {}) {
-  // Fail closed: a deploy without both secrets serves nothing.
+export function createGate(
+  { password, secret, shareSecret },
+  { now = Date.now, delay = sleep } = {},
+) {
+  // Fail closed: a deploy without both secrets serves nothing. Without a share
+  // secret, share links are off and the rest works.
   if (!password || !secret) {
     return async () => text("The sketchbook isn't configured.", 503);
   }
@@ -75,6 +90,29 @@ export function createGate({ password, secret }, { now = Date.now, delay = sleep
     return page(loginPage(next, "That password isn't right."), 401);
   };
 
+  // Signs a share link to one entry for someone with a session.
+  /** @param {Request} request */
+  const share = async (request) => {
+    if (!shareSecret) return text("Sharing isn't configured.", 503);
+    const dir = new URLSearchParams(await request.text()).get("dir") ?? "";
+    if (!ENTRY_DIR.test(dir)) return text("Not an entry.", 400);
+    const token = signShare(dir, now(), shareSecret);
+    const expires = new Date(Number(token.split(".")[0]) * 1000).toISOString();
+    const url = `${new URL(request.url).origin}/s/${dir}/?t=${token}`;
+    return json({ url, expires });
+  };
+
+  // Requests that skip the session check: a share page with a valid token for
+  // that entry, plus the share build's assets and unfurl images. Those assets
+  // are hashed and named only by the share pages, and hold one entry each.
+  /** @param {URL} url */
+  const isPublic = ({ pathname, searchParams }) => {
+    if (pathname.startsWith(SHARE_ASSETS) || SHARE_OG_IMAGE.test(pathname)) return true;
+    const dir = pathname.match(SHARE_PAGE)?.[1];
+    const token = searchParams.get("t");
+    return Boolean(dir && token && shareSecret && verifyShare(dir, token, shareSecret, now()));
+  };
+
   return async (request) => {
     const url = new URL(request.url);
     const { pathname } = url;
@@ -93,7 +131,14 @@ export function createGate({ password, secret }, { now = Date.now, delay = sleep
 
     const session = readCookie(request, SESSION_COOKIE);
     if (session && verifySession(session, password, secret, now())) {
+      if (pathname === "/share" && request.method === "POST") return share(request);
       return undefined;
+    }
+
+    // Someone holding a share link that has expired, or was revoked by rotating
+    // the share secret, is told so rather than asked for a password.
+    if (SHARE_PAGE.test(pathname) && url.searchParams.has("t")) {
+      return page(messagePage("This share link has expired or is no longer valid."), 403);
     }
 
     if (request.method === "GET" || request.method === "HEAD") {
@@ -102,13 +147,6 @@ export function createGate({ password, secret }, { now = Date.now, delay = sleep
     }
     return text("Unauthorized", 401);
   };
-}
-
-// Requests that skip the session check. Nothing yet: per-sketch share links
-// (MDU-74) will let a valid share token through here.
-/** @param {URL} _url */
-function isPublic(_url) {
-  return false;
 }
 
 // A session is `<expiry>.<signature>`. The signature covers a hash of the
@@ -136,6 +174,42 @@ export function verifySession(value, password, secret, at) {
   if (!Number.isInteger(expires) || !given) return false;
   if (expires * 1000 <= at) return false;
   return sameBytes(given, signature(expires, password, secret));
+}
+
+// A share token is `<expiry>.<signature>` over the entry's folder name, signed
+// with its own secret: rotating it revokes every share link and no session.
+/**
+ * @param {string} dir
+ * @param {number} at
+ * @param {string} secret
+ */
+export function signShare(dir, at, secret) {
+  const expires = Math.floor(at / 1000) + SHARE_SECONDS;
+  return `${expires}.${shareSignature(dir, expires, secret)}`;
+}
+
+/**
+ * @param {string} dir
+ * @param {string} token
+ * @param {string} secret
+ * @param {number} at
+ * @returns {boolean}
+ */
+export function verifyShare(dir, token, secret, at) {
+  const [expiresText, given] = token.split(".");
+  const expires = Number(expiresText);
+  if (!Number.isInteger(expires) || !given) return false;
+  if (expires * 1000 <= at) return false;
+  return sameBytes(given, shareSignature(dir, expires, secret));
+}
+
+/**
+ * @param {string} dir
+ * @param {number} expires
+ * @param {string} secret
+ */
+function shareSignature(dir, expires, secret) {
+  return createHmac("sha256", secret).update(`share.${dir}.${expires}`).digest("base64url");
 }
 
 /**
@@ -239,6 +313,14 @@ function text(body, status) {
   });
 }
 
+/** @param {unknown} body */
+function json(body) {
+  return new Response(JSON.stringify(body), {
+    status: 200,
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+  });
+}
+
 /**
  * @param {string} body
  * @param {number} status
@@ -267,7 +349,6 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;");
 }
 
-// Self-contained: the playground's CSS and fonts sit behind the gate.
 /**
  * @param {string} next
  * @param {string} [error]
@@ -276,30 +357,7 @@ function loginPage(next, error) {
   const errorBlock = error
     ? `<p id="error" class="error" role="alert">${escapeHtml(error)}</p>`
     : "";
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
-<title>Sketchbook</title>
-<style>
-  :root { color-scheme: dark; }
-  body { margin: 0; min-height: 100vh; display: grid; place-items: center;
-    background: #121212; color: #ededed; font: 16px/1.5 system-ui, sans-serif; }
-  form { display: grid; gap: 12px; width: min(320px, calc(100vw - 48px)); }
-  h1 { margin: 0 0 4px; font-size: 20px; font-weight: 600; }
-  label { font-size: 14px; color: #b4b4b4; }
-  input { font: inherit; padding: 10px 12px; border-radius: 8px;
-    border: 1px solid #3a3a3a; background: #1c1c1c; color: inherit; }
-  button { font: inherit; font-weight: 500; padding: 10px 12px; border: 0;
-    border-radius: 8px; background: #ededed; color: #121212; cursor: pointer; }
-  input:focus-visible, button:focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }
-  .error { margin: 0; font-size: 14px; color: #ff8a80; }
-</style>
-</head>
-<body>
-<form method="post" action="/login">
+  return documentFor(`<form method="post" action="/login">
   <h1>Sketchbook</h1>
   <label for="password">Password</label>
   <input id="password" name="password" type="password" autocomplete="current-password" required autofocus${error ? ' aria-describedby="error"' : ""}>
@@ -314,7 +372,45 @@ function loginPage(next, error) {
     var next = this.elements.next;
     if (location.hash && next.value.indexOf("#") === -1) next.value += location.hash;
   });
-</script>
+</script>`);
+}
+
+/** @param {string} message */
+function messagePage(message) {
+  return documentFor(`<main>
+  <h1>Sketchbook</h1>
+  <p>${escapeHtml(message)}</p>
+</main>`);
+}
+
+// Self-contained: the playground's CSS and fonts sit behind the gate.
+/** @param {string} body */
+function documentFor(body) {
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Sketchbook</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center;
+    background: #121212; color: #ededed; font: 16px/1.5 system-ui, sans-serif; }
+  form, main { display: grid; gap: 12px; width: min(320px, calc(100vw - 48px)); }
+  p { margin: 0; color: #b4b4b4; }
+  h1 { margin: 0 0 4px; font-size: 20px; font-weight: 600; }
+  label { font-size: 14px; color: #b4b4b4; }
+  input { font: inherit; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid #3a3a3a; background: #1c1c1c; color: inherit; }
+  button { font: inherit; font-weight: 500; padding: 10px 12px; border: 0;
+    border-radius: 8px; background: #ededed; color: #121212; cursor: pointer; }
+  input:focus-visible, button:focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }
+  .error { margin: 0; font-size: 14px; color: #ff8a80; }
+</style>
+</head>
+<body>
+${body}
 </body>
 </html>
 `;

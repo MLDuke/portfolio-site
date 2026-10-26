@@ -10,6 +10,7 @@ export const config = { runtime: "nodejs" };
 const gate = createGate({
   password: process.env.SKETCHBOOK_PASSWORD,
   secret: process.env.SKETCHBOOK_COOKIE_SECRET,
+  shareSecret: process.env.SKETCHBOOK_SHARE_SECRET,
 });
 
 /** @param {Request} request */

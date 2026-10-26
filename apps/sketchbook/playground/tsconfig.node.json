@@ -1,6 +1,7 @@
 {
-  // The files that run in Node rather than the browser: vite.config.ts, and the
-  // deployed password gate (middleware.js, gate/gate.js). Kept as its own project so
+  // The files that run in Node rather than the browser: vite.config.ts and the
+  // share-pages.ts plugin it loads, and the deployed password gate
+  // (middleware.js, gate/gate.js). Kept as its own project so
   // `@types/node` doesn't apply to playground/src and entries/*/src, where
   // `setTimeout` must stay the DOM one and `process` genuinely isn't there at
   // runtime.
@@ -11,5 +12,5 @@
     // middleware.js and gate/gate.js are typed with JSDoc.
     "checkJs": true
   },
-  "include": ["vite.config.ts", "../middleware.js", "../gate/gate.js"]
+  "include": ["vite.config.ts", "share-pages.ts", "../middleware.js", "../gate/gate.js"]
 }

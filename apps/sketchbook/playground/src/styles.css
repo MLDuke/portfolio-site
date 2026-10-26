@@ -50,15 +50,71 @@ code {
   padding: var(--size-unit-40);
 }
 
-.stage__back {
-  display: inline-block;
+.stage__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--size-unit-12);
   margin-bottom: var(--size-unit-16);
+}
+
+.stage__back {
   font-size: var(--typography-font-size-label-small);
   color: var(--color-neutral-3);
 }
 
 .stage__back:hover {
   color: var(--on-surface-primary);
+}
+
+/* Share link (ShareButton.tsx) ----------------------------------------- */
+.share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--size-unit-8);
+  font-size: var(--typography-font-size-label-small);
+}
+
+.share__button {
+  font: inherit;
+  padding: var(--size-unit-4) var(--size-unit-12);
+  color: var(--on-surface-primary);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-8);
+  cursor: pointer;
+}
+
+.share__button:hover:not(:disabled) {
+  background: var(--surface-overlay);
+}
+
+.share__button:disabled {
+  cursor: progress;
+  color: var(--color-neutral-3);
+}
+
+.share__button:focus-visible,
+.share__url:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.share__status {
+  color: var(--color-neutral-3);
+}
+
+.share__url {
+  font: inherit;
+  font-family: var(--typography-font-family-mono);
+  width: min(48ch, 100%);
+  padding: var(--size-unit-4) var(--size-unit-8);
+  color: inherit;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-4);
 }
 
 .stage__head h1 {
